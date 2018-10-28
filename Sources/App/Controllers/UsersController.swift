@@ -9,6 +9,7 @@ import Foundation
 import Vapor
 import JWT
 import FluentSQLite
+import Crypto
 
 /// Controls basic operations for User object.
 final class UsersController: RouteCollection {
@@ -86,7 +87,9 @@ final class UsersController: RouteCollection {
 
             // Create JWT and sign
             let secureKeyStorage = try req.make(SecureKeyStorage.self)
-            let data = try JWT(payload: authorizationPayload).sign(using: .hs256(key: secureKeyStorage.secureKey))
+
+            let rsaKey: RSAKey = try .private(pem: secureKeyStorage.privateKey)
+            let data = try JWT(payload: authorizationPayload).sign(using: JWTSigner.rs512(key: rsaKey))
             let actionToken = String(data: data, encoding: .utf8) ?? ""
 
             return SignInResponseDto(actionToken)

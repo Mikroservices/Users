@@ -9,5 +9,5 @@ import Foundation
 import Vapor
 
 struct SecureKeyStorage: Service {
-    let secureKey: String
+    let privateKey: String
 }
