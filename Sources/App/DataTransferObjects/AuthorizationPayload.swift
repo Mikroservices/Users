@@ -9,7 +9,7 @@ import Foundation
 import JWT
 
 struct AuthorizationPayload: JWTPayload {
-    var id: Int?
+    var id: UUID?
     var name: String
     var email: String
     var exp: Date

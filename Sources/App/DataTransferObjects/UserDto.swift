@@ -10,12 +10,12 @@ import Vapor
 /// A single entry of a Voice list.
 final class UserDto {
 
-    var id: Int?
+    var id: UUID?
     var email: String
     var userName: String
     var password: String?
 
-    init(id: Int? = nil, email: String, userName: String, password: String?) {
+    init(id: UUID? = nil, email: String, userName: String, password: String?) {
         self.id = id
         self.email = email
         self.userName = userName

@@ -9,9 +9,9 @@ import FluentSQLite
 import Vapor
 
 /// A single entry of a Voice list.
-final class User: SQLiteModel {
+final class User: SQLiteUUIDModel {
 
-    var id: Int?
+    var id: UUID?
     var email: String
     var userName: String
     var password: String
@@ -20,7 +20,7 @@ final class User: SQLiteModel {
     var isBlocked: Bool
     var emailConfirmationGuid: String
 
-    init(id: Int? = nil,
+    init(id: UUID? = nil,
          email: String,
          userName: String,
          password: String,
