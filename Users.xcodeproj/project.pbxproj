@@ -22,6 +22,7 @@
 
 /* Begin PBXBuildFile section */
 		F853FC112185A05000079BDB /* Password.swift in Sources */ = {isa = PBXBuildFile; fileRef = F853FC102185A05000079BDB /* Password.swift */; };
+		F853FC142185AAED00079BDB /* SecureKeyStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F853FC132185AAED00079BDB /* SecureKeyStorage.swift */; };
 		OBJ_1091 /* AppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_30 /* AppTests.swift */; };
 		OBJ_1093 /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "Users::App::Product" /* App.framework */; };
 		OBJ_1094 /* JWT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "JWT::JWT::Product" /* JWT.framework */; };
@@ -5293,6 +5294,7 @@
 		"Crypto::Random::Product" /* Random.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Random.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"DatabaseKit::DatabaseKit::Product" /* DatabaseKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DatabaseKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F853FC102185A05000079BDB /* Password.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Password.swift; sourceTree = "<group>"; };
+		F853FC132185AAED00079BDB /* SecureKeyStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureKeyStorage.swift; sourceTree = "<group>"; };
 		"Fluent::Fluent::Product" /* Fluent.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Fluent.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"Fluent::FluentSQL::Product" /* FluentSQL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FluentSQL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"FluentSQLite::FluentSQLite::Product" /* FluentSQLite.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FluentSQLite.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -6945,9 +6947,18 @@
 			path = Utilities;
 			sourceTree = "<group>";
 		};
+		F853FC122185AABF00079BDB /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				F853FC132185AAED00079BDB /* SecureKeyStorage.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
 		OBJ_10 /* App */ = {
 			isa = PBXGroup;
 			children = (
+				F853FC122185AABF00079BDB /* Services */,
 				F853FC0F2185A03F00079BDB /* Utilities */,
 				F853FC0E21859A7E00079BDB /* Setup */,
 				OBJ_13 /* Controllers */,
@@ -12083,6 +12094,7 @@
 				OBJ_944 /* SignInResponseDto.swift in Sources */,
 				OBJ_945 /* UserDto.swift in Sources */,
 				OBJ_948 /* User.swift in Sources */,
+				F853FC142185AAED00079BDB /* SecureKeyStorage.swift in Sources */,
 				OBJ_949 /* app.swift in Sources */,
 				OBJ_950 /* boot.swift in Sources */,
 				OBJ_951 /* configure.swift in Sources */,

@@ -13,7 +13,7 @@ final class User: SQLiteUUIDModel {
 
     var id: UUID?
     var email: String
-    var userName: String
+    var name: String
     var password: String
     var salt: String
     var emailWasConfirmed: Bool
@@ -22,7 +22,7 @@ final class User: SQLiteUUIDModel {
 
     init(id: UUID? = nil,
          email: String,
-         userName: String,
+         name: String,
          password: String,
          salt: String,
          emailWasConfirmed: Bool,
@@ -31,7 +31,7 @@ final class User: SQLiteUUIDModel {
     ) {
         self.id = id
         self.email = email
-        self.userName = userName
+        self.name = name
         self.password = password
         self.salt = salt
         self.emailWasConfirmed = emailWasConfirmed

@@ -62,6 +62,18 @@
             ReferencedContainer = "container:Users.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "LETTERER-SQLITE-PATH"
+            value = "/Users/mczachurski/Projects/Letterer/Databases/Users.db"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "LETTERER-SECURE-KEY"
+            value = "securekey"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>

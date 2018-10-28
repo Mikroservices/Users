@@ -12,13 +12,13 @@ final class UserDto {
 
     var id: UUID?
     var email: String
-    var userName: String
+    var name: String
     var password: String?
 
-    init(id: UUID? = nil, email: String, userName: String, password: String?) {
+    init(id: UUID? = nil, email: String, name: String, password: String?) {
         self.id = id
         self.email = email
-        self.userName = userName
+        self.name = name
         self.password = password
     }
 }

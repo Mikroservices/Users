@@ -9,6 +9,5 @@ public func routes(_ router: Router) throws {
     }
 
     // Configuring a users controller.
-    let usersController = UsersController()
-    try usersController.boot(router: router)
+    try router.register(collection: UsersController())
 }

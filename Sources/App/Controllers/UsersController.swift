@@ -37,7 +37,7 @@ final class UsersController: RouteCollection {
 
             let user = User(
                 email: userDto.email,
-                userName: userDto.userName,
+                name: userDto.name,
                 password: passwordHash,
                 salt: salt,
                 emailWasConfirmed: false,
@@ -48,7 +48,7 @@ final class UsersController: RouteCollection {
             return user.save(on: req)
 
         }.map(to: UserDto.self) { user in
-            return UserDto(id: user.id, email: user.email, userName: user.userName, password: nil)
+            return UserDto(id: user.id, email: user.email, name: user.name, password: nil)
         }
 
         return savedUser
@@ -79,13 +79,14 @@ final class UsersController: RouteCollection {
             let expirationDate = Date().addingTimeInterval(TimeInterval(3600.0))
             let authorizationPayload = AuthorizationPayload(
                 id: user.id,
-                name: user.userName,
+                name: user.name,
                 email: user.email,
                 exp: expirationDate
             )
 
             // Create JWT and sign
-            let data = try JWT(payload: authorizationPayload).sign(using: .hs256(key: "secret"))
+            let secureKeyStorage = try req.make(SecureKeyStorage.self)
+            let data = try JWT(payload: authorizationPayload).sign(using: .hs256(key: secureKeyStorage.secureKey))
             let actionToken = String(data: data, encoding: .utf8) ?? ""
 
             return SignInResponseDto(actionToken)

@@ -6,6 +6,12 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     /// Register providers first
     try services.register(FluentSQLiteProvider())
 
+    // Register custom services.
+    guard let secureKey = Environment.get("LETTERER-SECURE-KEY") else { throw Abort(.internalServerError) }
+    services.register { container -> SecureKeyStorage in
+        return SecureKeyStorage(secureKey: secureKey)
+    }
+
     /// Register routes to the router
     let router = EngineRouter.default()
     try routes(router)
@@ -18,7 +24,8 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     services.register(middlewares)
 
     // Configure a SQLite database
-    let sqlite = try SQLiteDatabase(storage: .memory)
+    guard let sqliteFilePath  = Environment.get("LETTERER-SQLITE-PATH") else { throw Abort(.internalServerError) }
+    let sqlite = try SQLiteDatabase(storage: .file(path: sqliteFilePath))
 
     /// Register the configured SQLite database to the database config.
     var databases = DatabasesConfig()
@@ -29,5 +36,4 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     var migrations = MigrationConfig()
     migrations.add(model: User.self, database: .sqlite)
     services.register(migrations)
-
 }
