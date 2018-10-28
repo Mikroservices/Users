@@ -10,7 +10,5 @@ public func routes(_ router: Router) throws {
 
     // Configuring a users controller.
     let usersController = UsersController()
-    router.get("users", use: usersController.index)
-    router.post("users", use: usersController.create)
-    router.post("users/sign-in", use: usersController.signIn)
+    try usersController.boot(router: router)
 }

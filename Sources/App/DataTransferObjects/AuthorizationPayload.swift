@@ -11,6 +11,7 @@ import JWT
 struct AuthorizationPayload: JWTPayload {
     var id: Int?
     var name: String
+    var email: String
     var exp: Date
 
     func verify(using signer: JWTSigner) throws {

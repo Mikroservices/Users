@@ -15,12 +15,28 @@ final class User: SQLiteModel {
     var email: String
     var userName: String
     var password: String
+    var salt: String
+    var emailWasConfirmed: Bool
+    var isBlocked: Bool
+    var emailConfirmationGuid: String
 
-    init(id: Int? = nil, email: String, userName: String, password: String) {
+    init(id: Int? = nil,
+         email: String,
+         userName: String,
+         password: String,
+         salt: String,
+         emailWasConfirmed: Bool,
+         isBlocked: Bool,
+         emailConfirmationGuid: String
+    ) {
         self.id = id
         self.email = email
         self.userName = userName
         self.password = password
+        self.salt = salt
+        self.emailWasConfirmed = emailWasConfirmed
+        self.isBlocked = isBlocked
+        self.emailConfirmationGuid = emailConfirmationGuid
     }
 }
 
