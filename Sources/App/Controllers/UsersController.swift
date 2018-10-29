@@ -17,6 +17,7 @@ final class UsersController: RouteCollection {
     func boot(router: Router) throws {
         router.post(SignInRequestDto.self, at: "/users/login", use: login)
         router.post(UserDto.self, at: "/users", use: register)
+        // router.post(ConfirmEmailRequestDto.self, at: "/users/confirm", use: confirm)
     }
 
     // Register new user.
