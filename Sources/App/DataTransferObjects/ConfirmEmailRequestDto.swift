@@ -10,10 +10,10 @@ import Vapor
 /// Class for email confirmation process.
 final class ConfirmEmailRequestDto {
 
-    var id: String
+    var id: UUID
     var confirmationGuid: String
 
-    init(id: String, confirmationGuid: String) {
+    init(id: UUID, confirmationGuid: String) {
         self.id = id
         self.confirmationGuid = confirmationGuid
     }

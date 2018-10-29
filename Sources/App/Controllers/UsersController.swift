@@ -15,9 +15,46 @@ import Crypto
 final class UsersController: RouteCollection {
 
     func boot(router: Router) throws {
+        router.get("/users", UUID.parameter, use: profile)
         router.post(SignInRequestDto.self, at: "/users/login", use: login)
         router.post(UserDto.self, at: "/users", use: register)
-        // router.post(ConfirmEmailRequestDto.self, at: "/users/confirm", use: confirm)
+        router.post(ConfirmEmailRequestDto.self, at: "/users/confirm", use: confirm)
+    }
+
+    /// User profile.
+    func profile(req: Request) throws -> Future<UserDto> {
+
+        let userIdFromParameter = try req.parameters.next(UUID.self)
+
+        return User.find(userIdFromParameter, on: req).map(to: UserDto.self) { userFromDb in
+
+            guard let user = userFromDb else {
+                throw Abort(.badRequest, reason: "User with id '\(userIdFromParameter)' not exists.")
+            }
+
+            var userIdFromToken: UUID?
+            if let bearer = req.http.headers.bearerAuthorization {
+
+                let secureKeyStorage = try req.make(SecureKeyStorage.self)
+                let rsaKey: RSAKey = try .private(pem: secureKeyStorage.privateKey)
+                let authorizationPayload = try JWT<AuthorizationPayload>(from: bearer.token, verifiedUsing: JWTSigner.rs512(key: rsaKey))
+
+                userIdFromToken = authorizationPayload.payload.id
+            }
+
+            let isProfileOwner = userIdFromToken == userIdFromParameter
+
+            let userDto = UserDto(id: user.id,
+                                  email: isProfileOwner ? user.email : "",
+                                  name: user.name,
+                                  password: nil,
+                                  bio: user.bio,
+                                  location: user.location,
+                                  website: user.website,
+                                  birthDate: user.birthDate)
+
+            return userDto
+        }
     }
 
     // Register new user.
@@ -44,13 +81,24 @@ final class UsersController: RouteCollection {
                 salt: salt,
                 emailWasConfirmed: false,
                 isBlocked: false,
-                emailConfirmationGuid: emailConfirmationGuid
+                emailConfirmationGuid: emailConfirmationGuid,
+                bio: userDto.bio,
+                location: userDto.location,
+                website: userDto.website,
+                birthDate: userDto.birthDate
             )
 
             return user.save(on: req)
 
         }.map(to: UserDto.self) { user in
-            return UserDto(id: user.id, email: user.email, name: user.name, password: nil)
+            return UserDto(id: user.id,
+                                  email: user.email,
+                                  name: user.name,
+                                  password: nil,
+                                  bio: user.bio,
+                                  location: user.location,
+                                  website: user.website,
+                                  birthDate: user.birthDate)
         }
 
         return savedUser
@@ -88,12 +136,28 @@ final class UsersController: RouteCollection {
 
             // Create JWT and sign
             let secureKeyStorage = try req.make(SecureKeyStorage.self)
-
             let rsaKey: RSAKey = try .private(pem: secureKeyStorage.privateKey)
             let data = try JWT(payload: authorizationPayload).sign(using: JWTSigner.rs512(key: rsaKey))
             let actionToken = String(data: data, encoding: .utf8) ?? ""
 
             return SignInResponseDto(actionToken)
         }
+    }
+
+    /// Confirm email address.
+    func confirm(req: Request, confirmEmailRequestDto: ConfirmEmailRequestDto) throws -> Future<HTTPResponseStatus> {
+        return User.find(confirmEmailRequestDto.id, on: req).flatMap(to: User.self) { userFromDb in
+
+            guard let user = userFromDb else {
+                throw Abort(.badRequest, reason: "Invalid id or confirmation token.")
+            }
+
+            guard user.emailConfirmationGuid == confirmEmailRequestDto.confirmationGuid else {
+                throw Abort(.badRequest, reason: "Invalid id or confirmation token.")
+            }
+
+            user.emailWasConfirmed = true
+            return user.save(on: req)
+        }.transform(to: HTTPStatus.ok)
     }
 }

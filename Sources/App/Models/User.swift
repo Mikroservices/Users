@@ -19,6 +19,10 @@ final class User: SQLiteUUIDModel {
     var emailWasConfirmed: Bool
     var isBlocked: Bool
     var emailConfirmationGuid: String
+    var bio: String?
+    var location: String?
+    var website: String?
+    var birthDate: Date?
 
     init(id: UUID? = nil,
          email: String,
@@ -27,7 +31,11 @@ final class User: SQLiteUUIDModel {
          salt: String,
          emailWasConfirmed: Bool,
          isBlocked: Bool,
-         emailConfirmationGuid: String
+         emailConfirmationGuid: String,
+         bio: String? = nil,
+         location: String? = nil,
+         website: String? = nil,
+         birthDate: Date? = nil
     ) {
         self.id = id
         self.email = email
@@ -37,6 +45,10 @@ final class User: SQLiteUUIDModel {
         self.emailWasConfirmed = emailWasConfirmed
         self.isBlocked = isBlocked
         self.emailConfirmationGuid = emailConfirmationGuid
+        self.bio = bio
+        self.location = location
+        self.website = website
+        self.birthDate = birthDate
     }
 }
 

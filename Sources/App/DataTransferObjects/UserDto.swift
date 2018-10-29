@@ -14,12 +14,28 @@ final class UserDto {
     var email: String
     var name: String
     var password: String?
+    var bio: String?
+    var location: String?
+    var website: String?
+    var birthDate: Date?
 
-    init(id: UUID? = nil, email: String, name: String, password: String?) {
+    init(id: UUID? = nil,
+         email: String,
+         name: String,
+         password: String?,
+         bio: String? = nil,
+         location: String? = nil,
+         website: String? = nil,
+         birthDate: Date? = nil
+    ) {
         self.id = id
         self.email = email
         self.name = name
         self.password = password
+        self.bio = bio
+        self.location = location
+        self.website = website
+        self.birthDate = birthDate
     }
 }
 

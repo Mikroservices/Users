@@ -23,6 +23,7 @@
 /* Begin PBXBuildFile section */
 		F853FC112185A05000079BDB /* Password.swift in Sources */ = {isa = PBXBuildFile; fileRef = F853FC102185A05000079BDB /* Password.swift */; };
 		F853FC142185AAED00079BDB /* SecureKeyStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F853FC132185AAED00079BDB /* SecureKeyStorage.swift */; };
+		F89354B021878B1C002D5BF5 /* ConfirmEmailRequestDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = F89354AF21878B1C002D5BF5 /* ConfirmEmailRequestDto.swift */; };
 		OBJ_1091 /* AppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_30 /* AppTests.swift */; };
 		OBJ_1093 /* App.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "Users::App::Product" /* App.framework */; };
 		OBJ_1094 /* JWT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = "JWT::JWT::Product" /* JWT.framework */; };
@@ -5295,6 +5296,7 @@
 		"DatabaseKit::DatabaseKit::Product" /* DatabaseKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DatabaseKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F853FC102185A05000079BDB /* Password.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Password.swift; sourceTree = "<group>"; };
 		F853FC132185AAED00079BDB /* SecureKeyStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureKeyStorage.swift; sourceTree = "<group>"; };
+		F89354AF21878B1C002D5BF5 /* ConfirmEmailRequestDto.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConfirmEmailRequestDto.swift; sourceTree = "<group>"; };
 		"Fluent::Fluent::Product" /* Fluent.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Fluent.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"Fluent::FluentSQL::Product" /* FluentSQL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FluentSQL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"FluentSQLite::FluentSQLite::Product" /* FluentSQLite.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FluentSQLite.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -7141,6 +7143,7 @@
 		OBJ_16 /* DataTransferObjects */ = {
 			isa = PBXGroup;
 			children = (
+				F89354AF21878B1C002D5BF5 /* ConfirmEmailRequestDto.swift */,
 				OBJ_12 /* AuthorizationPayload.swift */,
 				OBJ_17 /* SignInRequestDto.swift */,
 				OBJ_18 /* SignInResponseDto.swift */,
@@ -8043,7 +8046,7 @@
 			path = ConnectionPool;
 			sourceTree = "<group>";
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -8052,7 +8055,6 @@
 				OBJ_31 /* Dependencies */,
 				OBJ_887 /* Products */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_504 /* Database */ = {
@@ -10871,7 +10873,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_887 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -12089,6 +12091,7 @@
 			buildActionMask = 0;
 			files = (
 				OBJ_940 /* AuthorizationPayload.swift in Sources */,
+				F89354B021878B1C002D5BF5 /* ConfirmEmailRequestDto.swift in Sources */,
 				OBJ_942 /* UsersController.swift in Sources */,
 				OBJ_943 /* SignInRequestDto.swift in Sources */,
 				OBJ_944 /* SignInResponseDto.swift in Sources */,
