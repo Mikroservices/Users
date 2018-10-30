@@ -1,6 +1,6 @@
 //
-//  Random.swift
-//  App
+//  Password.swift
+//  Letterer/Users
 //
 //  Created by Marcin Czachurski on 28/10/2018.
 //

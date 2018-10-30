@@ -1,6 +1,6 @@
 //
 //  UsersController.swift
-//  App
+//  Letterer/Users
 //
 //  Created by Marcin Czachurski on 25/10/2018.
 //
@@ -10,7 +10,6 @@ import Vapor
 import JWT
 import FluentSQLite
 import Crypto
-import VaporRecaptcha
 
 /// Controls basic operations for User object.
 final class UsersController: RouteCollection {
@@ -23,11 +22,11 @@ final class UsersController: RouteCollection {
     }
 
     /// User profile.
-    func profile(req: Request) throws -> Future<UserDto> {
+    func profile(request: Request) throws -> Future<UserDto> {
 
-        let userIdFromParameter = try req.parameters.next(UUID.self)
+        let userIdFromParameter = try request.parameters.next(UUID.self)
 
-        return User.find(userIdFromParameter, on: req).map(to: UserDto.self) { userFromDb in
+        return User.find(userIdFromParameter, on: request).map(to: UserDto.self) { userFromDb in
 
             guard let user = userFromDb else {
                 throw Abort(.badRequest, reason: "User with id '\(userIdFromParameter)' not exists.")
@@ -35,7 +34,7 @@ final class UsersController: RouteCollection {
 
             let userDto = UserDto(from: user)
 
-            let userIdFromToken = try self.getUserIdFromBearerToken(req: req)
+            let userIdFromToken = try self.getUserIdFromBearerToken(request: request)
             let isProfileOwner = userIdFromToken == userIdFromParameter
 
             if !isProfileOwner {
@@ -47,7 +46,7 @@ final class UsersController: RouteCollection {
     }
 
     // Register new user.
-    func register(req: Request, userDto: UserDto) throws -> Future<UserDto> {
+    func register(request: Request, userDto: UserDto) throws -> Future<UserDto> {
 
         guard let captchaToken = userDto.securityToken else {
             throw Abort(.badRequest, reason: "Security token is mandatory.")
@@ -57,14 +56,14 @@ final class UsersController: RouteCollection {
             throw Abort(.badRequest, reason: "Password is required.")
         }
 
-        let googleCaptcha = try req.make(Captcha.self)
-        return try googleCaptcha.validate(captchaFormResponse: captchaToken).flatMap(to: UserDto.self) { success in
+        let captcha = try request.make(Captcha.self)
+        return try captcha.validate(captchaFormResponse: captchaToken).flatMap(to: UserDto.self) { success in
         
             if !success {
                 throw Abort(.badRequest, reason: "Security token is invalid.")
             }
 
-            return User.query(on: req).filter(\.email == userDto.email).first().flatMap(to: User.self) { user in
+            return User.query(on: request).filter(\.email == userDto.email).first().flatMap(to: User.self) { user in
 
                 if user != nil {
                     throw Abort(.badRequest, reason: "User with email '\(userDto.email)' exists.")
@@ -79,7 +78,7 @@ final class UsersController: RouteCollection {
                                 salt: salt, 
                                 emailConfirmationGuid: emailConfirmationGuid)
 
-                return user.save(on: req)
+                return user.save(on: request)
 
             }.map(to: UserDto.self) { user in
                 return UserDto(from: user)
@@ -88,8 +87,8 @@ final class UsersController: RouteCollection {
     }
 
     /// Sign-in user.
-    func login(req: Request, signInRequestDto: SignInRequestDto) throws -> Future<SignInResponseDto> {
-        return User.query(on: req).filter(\.email == signInRequestDto.email).first().map(to: SignInResponseDto.self) { userFromDb in
+    func login(request: Request, signInRequestDto: SignInRequestDto) throws -> Future<SignInResponseDto> {
+        return User.query(on: request).filter(\.email == signInRequestDto.email).first().map(to: SignInResponseDto.self) { userFromDb in
 
             guard let user = userFromDb else {
                 throw Abort(.unauthorized, reason: "Invalid email or password.")
@@ -109,14 +108,14 @@ final class UsersController: RouteCollection {
             }
 
             // Create payload.
-            let accessToken = try self.createAccessToken(req: req, forUser: user)
+            let accessToken = try self.createAccessToken(request: request, forUser: user)
             return SignInResponseDto(accessToken)
         }
     }
 
     /// Confirm email address.
-    func confirm(req: Request, confirmEmailRequestDto: ConfirmEmailRequestDto) throws -> Future<HTTPResponseStatus> {
-        return User.find(confirmEmailRequestDto.id, on: req).flatMap(to: User.self) { userFromDb in
+    func confirm(request: Request, confirmEmailRequestDto: ConfirmEmailRequestDto) throws -> Future<HTTPResponseStatus> {
+        return User.find(confirmEmailRequestDto.id, on: request).flatMap(to: User.self) { userFromDb in
 
             guard let user = userFromDb else {
                 throw Abort(.badRequest, reason: "Invalid id or confirmation token.")
@@ -127,19 +126,21 @@ final class UsersController: RouteCollection {
             }
 
             user.emailWasConfirmed = true
-            return user.save(on: req)
+            return user.save(on: request)
         }.transform(to: HTTPStatus.ok)
     }
 
-    private func getUserIdFromBearerToken(req: Request) throws -> UUID? {
+    private func getUserIdFromBearerToken(request: Request) throws -> UUID? {
         var userIdFromToken: UUID?
-        if let bearer = req.http.headers.bearerAuthorization {
+        if let bearer = request.http.headers.bearerAuthorization {
 
-            let secureKeyStorage = try req.make(SecureKeyStorage.self)
+            let secureKeyStorage = try request.make(SecureKeyStorage.self)
             let rsaKey: RSAKey = try .private(pem: secureKeyStorage.privateKey)
             let authorizationPayload = try JWT<AuthorizationPayload>(from: bearer.token, verifiedUsing: JWTSigner.rs512(key: rsaKey))
 
-            userIdFromToken = authorizationPayload.payload.id
+            if authorizationPayload.payload.exp < Date() {
+                userIdFromToken = authorizationPayload.payload.id
+            }
         }
 
         return userIdFromToken
@@ -157,11 +158,11 @@ final class UsersController: RouteCollection {
         return authorizationPayload
     }
 
-    private func createAccessToken(req: Request, forUser user: User) throws -> String {
+    private func createAccessToken(request: Request, forUser user: User) throws -> String {
 
         let authorizationPayload = self.createAuthorizationPayload(forUser: user)
 
-        let secureKeyStorage = try req.make(SecureKeyStorage.self)
+        let secureKeyStorage = try request.make(SecureKeyStorage.self)
         let rsaKey: RSAKey = try .private(pem: secureKeyStorage.privateKey)
         let data = try JWT(payload: authorizationPayload).sign(using: JWTSigner.rs512(key: rsaKey))
         let accessToken = String(data: data, encoding: .utf8) ?? ""

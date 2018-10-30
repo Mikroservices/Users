@@ -64,6 +64,16 @@
       </BuildableProductRunnable>
       <EnvironmentVariables>
          <EnvironmentVariable
+            key = "LETTERER_RECAPTCHA_KEY"
+            value = "0000"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
+            key = "LETTERER_RECAPTCHA_ENABLED"
+            value = "0"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
             key = "LETTERER_SQLITE_PATH"
             value = "/Users/mczachurski/Projects/Letterer/Databases/Users.db"
             isEnabled = "YES">

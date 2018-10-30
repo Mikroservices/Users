@@ -1,6 +1,6 @@
 //
 //  JWTSecureKeyStorage.swift
-//  App
+//  Letterer/Users
 //
 //  Created by Marcin Czachurski on 28/10/2018.
 //

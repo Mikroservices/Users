@@ -1,6 +1,6 @@
 //
 //  SignInResponseDto.swift
-//  App
+//  Letterer/Users
 //
 //  Created by Marcin Czachurski on 25/10/2018.
 //

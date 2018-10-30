@@ -1,6 +1,6 @@
 //
 //  UserDto.swift
-//  App
+//  Letterer/Users
 //
 //  Created by Marcin Czachurski on 08/10/2018.
 //
@@ -47,14 +47,15 @@ extension UserDto: Content { }
 
 extension UserDto {
     convenience init(from user: User) {
-        self.init(id: user.id,
-                email: user.email,
-                name: user.name,
-                password: nil,
-                bio: user.bio,
-                location: user.location,
-                website: user.website,
-                birthDate: user.birthDate
+        self.init(
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            password: nil,
+            bio: user.bio,
+            location: user.location,
+            website: user.website,
+            birthDate: user.birthDate
         )
     }
 }

@@ -1,6 +1,6 @@
 //
 //  User.swift
-//  App
+//  Letterer/Users
 //
 //  Created by Marcin Czachurski on 08/10/2018.
 //
@@ -62,22 +62,22 @@ extension User: Content { }
 extension User: Parameter { }
 
 extension User {
-    convenience init(from userDto: UserDto, 
-                        withPassword password: String, 
-                        salt: String, 
-                        emailConfirmationGuid: String) {
+    convenience init(from userDto: UserDto,
+                     withPassword password: String,
+                     salt: String,
+                     emailConfirmationGuid: String) {
         self.init(
-                email: userDto.email,
-                name: userDto.name,
-                password: password,
-                salt: salt,
-                emailWasConfirmed: false,
-                isBlocked: false,
-                emailConfirmationGuid: emailConfirmationGuid,
-                bio: userDto.bio,
-                location: userDto.location,
-                website: userDto.website,
-                birthDate: userDto.birthDate
-            )
+            email: userDto.email,
+            name: userDto.name,
+            password: password,
+            salt: salt,
+            emailWasConfirmed: false,
+            isBlocked: false,
+            emailConfirmationGuid: emailConfirmationGuid,
+            bio: userDto.bio,
+            location: userDto.location,
+            website: userDto.website,
+            birthDate: userDto.birthDate
+        )
     }
 }
