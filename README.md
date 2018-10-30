@@ -97,6 +97,14 @@ Name: `LETTERER_SQLITE_PATH`
 
 Value: `/home/[USER]/Projects/Letterer/Databases/Users.db`
 
+**Private key to Google reCaptcha**
+
+Variable for secret key generated for the domain in Google: [https://www.google.com/recaptcha/admin](https://www.google.com/recaptcha/admin).
+
+Name: `LETTERER_RECAPTCHA_KEY`
+
+Value: ``
+
 3. Build & Run
 
 If you have Vapor installed on your Linux distribution you can run following commands:
