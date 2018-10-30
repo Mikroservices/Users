@@ -10,6 +10,7 @@ import Vapor
 import JWT
 import FluentSQLite
 import Crypto
+import VaporRecaptcha
 
 /// Controls basic operations for User object.
 final class UsersController: RouteCollection {
@@ -48,32 +49,42 @@ final class UsersController: RouteCollection {
     // Register new user.
     func register(req: Request, userDto: UserDto) throws -> Future<UserDto> {
 
+        guard let captchaToken = userDto.securityToken else {
+            throw Abort(.badRequest, reason: "Security token is mandatory.")
+        }
+
         guard let password = userDto.password else {
             throw Abort(.badRequest, reason: "Password is required.")
         }
 
-        let savedUser = User.query(on: req).filter(\.email == userDto.email).first().flatMap(to: User.self) { user in
-
-            if user != nil {
-                throw Abort(.badRequest, reason: "User with email '\(userDto.email)' exists.")
+        let googleCaptcha = try req.make(Captcha.self)
+        return try googleCaptcha.validate(captchaFormResponse: captchaToken).flatMap(to: UserDto.self) { success in
+        
+            if !success {
+                throw Abort(.badRequest, reason: "Security token is invalid.")
             }
 
-            let salt = try Password.generateSalt()
-            let passwordHash = try Password.hash(password, withSalt: salt)
-            let emailConfirmationGuid = UUID.init().uuidString
+            return User.query(on: req).filter(\.email == userDto.email).first().flatMap(to: User.self) { user in
 
-            let user = User(from: userDto, 
-                            withPassword: passwordHash, 
-                            salt: salt, 
-                            emailConfirmationGuid: emailConfirmationGuid)
+                if user != nil {
+                    throw Abort(.badRequest, reason: "User with email '\(userDto.email)' exists.")
+                }
 
-            return user.save(on: req)
+                let salt = try Password.generateSalt()
+                let passwordHash = try Password.hash(password, withSalt: salt)
+                let emailConfirmationGuid = UUID.init().uuidString
 
-        }.map(to: UserDto.self) { user in
-            return UserDto(from: user)
+                let user = User(from: userDto, 
+                                withPassword: passwordHash, 
+                                salt: salt, 
+                                emailConfirmationGuid: emailConfirmationGuid)
+
+                return user.save(on: req)
+
+            }.map(to: UserDto.self) { user in
+                return UserDto(from: user)
+            }
         }
-
-        return savedUser
     }
 
     /// Sign-in user.

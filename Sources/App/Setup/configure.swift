@@ -1,5 +1,6 @@
 import FluentSQLite
 import Vapor
+import VaporRecaptcha
 
 /// Called before your application initializes.
 public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
@@ -11,6 +12,11 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     services.register { container -> SecureKeyStorage in
         return SecureKeyStorage(privateKey: privateKey)
     }
+
+    // Register reCaptcha.
+    guard let recaptchaKey = Environment.get("LETTERER_RECAPTCHA_KEY") else { throw Abort(.internalServerError) }
+    let captchaConfig = CaptchaConfig(secretKey: recaptchaKey)
+    try services.register(CaptchaProvider(config: captchaConfig))
 
     /// Register routes to the router
     let router = EngineRouter.default()
