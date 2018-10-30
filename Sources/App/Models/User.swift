@@ -60,3 +60,24 @@ extension User: Content { }
 
 /// Allows `Voice` to be used as a dynamic parameter in route definitions.
 extension User: Parameter { }
+
+extension User {
+    convenience init(from userDto: UserDto, 
+                        withPassword password: String, 
+                        salt: String, 
+                        emailConfirmationGuid: String) {
+        self.init(
+                email: userDto.email,
+                name: userDto.name,
+                password: password,
+                salt: salt,
+                emailWasConfirmed: false,
+                isBlocked: false,
+                emailConfirmationGuid: emailConfirmationGuid,
+                bio: userDto.bio,
+                location: userDto.location,
+                website: userDto.website,
+                birthDate: userDto.birthDate
+            )
+    }
+}

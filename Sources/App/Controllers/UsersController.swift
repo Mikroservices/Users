@@ -32,26 +32,14 @@ final class UsersController: RouteCollection {
                 throw Abort(.badRequest, reason: "User with id '\(userIdFromParameter)' not exists.")
             }
 
-            var userIdFromToken: UUID?
-            if let bearer = req.http.headers.bearerAuthorization {
+            let userDto = UserDto(from: user)
 
-                let secureKeyStorage = try req.make(SecureKeyStorage.self)
-                let rsaKey: RSAKey = try .private(pem: secureKeyStorage.privateKey)
-                let authorizationPayload = try JWT<AuthorizationPayload>(from: bearer.token, verifiedUsing: JWTSigner.rs512(key: rsaKey))
-
-                userIdFromToken = authorizationPayload.payload.id
-            }
-
+            let userIdFromToken = try self.getUserIdFromBearerToken(req: req)
             let isProfileOwner = userIdFromToken == userIdFromParameter
 
-            let userDto = UserDto(id: user.id,
-                                  email: isProfileOwner ? user.email : "",
-                                  name: user.name,
-                                  password: nil,
-                                  bio: user.bio,
-                                  location: user.location,
-                                  website: user.website,
-                                  birthDate: user.birthDate)
+            if !isProfileOwner {
+                userDto.email = ""
+            }
 
             return userDto
         }
@@ -74,31 +62,15 @@ final class UsersController: RouteCollection {
             let passwordHash = try Password.hash(password, withSalt: salt)
             let emailConfirmationGuid = UUID.init().uuidString
 
-            let user = User(
-                email: userDto.email,
-                name: userDto.name,
-                password: passwordHash,
-                salt: salt,
-                emailWasConfirmed: false,
-                isBlocked: false,
-                emailConfirmationGuid: emailConfirmationGuid,
-                bio: userDto.bio,
-                location: userDto.location,
-                website: userDto.website,
-                birthDate: userDto.birthDate
-            )
+            let user = User(from: userDto, 
+                            withPassword: passwordHash, 
+                            salt: salt, 
+                            emailConfirmationGuid: emailConfirmationGuid)
 
             return user.save(on: req)
 
         }.map(to: UserDto.self) { user in
-            return UserDto(id: user.id,
-                                  email: user.email,
-                                  name: user.name,
-                                  password: nil,
-                                  bio: user.bio,
-                                  location: user.location,
-                                  website: user.website,
-                                  birthDate: user.birthDate)
+            return UserDto(from: user)
         }
 
         return savedUser
@@ -126,21 +98,8 @@ final class UsersController: RouteCollection {
             }
 
             // Create payload.
-            let expirationDate = Date().addingTimeInterval(TimeInterval(3600.0))
-            let authorizationPayload = AuthorizationPayload(
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                exp: expirationDate
-            )
-
-            // Create JWT and sign
-            let secureKeyStorage = try req.make(SecureKeyStorage.self)
-            let rsaKey: RSAKey = try .private(pem: secureKeyStorage.privateKey)
-            let data = try JWT(payload: authorizationPayload).sign(using: JWTSigner.rs512(key: rsaKey))
-            let actionToken = String(data: data, encoding: .utf8) ?? ""
-
-            return SignInResponseDto(actionToken)
+            let accessToken = try self.createAccessToken(req: req, forUser: user)
+            return SignInResponseDto(accessToken)
         }
     }
 
@@ -159,5 +118,43 @@ final class UsersController: RouteCollection {
             user.emailWasConfirmed = true
             return user.save(on: req)
         }.transform(to: HTTPStatus.ok)
+    }
+
+    private func getUserIdFromBearerToken(req: Request) throws -> UUID? {
+        var userIdFromToken: UUID?
+        if let bearer = req.http.headers.bearerAuthorization {
+
+            let secureKeyStorage = try req.make(SecureKeyStorage.self)
+            let rsaKey: RSAKey = try .private(pem: secureKeyStorage.privateKey)
+            let authorizationPayload = try JWT<AuthorizationPayload>(from: bearer.token, verifiedUsing: JWTSigner.rs512(key: rsaKey))
+
+            userIdFromToken = authorizationPayload.payload.id
+        }
+
+        return userIdFromToken
+    }
+
+    private func createAuthorizationPayload(forUser user: User) -> AuthorizationPayload {
+        let expirationDate = Date().addingTimeInterval(TimeInterval(3600.0))
+        let authorizationPayload = AuthorizationPayload(
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            exp: expirationDate
+        )
+
+        return authorizationPayload
+    }
+
+    private func createAccessToken(req: Request, forUser user: User) throws -> String {
+
+        let authorizationPayload = self.createAuthorizationPayload(forUser: user)
+
+        let secureKeyStorage = try req.make(SecureKeyStorage.self)
+        let rsaKey: RSAKey = try .private(pem: secureKeyStorage.privateKey)
+        let data = try JWT(payload: authorizationPayload).sign(using: JWTSigner.rs512(key: rsaKey))
+        let accessToken = String(data: data, encoding: .utf8) ?? ""
+
+        return accessToken
     }
 }

@@ -18,6 +18,7 @@ final class UserDto {
     var location: String?
     var website: String?
     var birthDate: Date?
+    var securityToken: String?
 
     init(id: UUID? = nil,
          email: String,
@@ -26,7 +27,8 @@ final class UserDto {
          bio: String? = nil,
          location: String? = nil,
          website: String? = nil,
-         birthDate: Date? = nil
+         birthDate: Date? = nil,
+         securityToken: String? = nil
     ) {
         self.id = id
         self.email = email
@@ -36,8 +38,23 @@ final class UserDto {
         self.location = location
         self.website = website
         self.birthDate = birthDate
+        self.securityToken = securityToken
     }
 }
 
 /// Allows `UserDto` to be encoded to and decoded from HTTP messages.
 extension UserDto: Content { }
+
+extension UserDto {
+    convenience init(from user: User) {
+        self.init(id: user.id,
+                email: user.email,
+                name: user.name,
+                password: nil,
+                bio: user.bio,
+                location: user.location,
+                website: user.website,
+                birthDate: user.birthDate
+        )
+    }
+}
