@@ -10,6 +10,7 @@ import Vapor
 import JWT
 import FluentSQLite
 import Crypto
+import Recaptcha
 
 /// Controls basic operations for User object.
 final class UsersController: RouteCollection {
