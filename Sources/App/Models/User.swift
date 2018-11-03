@@ -5,11 +5,11 @@
 //  Created by Marcin Czachurski on 08/10/2018.
 //
 
-import FluentSQLite
+import FluentPostgreSQL
 import Vapor
 
 /// A single entry of a Voice list.
-final class User: SQLiteUUIDModel {
+final class User: PostgreSQLUUIDModel {
 
     var id: UUID?
     var email: String

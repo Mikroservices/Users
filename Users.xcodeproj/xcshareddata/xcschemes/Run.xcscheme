@@ -70,12 +70,12 @@
          </EnvironmentVariable>
          <EnvironmentVariable
             key = "LETTERER_RECAPTCHA_ENABLED"
-            value = "0"
+            value = "NO"
             isEnabled = "YES">
          </EnvironmentVariable>
          <EnvironmentVariable
-            key = "LETTERER_SQLITE_PATH"
-            value = "/Users/mczachurski/Projects/Letterer/Databases/Users.db"
+            key = "LETTERER_USERS_CONNECTION_STRING"
+            value = "postgresql://user:************@35.228.33.24:5432/users"
             isEnabled = "YES">
          </EnvironmentVariable>
          <EnvironmentVariable
