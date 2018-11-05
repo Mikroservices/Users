@@ -5,5 +5,5 @@ ADD . /users
 WORKDIR /users
 
 RUN swift build --configuration release
-EXPOSE 8080
+EXPOSE 8001
 ENTRYPOINT [".build/release/Run", "--port", "8001", "--hostname", "0.0.0.0"]
