@@ -39,8 +39,10 @@ private func registerRoutes(services: inout Services) throws {
 
 private func registerAuthorizationPrivateKey(services: inout Services) throws {
     guard let privateKey = Environment.get("LETTERER_PRIVATE_KEY") else { throw Abort(.internalServerError) }
-    services.register { container -> SecureKeyStorage in
-        return SecureKeyStorage(privateKey: privateKey)
+    guard let emailServiceAddress = Environment.get("LETTERER_EMAIL_SERVICE_ADDRESS") else { throw Abort(.internalServerError) }
+
+    services.register { container -> SettingsStorage in
+        return SettingsStorage(privateKey: privateKey, emailServiceAddress: emailServiceAddress)
     }
 }
 

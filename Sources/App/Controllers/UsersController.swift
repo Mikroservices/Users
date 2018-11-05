@@ -58,30 +58,42 @@ final class UsersController: RouteCollection {
         }
 
         let captcha = try request.make(Captcha.self)
-        return try captcha.validate(captchaFormResponse: captchaToken).flatMap(to: UserDto.self) { success in
-        
+        return try captcha.validate(captchaFormResponse: captchaToken).map(to: Void.self) { success in
+
             if !success {
                 throw Abort(.badRequest, reason: "Security token is invalid.")
             }
 
-            return User.query(on: request).filter(\.email == userDto.email).first().flatMap(to: User.self) { user in
+        }.flatMap(to: User?.self) { _ in
+            return User.query(on: request).filter(\.email == userDto.email).first()
+        }.flatMap(to: User.self) { user in
 
-                if user != nil {
-                    throw Abort(.badRequest, reason: "User with email '\(userDto.email)' exists.")
-                }
+            if user != nil {
+                throw Abort(.badRequest, reason: "User with email '\(userDto.email)' exists.")
+            }
 
-                let salt = try Password.generateSalt()
-                let passwordHash = try Password.hash(password, withSalt: salt)
-                let emailConfirmationGuid = UUID.init().uuidString
+            let salt = try Password.generateSalt()
+            let passwordHash = try Password.hash(password, withSalt: salt)
+            let emailConfirmationGuid = UUID.init().uuidString
 
-                let user = User(from: userDto, 
-                                withPassword: passwordHash, 
-                                salt: salt, 
-                                emailConfirmationGuid: emailConfirmationGuid)
+            let user = User(from: userDto,
+                            withPassword: passwordHash,
+                            salt: salt,
+                            emailConfirmationGuid: emailConfirmationGuid)
 
-                return user.save(on: request)
+            return user.save(on: request)
+        }.flatMap(to: UserDto.self) { user in
+            let client = try request.client()
+            let settingsStorage = try request.make(SettingsStorage.self)
 
-            }.map(to: UserDto.self) { user in
+            return client.post("\(settingsStorage.emailServiceAddress)/emails") { httpRequest in
+                let emailAddress = EmailAddressDto(address: user.email, name: user.name)
+                let email = EmailDto(to: emailAddress,
+                                     title: "Confirm Letterer Account",
+                                     body: "<html><body><div>Hi \(user.name),</div><div>Please confirm your account by clicking following <a href='https:\\letterer.me/confirm?token=\(user.emailConfirmationGuid)&user=\(user.id)'>link</a>.</div></body></html>")
+
+                try httpRequest.content.encode(email)
+            }.map(to: UserDto.self) { _ in
                 return UserDto(from: user)
             }
         }
@@ -135,8 +147,8 @@ final class UsersController: RouteCollection {
         var userIdFromToken: UUID?
         if let bearer = request.http.headers.bearerAuthorization {
 
-            let secureKeyStorage = try request.make(SecureKeyStorage.self)
-            let rsaKey: RSAKey = try .private(pem: secureKeyStorage.privateKey)
+            let settingsStorage = try request.make(SettingsStorage.self)
+            let rsaKey: RSAKey = try .private(pem: settingsStorage.privateKey)
             let authorizationPayload = try JWT<AuthorizationPayload>(from: bearer.token, verifiedUsing: JWTSigner.rs512(key: rsaKey))
 
             if authorizationPayload.payload.exp < Date() {
@@ -163,8 +175,8 @@ final class UsersController: RouteCollection {
 
         let authorizationPayload = self.createAuthorizationPayload(forUser: user)
 
-        let secureKeyStorage = try request.make(SecureKeyStorage.self)
-        let rsaKey: RSAKey = try .private(pem: secureKeyStorage.privateKey)
+        let settingsStorage = try request.make(SettingsStorage.self)
+        let rsaKey: RSAKey = try .private(pem: settingsStorage.privateKey)
         let data = try JWT(payload: authorizationPayload).sign(using: JWTSigner.rs512(key: rsaKey))
         let accessToken = String(data: data, encoding: .utf8) ?? ""
 

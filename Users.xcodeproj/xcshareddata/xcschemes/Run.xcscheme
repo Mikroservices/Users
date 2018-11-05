@@ -69,6 +69,11 @@
             isEnabled = "YES">
          </EnvironmentVariable>
          <EnvironmentVariable
+            key = "LETTERER_EMAIL_SERVICE_ADDRESS"
+            value = "http://localhost:8002"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
             key = "LETTERER_RECAPTCHA_ENABLED"
             value = "NO"
             isEnabled = "YES">

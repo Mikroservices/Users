@@ -8,6 +8,7 @@
 import Foundation
 import Vapor
 
-struct SecureKeyStorage: Service {
+struct SettingsStorage: Service {
     let privateKey: String
+    let emailServiceAddress: String
 }
