@@ -30,7 +30,7 @@ final class UsersController: RouteCollection {
         return User.find(userIdFromParameter, on: request).map(to: UserDto.self) { userFromDb in
 
             guard let user = userFromDb else {
-                throw Abort(.badRequest, reason: "User with id '\(userIdFromParameter)' not exists.")
+                throw Abort(.badRequest, reason: "USER_WITH_ID_NOT_EXISTS")
             }
 
             let userDto = UserDto(from: user)
@@ -50,18 +50,18 @@ final class UsersController: RouteCollection {
     func register(request: Request, userDto: UserDto) throws -> Future<UserDto> {
 
         guard let captchaToken = userDto.securityToken else {
-            throw Abort(.badRequest, reason: "Security token is mandatory.")
+            throw Abort(.badRequest, reason: "SECURITY_TOKEN_IS_MANDATORY")
         }
 
         guard let password = userDto.password else {
-            throw Abort(.badRequest, reason: "Password is required.")
+            throw Abort(.badRequest, reason: "PASSWORD_IS_REQUIRED")
         }
 
         let captcha = try request.make(Captcha.self)
         return try captcha.validate(captchaFormResponse: captchaToken).map(to: Void.self) { success in
 
             if !success {
-                throw Abort(.badRequest, reason: "Security token is invalid.")
+                throw Abort(.badRequest, reason: "SECURITY_TOKEN_IS_INVALID")
             }
 
         }.flatMap(to: User?.self) { _ in
@@ -69,7 +69,7 @@ final class UsersController: RouteCollection {
         }.flatMap(to: User.self) { user in
 
             if user != nil {
-                throw Abort(.badRequest, reason: "User with email '\(userDto.email)' exists.")
+                throw Abort(.badRequest, reason: "USER_WITH_EMAIL_EXISTS")
             }
 
             let salt = try Password.generateSalt()
@@ -104,20 +104,20 @@ final class UsersController: RouteCollection {
         return User.query(on: request).filter(\.email == signInRequestDto.email).first().map(to: SignInResponseDto.self) { userFromDb in
 
             guard let user = userFromDb else {
-                throw Abort(.unauthorized, reason: "Invalid email or password.")
+                throw Abort(.unauthorized, reason: "INVALID_EMAIL_OR_PASSWORD")
             }
 
             let passwordHash = try Password.hash(signInRequestDto.password, withSalt: user.salt)
             if user.password != passwordHash {
-                throw Abort(.unauthorized, reason: "Invalid email or password.")
+                throw Abort(.unauthorized, reason: "INVALID_EMAIL_OR_PASSWORD")
             }
 
             if !user.emailWasConfirmed {
-                throw Abort(.unauthorized, reason: "User email was not confirmed.")
+                throw Abort(.unauthorized, reason: "USER_EMAIL_WAS_NOT_CONFIRMED")
             }
 
             if user.isBlocked {
-                throw Abort(.unauthorized, reason: "User account is blocked.")
+                throw Abort(.unauthorized, reason: "USER_ACCOUNT_IS_BLOCKED")
             }
 
             // Create payload.
@@ -131,11 +131,11 @@ final class UsersController: RouteCollection {
         return User.find(confirmEmailRequestDto.id, on: request).flatMap(to: User.self) { userFromDb in
 
             guard let user = userFromDb else {
-                throw Abort(.badRequest, reason: "Invalid id or confirmation token.")
+                throw Abort(.badRequest, reason: "INVALID_ID_OR_CONFIRMATION_TOKEN")
             }
 
             guard user.emailConfirmationGuid == confirmEmailRequestDto.confirmationGuid else {
-                throw Abort(.badRequest, reason: "Invalid id or confirmation token.")
+                throw Abort(.badRequest, reason: "INVALID_ID_OR_CONFIRMATION_TOKEN")
             }
 
             user.emailWasConfirmed = true
