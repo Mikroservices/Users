@@ -19,6 +19,8 @@ final class User: PostgreSQLUUIDModel {
     var emailWasConfirmed: Bool
     var isBlocked: Bool
     var emailConfirmationGuid: String
+    var forgotPasswordGuid: String?
+    var forgotPasswordDate: Date?
     var bio: String?
     var location: String?
     var website: String?
@@ -32,6 +34,8 @@ final class User: PostgreSQLUUIDModel {
          emailWasConfirmed: Bool,
          isBlocked: Bool,
          emailConfirmationGuid: String,
+         forgotPasswordGuid: String? = nil,
+         forgotPasswordDate: Date? = nil,
          bio: String? = nil,
          location: String? = nil,
          website: String? = nil,
@@ -45,6 +49,8 @@ final class User: PostgreSQLUUIDModel {
         self.emailWasConfirmed = emailWasConfirmed
         self.isBlocked = isBlocked
         self.emailConfirmationGuid = emailConfirmationGuid
+        self.forgotPasswordGuid = forgotPasswordGuid
+        self.forgotPasswordDate = forgotPasswordDate
         self.bio = bio
         self.location = location
         self.website = website

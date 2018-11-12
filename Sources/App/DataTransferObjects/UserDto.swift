@@ -8,7 +8,7 @@
 import Vapor
 
 /// A single entry of a Voice list.
-final class UserDto {
+final class UserDto: Reflectable {
 
     var id: UUID?
     var email: String
@@ -57,5 +57,25 @@ extension UserDto {
             website: user.website,
             birthDate: user.birthDate
         )
+    }
+}
+
+extension UserDto: Validatable {
+
+    /// See `Validatable`.
+    static func validations() throws -> Validations<UserDto> {
+        var validations = Validations(UserDto.self)
+
+        try validations.add(\.email, .email)
+        try validations.add(\.password, .count(8...32) && .password && !.nil)
+
+        try validations.add(\.name, .count(...50))
+        try validations.add(\.location, .count(...50) || .nil)
+        try validations.add(\.website, .count(...50) || .nil)
+        try validations.add(\.bio, .count(...200) || .nil)
+
+        try validations.add(\.securityToken, !.nil)
+
+        return validations
     }
 }
