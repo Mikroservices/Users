@@ -25,18 +25,18 @@ final class RegisterController: RouteCollection {
         try userDto.validate()
 
         guard let captchaToken = userDto.securityToken else {
-            throw Abort(.badRequest, reason: "SECURITY_TOKEN_IS_MANDATORY")
+            throw RegisterError.securityTokenIsMandatory
         }
 
         guard let password = userDto.password else {
-            throw Abort(.badRequest, reason: "PASSWORD_IS_REQUIRED")
+            throw RegisterError.passwordIsRequired
         }
 
         let captcha = try request.make(Captcha.self)
         return try captcha.validate(captchaFormResponse: captchaToken).map(to: Void.self) { success in
 
             if !success {
-                throw Abort(.badRequest, reason: "SECURITY_TOKEN_IS_INVALID")
+                throw RegisterError.securityTokenIsInvalid
             }
 
         }.flatMap(to: User?.self) { _ in
@@ -44,7 +44,7 @@ final class RegisterController: RouteCollection {
         }.flatMap(to: User.self) { user in
 
             if user != nil {
-                throw Abort(.badRequest, reason: "USER_WITH_EMAIL_EXISTS")
+                throw RegisterError.userWithEmailExists
             }
 
             let salt = try Password.generateSalt()
@@ -62,7 +62,7 @@ final class RegisterController: RouteCollection {
             let settingsStorage = try request.make(SettingsStorage.self)
 
             guard let userId = user.id else {
-                throw Abort(.badRequest, reason: "USER_ID_NOT_EXISTS")
+                throw RegisterError.userIdNotExists
             }
 
             return client.post("\(settingsStorage.emailServiceAddress)/emails") { httpRequest in
@@ -83,11 +83,11 @@ final class RegisterController: RouteCollection {
         return User.find(confirmEmailRequestDto.id, on: request).flatMap(to: User.self) { userFromDb in
 
             guard let user = userFromDb else {
-                throw Abort(.badRequest, reason: "INVALID_ID_OR_CONFIRMATION_TOKEN")
+                throw RegisterError.invalidIdOrToken
             }
 
             guard user.emailConfirmationGuid == confirmEmailRequestDto.confirmationGuid else {
-                throw Abort(.badRequest, reason: "INVALID_ID_OR_CONFIRMATION_TOKEN")
+                throw RegisterError.invalidIdOrToken
             }
 
             user.emailWasConfirmed = true

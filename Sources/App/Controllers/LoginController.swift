@@ -23,20 +23,20 @@ final class LoginController: RouteCollection {
         return User.query(on: request).filter(\.email == signInRequestDto.email).first().map(to: SignInResponseDto.self) { userFromDb in
 
             guard let user = userFromDb else {
-                throw Abort(.badRequest, reason: "INVALID_EMAIL_OR_PASSWORD")
+                throw LoginError.invalidEmailOrPassword
             }
 
             let passwordHash = try Password.hash(signInRequestDto.password, withSalt: user.salt)
             if user.password != passwordHash {
-                throw Abort(.badRequest, reason: "INVALID_EMAIL_OR_PASSWORD")
+                throw LoginError.invalidEmailOrPassword
             }
 
             if !user.emailWasConfirmed {
-                throw Abort(.badRequest, reason: "USER_EMAIL_WAS_NOT_CONFIRMED")
+                throw LoginError.emailNotConfirmed
             }
 
             if user.isBlocked {
-                throw Abort(.badRequest, reason: "USER_ACCOUNT_IS_BLOCKED")
+                throw LoginError.userAccountIsBlocked
             }
 
             // Create payload.

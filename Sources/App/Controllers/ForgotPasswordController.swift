@@ -24,11 +24,11 @@ final class ForgotPasswordController: RouteCollection {
         return User.query(on: request).filter(\.email == forgotPasswordRequestDto.email).first().flatMap(to: User.self) { userFromDb in
 
             guard let user = userFromDb else {
-                throw Abort(.badRequest, reason: "USER_NOT_EXISTS")
+                throw ForgotPasswordError.userNotExists
             }
 
             if user.isBlocked {
-                throw Abort(.badRequest, reason: "USER_ACCOUNT_IS_BLOCKED")
+                throw ForgotPasswordError.userAccountIsBlocked
             }
 
             user.forgotPasswordGuid = UUID.init().uuidString
@@ -40,7 +40,7 @@ final class ForgotPasswordController: RouteCollection {
             let settingsStorage = try request.make(SettingsStorage.self)
 
             guard let forgotPasswordGuid = user.forgotPasswordGuid else {
-                throw Abort(.badRequest, reason: "FORGOT_PASSWORD_TOKEN_WAS_NOT_GENERATED")
+                throw ForgotPasswordError.tokenNotGenerated
             }
 
             return client.post("\(settingsStorage.emailServiceAddress)/emails") { httpRequest in
@@ -61,20 +61,20 @@ final class ForgotPasswordController: RouteCollection {
             try confirmationDto.validate()
 
             guard let user = userFromDb else {
-                throw Abort(.badRequest, reason: "USER_NOT_EXISTS")
+                throw ForgotPasswordError.userNotExists
             }
 
             if user.isBlocked {
-                throw Abort(.badRequest, reason: "USER_ACCOUNT_IS_BLOCKED")
+                throw ForgotPasswordError.userAccountIsBlocked
             }
 
             guard let forgotPasswordDate = user.forgotPasswordDate else {
-                throw Abort(.badRequest, reason: "INVALID_FORGOT_PASSWORD_DATE")
+                throw ForgotPasswordError.tokenExpired
             }
 
             let hoursDifference = Calendar.current.dateComponents([.minute], from: forgotPasswordDate, to: Date()).hour ?? 0
             if hoursDifference > 6 {
-                throw Abort(.badRequest, reason: "FORGOT_PASSWORD_DATE_EXPIRED")
+                throw ForgotPasswordError.tokenExpired
             }
 
             let salt = try Password.generateSalt()

@@ -27,7 +27,7 @@ final class UsersController: RouteCollection {
         return User.find(userIdFromParameter, on: request).map(to: UserDto.self) { userFromDb in
 
             guard let user = userFromDb else {
-                throw Abort(.badRequest, reason: "USER_WITH_ID_NOT_EXISTS")
+                throw UserError.userNotExists
             }
 
             let userDto = UserDto(from: user)

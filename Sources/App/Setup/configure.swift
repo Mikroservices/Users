@@ -1,6 +1,7 @@
 import Vapor
 import Recaptcha
 import FluentPostgreSQL
+import ExtendedError
 
 /// Called before your application initializes.
 public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
@@ -36,7 +37,10 @@ private func registerMiddlewares(services: inout Services) {
     let corsMiddleware = CORSMiddleware(configuration: corsConfiguration)
     middlewares.use(corsMiddleware)
 
-    middlewares.use(ErrorMiddleware.self) // Catches errors and converts to HTTP response
+    // Catches errors and converts to HTTP response
+    services.register(CustomErrorMiddleware.self)
+    middlewares.use(CustomErrorMiddleware.self)
+    
     services.register(middlewares)
 }
 
