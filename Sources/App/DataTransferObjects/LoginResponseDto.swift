@@ -7,8 +7,7 @@
 
 import Vapor
 
-/// A single entry of a Voice list.
-final class SignInResponseDto {
+final class LoginResponseDto {
 
     var actionToken: String
 
@@ -17,6 +16,4 @@ final class SignInResponseDto {
     }
 }
 
-
-/// Allows `SignInResponseDto` to be encoded to and decoded from HTTP messages.
-extension SignInResponseDto: Content { }
+extension LoginResponseDto: Content { }

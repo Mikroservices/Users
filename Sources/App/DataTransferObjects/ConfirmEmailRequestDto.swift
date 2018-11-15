@@ -7,7 +7,6 @@
 
 import Vapor
 
-/// Class for email confirmation process.
 final class ConfirmEmailRequestDto {
 
     var id: UUID
@@ -19,6 +18,4 @@ final class ConfirmEmailRequestDto {
     }
 }
 
-
-/// Allows `ConfirmEmailRequestDto` to be encoded to and decoded from HTTP messages.
 extension ConfirmEmailRequestDto: Content { }

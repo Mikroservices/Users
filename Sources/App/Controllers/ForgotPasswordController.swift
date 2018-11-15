@@ -43,11 +43,13 @@ final class ForgotPasswordController: RouteCollection {
                 throw ForgotPasswordError.tokenNotGenerated
             }
 
+            let userName = user.getUserName()
+
             return client.post("\(settingsStorage.emailServiceAddress)/emails") { httpRequest in
                 let emailAddress = EmailAddressDto(address: user.email, name: user.name)
                 let email = EmailDto(to: emailAddress,
                                      title: "Letterer - Forgot password",
-                                     body: "<html><body><div>Hi \(user.name),</div><div>You can reset your password by clicking following <a href='https://letterer.me/reset-password?token=\(forgotPasswordGuid)'>link</a>.</div></body></html>")
+                                     body: "<html><body><div>Hi \(userName),</div><div>You can reset your password by clicking following <a href='https://letterer.me/reset-password?token=\(forgotPasswordGuid)'>link</a>.</div></body></html>")
 
                 try httpRequest.content.encode(email)
             }

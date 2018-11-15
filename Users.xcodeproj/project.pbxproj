@@ -31,8 +31,8 @@
 		OBJ_1040 /* EmailDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_20 /* EmailDto.swift */; };
 		OBJ_1041 /* ForgotPasswordConfirmationRequestDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_21 /* ForgotPasswordConfirmationRequestDto.swift */; };
 		OBJ_1042 /* ForgotPasswordRequestDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_22 /* ForgotPasswordRequestDto.swift */; };
-		OBJ_1043 /* SignInRequestDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* SignInRequestDto.swift */; };
-		OBJ_1044 /* SignInResponseDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* SignInResponseDto.swift */; };
+		OBJ_1043 /* LoginRequestDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_23 /* LoginRequestDto.swift */; };
+		OBJ_1044 /* LoginResponseDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_24 /* LoginResponseDto.swift */; };
 		OBJ_1045 /* UserDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_25 /* UserDto.swift */; };
 		OBJ_1047 /* ForgotPasswordError.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_28 /* ForgotPasswordError.swift */; };
 		OBJ_1048 /* LoginError.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_29 /* LoginError.swift */; };
@@ -6292,7 +6292,7 @@
 		OBJ_227 /* QueryBuilder+CRUD.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "QueryBuilder+CRUD.swift"; sourceTree = "<group>"; };
 		OBJ_228 /* QueryBuilder+Decode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "QueryBuilder+Decode.swift"; sourceTree = "<group>"; };
 		OBJ_229 /* QueryBuilder+Filter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "QueryBuilder+Filter.swift"; sourceTree = "<group>"; };
-		OBJ_23 /* SignInRequestDto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInRequestDto.swift; sourceTree = "<group>"; };
+		OBJ_23 /* LoginRequestDto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginRequestDto.swift; sourceTree = "<group>"; };
 		OBJ_230 /* QueryBuilder+Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "QueryBuilder+Model.swift"; sourceTree = "<group>"; };
 		OBJ_231 /* QueryBuilder+Operators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "QueryBuilder+Operators.swift"; sourceTree = "<group>"; };
 		OBJ_232 /* QueryBuilder+Range.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "QueryBuilder+Range.swift"; sourceTree = "<group>"; };
@@ -6302,7 +6302,7 @@
 		OBJ_237 /* Children.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Children.swift; sourceTree = "<group>"; };
 		OBJ_238 /* Parent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Parent.swift; sourceTree = "<group>"; };
 		OBJ_239 /* Siblings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Siblings.swift; sourceTree = "<group>"; };
-		OBJ_24 /* SignInResponseDto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInResponseDto.swift; sourceTree = "<group>"; };
+		OBJ_24 /* LoginResponseDto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginResponseDto.swift; sourceTree = "<group>"; };
 		OBJ_241 /* DatabasesConfig+References.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DatabasesConfig+References.swift"; sourceTree = "<group>"; };
 		OBJ_242 /* SchemaBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaBuilder.swift; sourceTree = "<group>"; };
 		OBJ_243 /* SchemaCreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SchemaCreator.swift; sourceTree = "<group>"; };
@@ -8145,8 +8145,8 @@
 				OBJ_20 /* EmailDto.swift */,
 				OBJ_21 /* ForgotPasswordConfirmationRequestDto.swift */,
 				OBJ_22 /* ForgotPasswordRequestDto.swift */,
-				OBJ_23 /* SignInRequestDto.swift */,
-				OBJ_24 /* SignInResponseDto.swift */,
+				OBJ_23 /* LoginRequestDto.swift */,
+				OBJ_24 /* LoginResponseDto.swift */,
 				OBJ_25 /* UserDto.swift */,
 			);
 			path = DataTransferObjects;
@@ -8982,7 +8982,7 @@
 			path = Tag;
 			sourceTree = "<group>";
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -8991,7 +8991,6 @@
 				OBJ_50 /* Dependencies */,
 				OBJ_978 /* Products */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_50 /* Dependencies */ = {
@@ -12321,7 +12320,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_978 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -12418,8 +12417,8 @@
 				OBJ_1040 /* EmailDto.swift in Sources */,
 				OBJ_1041 /* ForgotPasswordConfirmationRequestDto.swift in Sources */,
 				OBJ_1042 /* ForgotPasswordRequestDto.swift in Sources */,
-				OBJ_1043 /* SignInRequestDto.swift in Sources */,
-				OBJ_1044 /* SignInResponseDto.swift in Sources */,
+				OBJ_1043 /* LoginRequestDto.swift in Sources */,
+				OBJ_1044 /* LoginResponseDto.swift in Sources */,
 				OBJ_1045 /* UserDto.swift in Sources */,
 				OBJ_1047 /* ForgotPasswordError.swift in Sources */,
 				OBJ_1048 /* LoginError.swift in Sources */,

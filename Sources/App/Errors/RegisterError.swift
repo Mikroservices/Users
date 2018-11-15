@@ -12,9 +12,10 @@ enum RegisterError: String, Error {
     case securityTokenIsMandatory
     case passwordIsRequired
     case securityTokenIsInvalid
-    case userWithEmailExists
+    case userNameIsAlreadyTaken
     case userIdNotExists
     case invalidIdOrToken
+    case emailIsAlreadyConnected
 }
 
 extension RegisterError: TerminateError {
@@ -27,9 +28,10 @@ extension RegisterError: TerminateError {
         case .securityTokenIsMandatory: return "Security token is mandatory (it should be provided from Google reCaptcha)."
         case .passwordIsRequired: return "Password is required. User have to provide some."
         case .securityTokenIsInvalid: return "Security token is invalid (Google reCaptcha API returned that information)."
-        case .userWithEmailExists: return "User with provided email already exists in the system."
+        case .userNameIsAlreadyTaken: return "User with provided user name already exists in the system."
         case .userIdNotExists: return "User Id not exists. Probably saving of the user entity failed."
         case .invalidIdOrToken: return "Invalid user Id or token. User have to activate account by reseting his password."
+        case .emailIsAlreadyConnected: return "Email is already connected with other account."
         }
     }
 

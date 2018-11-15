@@ -7,7 +7,6 @@
 
 import Vapor
 
-/// Class for forgot password process.
 final class ForgotPasswordRequestDto {
 
     var email: String
@@ -17,6 +16,4 @@ final class ForgotPasswordRequestDto {
     }
 }
 
-
-/// Allows `ForgotPasswordRequestDto` to be encoded to and decoded from HTTP messages.
 extension ForgotPasswordRequestDto: Content { }

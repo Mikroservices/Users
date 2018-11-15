@@ -9,7 +9,7 @@ import Vapor
 import ExtendedError
 
 enum LoginError: String, Error {
-    case invalidEmailOrPassword
+    case invalidLoginCredentials
     case userAccountIsBlocked
     case emailNotConfirmed
 }
@@ -21,7 +21,7 @@ extension LoginError: TerminateError {
 
     var reason: String {
         switch self {
-        case .invalidEmailOrPassword: return "Given email or password are invalid."
+        case .invalidLoginCredentials: return "Given user name or password are invalid."
         case .userAccountIsBlocked: return "User account is blocked. User cannot login to the system right now."
         case .emailNotConfirmed: return "User email is not confirmed. User have to confirm his email first."
         }

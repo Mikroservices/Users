@@ -40,11 +40,18 @@ final class RegisterController: RouteCollection {
             }
 
         }.flatMap(to: User?.self) { _ in
+            return User.query(on: request).filter(\.userName == userDto.userName).first()
+        }.flatMap(to: User?.self) { user in
+
+            if user != nil {
+                throw RegisterError.userNameIsAlreadyTaken
+            }
+
             return User.query(on: request).filter(\.email == userDto.email).first()
         }.flatMap(to: User.self) { user in
 
             if user != nil {
-                throw RegisterError.userWithEmailExists
+                throw RegisterError.emailIsAlreadyConnected
             }
 
             let salt = try Password.generateSalt()
@@ -65,11 +72,13 @@ final class RegisterController: RouteCollection {
                 throw RegisterError.userIdNotExists
             }
 
+            let userName = user.getUserName()
+
             return client.post("\(settingsStorage.emailServiceAddress)/emails") { httpRequest in
                 let emailAddress = EmailAddressDto(address: user.email, name: user.name)
                 let email = EmailDto(to: emailAddress,
                                      title: "Letterer - Confirm email",
-                                     body: "<html><body><div>Hi \(user.name),</div><div>Please confirm your account by clicking following <a href='https://letterer.me/confirm-email?token=\(user.emailConfirmationGuid)&user=\(userId)'>link</a>.</div></body></html>")
+                                     body: "<html><body><div>Hi \(userName),</div><div>Please confirm your account by clicking following <a href='https://letterer.me/confirm-email?token=\(user.emailConfirmationGuid)&user=\(userId)'>link</a>.</div></body></html>")
 
                 try httpRequest.content.encode(email)
                 }.map(to: UserDto.self) { _ in

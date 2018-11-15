@@ -15,20 +15,23 @@ import FluentPostgreSQL
 final class LoginController: RouteCollection {
 
     func boot(router: Router) throws {
-        router.post(SignInRequestDto.self, at: "/login", use: login)
+        router.post(LoginRequestDto.self, at: "/login", use: login)
     }
 
     /// Sign-in user.
-    func login(request: Request, signInRequestDto: SignInRequestDto) throws -> Future<SignInResponseDto> {
-        return User.query(on: request).filter(\.email == signInRequestDto.email).first().map(to: SignInResponseDto.self) { userFromDb in
+    func login(request: Request, loginRequestDto: LoginRequestDto) throws -> Future<LoginResponseDto> {
+        return User.query(on: request).group(.or) { userNameGroup in
+                userNameGroup.filter(\.userName == loginRequestDto.userNameOrEmail)
+                userNameGroup.filter(\.email == loginRequestDto.userNameOrEmail)
+            }.first().map(to: LoginResponseDto.self) { userFromDb in
 
             guard let user = userFromDb else {
-                throw LoginError.invalidEmailOrPassword
+                throw LoginError.invalidLoginCredentials
             }
 
-            let passwordHash = try Password.hash(signInRequestDto.password, withSalt: user.salt)
+            let passwordHash = try Password.hash(loginRequestDto.password, withSalt: user.salt)
             if user.password != passwordHash {
-                throw LoginError.invalidEmailOrPassword
+                throw LoginError.invalidLoginCredentials
             }
 
             if !user.emailWasConfirmed {
@@ -41,7 +44,7 @@ final class LoginController: RouteCollection {
 
             // Create payload.
             let accessToken = try self.createAccessToken(request: request, forUser: user)
-            return SignInResponseDto(accessToken)
+            return LoginResponseDto(accessToken)
         }
     }
 
@@ -61,6 +64,7 @@ final class LoginController: RouteCollection {
         let expirationDate = Date().addingTimeInterval(TimeInterval(3600.0))
         let authorizationPayload = AuthorizationPayload(
             id: user.id,
+            userName: user.userName,
             name: user.name,
             email: user.email,
             exp: expirationDate

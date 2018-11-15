@@ -12,8 +12,9 @@ import Vapor
 final class User: PostgreSQLUUIDModel {
 
     var id: UUID?
+    var userName: String
     var email: String
-    var name: String
+    var name: String?
     var password: String
     var salt: String
     var emailWasConfirmed: Bool
@@ -27,8 +28,9 @@ final class User: PostgreSQLUUIDModel {
     var birthDate: Date?
 
     init(id: UUID? = nil,
+         userName: String,
          email: String,
-         name: String,
+         name: String?,
          password: String,
          salt: String,
          emailWasConfirmed: Bool,
@@ -42,6 +44,7 @@ final class User: PostgreSQLUUIDModel {
          birthDate: Date? = nil
     ) {
         self.id = id
+        self.userName = userName
         self.email = email
         self.name = name
         self.password = password
@@ -73,6 +76,7 @@ extension User {
                      salt: String,
                      emailConfirmationGuid: String) {
         self.init(
+            userName: userDto.userName,
             email: userDto.email,
             name: userDto.name,
             password: password,
@@ -85,5 +89,13 @@ extension User {
             website: userDto.website,
             birthDate: userDto.birthDate
         )
+    }
+
+    func getUserName() -> String {
+        guard let userName = self.name else {
+            return self.userName
+        }
+
+        return userName
     }
 }

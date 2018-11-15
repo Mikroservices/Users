@@ -7,7 +7,6 @@
 
 import Vapor
 
-/// Class for forgot password confirmation process.
 final class ForgotPasswordConfirmationRequestDto: Reflectable {
 
     var forgotPasswordGuid: String
@@ -19,7 +18,6 @@ final class ForgotPasswordConfirmationRequestDto: Reflectable {
     }
 }
 
-/// Allows `ForgotPasswordConfirmationRequestDto` to be encoded to and decoded from HTTP messages.
 extension ForgotPasswordConfirmationRequestDto: Content { }
 
 extension ForgotPasswordConfirmationRequestDto: Validatable {

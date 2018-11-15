@@ -7,7 +7,6 @@
 
 import Vapor
 
-/// A single entry of a EmailAddressDto.
 final class EmailAddressDto {
 
     var address: String
@@ -21,5 +20,4 @@ final class EmailAddressDto {
     }
 }
 
-/// Allows `EmailAddressDto` to be encoded to and decoded from HTTP messages.
 extension EmailAddressDto: Content { }
