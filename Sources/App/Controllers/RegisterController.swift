@@ -17,6 +17,8 @@ final class RegisterController: RouteCollection {
     func boot(router: Router) throws {
         router.post(UserDto.self, at: "/register", use: register)
         router.post(ConfirmEmailRequestDto.self, at: "/register/confirm", use: confirm)
+        router.get("/register/userName", String.parameter, use: isUserNameTaken)
+        router.get("/register/email", String.parameter, use: isEmailConnected)
     }
 
     // Register new user.
@@ -40,14 +42,16 @@ final class RegisterController: RouteCollection {
             }
 
         }.flatMap(to: User?.self) { _ in
-            return User.query(on: request).filter(\.userName == userDto.userName).first()
+            let userNameNormalized = userDto.userName.uppercased()
+            return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first()
         }.flatMap(to: User?.self) { user in
 
             if user != nil {
                 throw RegisterError.userNameIsAlreadyTaken
             }
 
-            return User.query(on: request).filter(\.email == userDto.email).first()
+            let emailNormalized = userDto.email.uppercased()
+            return User.query(on: request).filter(\.emailNormalized == emailNormalized).first()
         }.flatMap(to: User.self) { user in
 
             if user != nil {
@@ -102,5 +106,33 @@ final class RegisterController: RouteCollection {
             user.emailWasConfirmed = true
             return user.save(on: request)
         }.transform(to: HTTPStatus.ok)
+    }
+
+    func isUserNameTaken(request: Request) throws -> Future<HTTPResponseStatus> {
+
+        let userNameNormalized = try request.parameters.next(String.self).uppercased()
+
+        return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().map(to: HTTPStatus.self) { userFromDb in
+
+            if userFromDb != nil {
+                return HTTPStatus.ok
+            }
+
+            return HTTPStatus.notFound
+        }
+    }
+
+    func isEmailConnected(request: Request) throws -> Future<HTTPResponseStatus> {
+
+        let emailNormalized = try request.parameters.next(String.self).uppercased()
+
+        return User.query(on: request).filter(\.emailNormalized == emailNormalized).first().map(to: HTTPStatus.self) { userFromDb in
+
+            if userFromDb != nil {
+                return HTTPStatus.ok
+            }
+
+            return HTTPStatus.notFound
+        }
     }
 }

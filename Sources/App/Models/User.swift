@@ -27,6 +27,9 @@ final class User: PostgreSQLUUIDModel {
     var website: String?
     var birthDate: Date?
 
+    var userNameNormalized: String
+    var emailNormalized: String;
+
     init(id: UUID? = nil,
          userName: String,
          email: String,
@@ -58,6 +61,9 @@ final class User: PostgreSQLUUIDModel {
         self.location = location
         self.website = website
         self.birthDate = birthDate
+
+        self.userNameNormalized = userName.uppercased()
+        self.emailNormalized = email.uppercased()
     }
 }
 

@@ -21,7 +21,10 @@ final class ForgotPasswordController: RouteCollection {
 
     /// Forgot password.
     func forgotPasswordToken(request: Request, forgotPasswordRequestDto: ForgotPasswordRequestDto) throws -> Future<HTTPResponseStatus> {
-        return User.query(on: request).filter(\.email == forgotPasswordRequestDto.email).first().flatMap(to: User.self) { userFromDb in
+
+        let emailNormalized = forgotPasswordRequestDto.email.uppercased()
+
+        return User.query(on: request).filter(\.emailNormalized == emailNormalized).first().flatMap(to: User.self) { userFromDb in
 
             guard let user = userFromDb else {
                 throw ForgotPasswordError.userNotExists

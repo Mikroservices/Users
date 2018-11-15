@@ -20,9 +20,12 @@ final class LoginController: RouteCollection {
 
     /// Sign-in user.
     func login(request: Request, loginRequestDto: LoginRequestDto) throws -> Future<LoginResponseDto> {
+
+        let userNameOrEmailNormalized = loginRequestDto.userNameOrEmail.uppercased()
+
         return User.query(on: request).group(.or) { userNameGroup in
-                userNameGroup.filter(\.userName == loginRequestDto.userNameOrEmail)
-                userNameGroup.filter(\.email == loginRequestDto.userNameOrEmail)
+                userNameGroup.filter(\.userNameNormalized == userNameOrEmailNormalized)
+                userNameGroup.filter(\.emailNormalized == userNameOrEmailNormalized)
             }.first().map(to: LoginResponseDto.self) { userFromDb in
 
             guard let user = userFromDb else {
