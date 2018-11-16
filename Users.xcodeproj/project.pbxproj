@@ -21,6 +21,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		F8173780219E15CF005199DD /* BooleanResponseDto.swift in Sources */ = {isa = PBXBuildFile; fileRef = F817377F219E15CF005199DD /* BooleanResponseDto.swift */; };
 		OBJ_1033 /* ForgotPasswordController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_12 /* ForgotPasswordController.swift */; };
 		OBJ_1034 /* LoginController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_13 /* LoginController.swift */; };
 		OBJ_1035 /* RegisterController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_14 /* RegisterController.swift */; };
@@ -6167,6 +6168,7 @@
 		"Crypto::Random::Product" /* Random.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Random.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"DatabaseKit::DatabaseKit::Product" /* DatabaseKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DatabaseKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"ExtendedError::ExtendedError::Product" /* ExtendedError.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ExtendedError.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F817377F219E15CF005199DD /* BooleanResponseDto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BooleanResponseDto.swift; sourceTree = "<group>"; };
 		"Fluent::Fluent::Product" /* Fluent.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Fluent.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"Fluent::FluentSQL::Product" /* FluentSQL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FluentSQL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"FluentPostgreSQL::FluentPostgreSQL::Product" /* FluentPostgreSQL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FluentPostgreSQL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -8148,6 +8150,7 @@
 				OBJ_23 /* LoginRequestDto.swift */,
 				OBJ_24 /* LoginResponseDto.swift */,
 				OBJ_25 /* UserDto.swift */,
+				F817377F219E15CF005199DD /* BooleanResponseDto.swift */,
 			);
 			path = DataTransferObjects;
 			sourceTree = "<group>";
@@ -12410,6 +12413,7 @@
 				OBJ_1033 /* ForgotPasswordController.swift in Sources */,
 				OBJ_1034 /* LoginController.swift in Sources */,
 				OBJ_1035 /* RegisterController.swift in Sources */,
+				F8173780219E15CF005199DD /* BooleanResponseDto.swift in Sources */,
 				OBJ_1036 /* UsersController.swift in Sources */,
 				OBJ_1037 /* AuthorizationPayload.swift in Sources */,
 				OBJ_1038 /* ConfirmEmailRequestDto.swift in Sources */,

@@ -108,31 +108,31 @@ final class RegisterController: RouteCollection {
         }.transform(to: HTTPStatus.ok)
     }
 
-    func isUserNameTaken(request: Request) throws -> Future<HTTPResponseStatus> {
+    func isUserNameTaken(request: Request) throws -> Future<BooleanResponseDto> {
 
         let userNameNormalized = try request.parameters.next(String.self).uppercased()
 
-        return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().map(to: HTTPStatus.self) { userFromDb in
+        return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().map(to: BooleanResponseDto.self) { userFromDb in
 
             if userFromDb != nil {
-                return HTTPStatus.ok
+                return BooleanResponseDto(true)
             }
 
-            return HTTPStatus.notFound
+            return BooleanResponseDto(false)
         }
     }
 
-    func isEmailConnected(request: Request) throws -> Future<HTTPResponseStatus> {
+    func isEmailConnected(request: Request) throws -> Future<BooleanResponseDto> {
 
         let emailNormalized = try request.parameters.next(String.self).uppercased()
 
-        return User.query(on: request).filter(\.emailNormalized == emailNormalized).first().map(to: HTTPStatus.self) { userFromDb in
+        return User.query(on: request).filter(\.emailNormalized == emailNormalized).first().map(to: BooleanResponseDto.self) { userFromDb in
 
             if userFromDb != nil {
-                return HTTPStatus.ok
+                return BooleanResponseDto(true)
             }
 
-            return HTTPStatus.notFound
+            return BooleanResponseDto(false)
         }
     }
 }
