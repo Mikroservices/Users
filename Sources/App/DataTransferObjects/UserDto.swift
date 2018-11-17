@@ -69,7 +69,7 @@ extension UserDto: Validatable {
     static func validations() throws -> Validations<UserDto> {
         var validations = Validations(UserDto.self)
 
-        try validations.add(\.userName, .count(1...50))
+        try validations.add(\.userName, .count(1...50) && .alphanumeric)
         try validations.add(\.email, .email)
         try validations.add(\.password, .count(8...32) && .password && !.nil)
 

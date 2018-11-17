@@ -16,15 +16,15 @@ import FluentPostgreSQL
 final class UsersController: RouteCollection {
 
     func boot(router: Router) throws {
-        router.get("/users", UUID.parameter, use: profile)
+        router.get("/users", String.parameter, use: profile)
     }
 
     /// User profile.
     func profile(request: Request) throws -> Future<UserDto> {
 
-        let userIdFromParameter = try request.parameters.next(UUID.self)
+        let userNameNormalized = try request.parameters.next(String.self).uppercased().replacingOccurrences(of: "@", with: "")
 
-        return User.find(userIdFromParameter, on: request).map(to: UserDto.self) { userFromDb in
+        return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().map(to: UserDto.self) { userFromDb in
 
             guard let user = userFromDb else {
                 throw UserError.userNotExists
@@ -32,8 +32,8 @@ final class UsersController: RouteCollection {
 
             let userDto = UserDto(from: user)
 
-            let userIdFromToken = try self.getUserIdFromBearerToken(request: request)
-            let isProfileOwner = userIdFromToken == userIdFromParameter
+            let userNameFromToken = try self.getUserNameFromBearerToken(request: request)
+            let isProfileOwner = userNameFromToken == userNameNormalized
 
             if !isProfileOwner {
                 userDto.email = ""
@@ -43,19 +43,19 @@ final class UsersController: RouteCollection {
         }
     }
 
-    private func getUserIdFromBearerToken(request: Request) throws -> UUID? {
-        var userIdFromToken: UUID?
+    private func getUserNameFromBearerToken(request: Request) throws -> String {
+        var userNameFromToken: String = ""
         if let bearer = request.http.headers.bearerAuthorization {
 
             let settingsStorage = try request.make(SettingsStorage.self)
             let rsaKey: RSAKey = try .private(pem: settingsStorage.privateKey)
             let authorizationPayload = try JWT<AuthorizationPayload>(from: bearer.token, verifiedUsing: JWTSigner.rs512(key: rsaKey))
 
-            if authorizationPayload.payload.exp < Date() {
-                userIdFromToken = authorizationPayload.payload.id
+            if authorizationPayload.payload.exp > Date() {
+                userNameFromToken = authorizationPayload.payload.userName.uppercased()
             }
         }
 
-        return userIdFromToken
+        return userNameFromToken
     }
 }
