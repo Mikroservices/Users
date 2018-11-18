@@ -32,8 +32,8 @@ final class UsersController: RouteCollection {
 
             let authorizationService = try request.make(AuthorizationService.self)
             let userNameFromToken = try authorizationService.getUserNameFromBearerToken(request: request)
-            let isProfileOwner = userNameFromToken == userNameNormalized
-
+            
+            let isProfileOwner = userNameFromToken?.uppercased() == userNameNormalized
             if !isProfileOwner {
                 userDto.email = ""
             }
