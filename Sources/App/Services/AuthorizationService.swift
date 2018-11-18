@@ -66,7 +66,8 @@ final class AuthorizationService: ServiceType {
             userName: user.userName,
             name: user.name,
             email: user.email,
-            exp: expirationDate
+            exp: expirationDate,
+            gravatarHash: user.gravatarHash
         )
 
         return authorizationPayload

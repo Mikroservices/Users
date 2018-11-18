@@ -7,6 +7,7 @@
 
 import FluentPostgreSQL
 import Vapor
+import Crypto
 
 /// A single entry of a Voice list.
 final class User: PostgreSQLUUIDModel {
@@ -28,7 +29,8 @@ final class User: PostgreSQLUUIDModel {
     var birthDate: Date?
 
     var userNameNormalized: String
-    var emailNormalized: String;
+    var emailNormalized: String
+    var gravatarHash: String
 
     init(id: UUID? = nil,
          userName: String,
@@ -39,6 +41,7 @@ final class User: PostgreSQLUUIDModel {
          emailWasConfirmed: Bool,
          isBlocked: Bool,
          emailConfirmationGuid: String,
+         gravatarHash: String,
          forgotPasswordGuid: String? = nil,
          forgotPasswordDate: Date? = nil,
          bio: String? = nil,
@@ -55,6 +58,7 @@ final class User: PostgreSQLUUIDModel {
         self.emailWasConfirmed = emailWasConfirmed
         self.isBlocked = isBlocked
         self.emailConfirmationGuid = emailConfirmationGuid
+        self.gravatarHash = gravatarHash
         self.forgotPasswordGuid = forgotPasswordGuid
         self.forgotPasswordDate = forgotPasswordDate
         self.bio = bio
@@ -64,6 +68,7 @@ final class User: PostgreSQLUUIDModel {
 
         self.userNameNormalized = userName.uppercased()
         self.emailNormalized = email.uppercased()
+        self.gravatarHash = gravatarHash
     }
 }
 
@@ -80,16 +85,18 @@ extension User {
     convenience init(from userDto: UserDto,
                      withPassword password: String,
                      salt: String,
-                     emailConfirmationGuid: String) {
+                     emailConfirmationGuid: String,
+                     gravatarHash: String) {
         self.init(
             userName: userDto.userName,
-            email: userDto.email,
+            email: userDto.email ?? "",
             name: userDto.name,
             password: password,
             salt: salt,
             emailWasConfirmed: false,
             isBlocked: false,
             emailConfirmationGuid: emailConfirmationGuid,
+            gravatarHash: gravatarHash,
             bio: userDto.bio,
             location: userDto.location,
             website: userDto.website,

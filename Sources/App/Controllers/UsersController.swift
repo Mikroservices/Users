@@ -35,7 +35,7 @@ final class UsersController: RouteCollection {
             
             let isProfileOwner = userNameFromToken?.uppercased() == userNameNormalized
             if !isProfileOwner {
-                userDto.email = ""
+                userDto.email = nil
             }
 
             return userDto

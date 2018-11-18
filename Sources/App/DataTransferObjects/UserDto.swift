@@ -11,7 +11,7 @@ final class UserDto: Reflectable {
 
     var id: UUID?
     var userName: String
-    var email: String
+    var email: String?
     var name: String?
     var password: String?
     var bio: String?
@@ -19,10 +19,12 @@ final class UserDto: Reflectable {
     var website: String?
     var birthDate: Date?
     var securityToken: String?
+    var gravatarHash: String?
 
     init(id: UUID? = nil,
          userName: String,
-         email: String,
+         email: String?,
+         gravatarHash: String? = nil,
          name: String? = nil,
          password: String? = nil,
          bio: String? = nil,
@@ -34,6 +36,7 @@ final class UserDto: Reflectable {
         self.id = id
         self.userName = userName
         self.email = email
+        self.gravatarHash = gravatarHash
         self.name = name
         self.password = password
         self.bio = bio
@@ -52,6 +55,7 @@ extension UserDto {
             id: user.id,
             userName: user.userName,
             email: user.email,
+            gravatarHash: user.gravatarHash,
             name: user.name,
             password: nil,
             bio: user.bio,
@@ -70,7 +74,7 @@ extension UserDto: Validatable {
         var validations = Validations(UserDto.self)
 
         try validations.add(\.userName, .count(1...50) && .alphanumeric)
-        try validations.add(\.email, .email)
+        try validations.add(\.email, .email && !.nil)
         try validations.add(\.password, .count(8...32) && .password && !.nil)
 
         try validations.add(\.name, .count(...50) || .nil)

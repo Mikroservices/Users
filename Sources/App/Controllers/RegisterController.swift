@@ -50,7 +50,7 @@ final class RegisterController: RouteCollection {
                 throw RegisterError.userNameIsAlreadyTaken
             }
 
-            let emailNormalized = userDto.email.uppercased()
+            let emailNormalized = (userDto.email ?? "").uppercased()
             return User.query(on: request).filter(\.emailNormalized == emailNormalized).first()
         }.flatMap(to: User.self) { user in
 
@@ -62,10 +62,14 @@ final class RegisterController: RouteCollection {
             let passwordHash = try Password.hash(password, withSalt: salt)
             let emailConfirmationGuid = UUID.init().uuidString
 
+            let gravatarEmail = (userDto.email ?? "").lowercased().trimmingCharacters(in: [" "])
+            let gravatarHash = try MD5.hash(gravatarEmail).hexEncodedString()
+
             let user = User(from: userDto,
                             withPassword: passwordHash,
                             salt: salt,
-                            emailConfirmationGuid: emailConfirmationGuid)
+                            emailConfirmationGuid: emailConfirmationGuid,
+                            gravatarHash: gravatarHash)
 
             return user.save(on: request)
         }.flatMap(to: UserDto.self) { user in
