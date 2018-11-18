@@ -1,6 +1,6 @@
 //
 //  BooleanResponseDto.swift
-//  App
+//  Letterer/Users
 //
 //  Created by Marcin Czachurski on 15/11/2018.
 //

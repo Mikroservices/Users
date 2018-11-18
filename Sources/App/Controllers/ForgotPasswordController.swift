@@ -94,20 +94,4 @@ final class ForgotPasswordController: RouteCollection {
             return user.save(on: request)
         }.transform(to: HTTPStatus.ok)
     }
-
-    private func getUserIdFromBearerToken(request: Request) throws -> UUID? {
-        var userIdFromToken: UUID?
-        if let bearer = request.http.headers.bearerAuthorization {
-
-            let settingsStorage = try request.make(SettingsStorage.self)
-            let rsaKey: RSAKey = try .private(pem: settingsStorage.privateKey)
-            let authorizationPayload = try JWT<AuthorizationPayload>(from: bearer.token, verifiedUsing: JWTSigner.rs512(key: rsaKey))
-
-            if authorizationPayload.payload.exp < Date() {
-                userIdFromToken = authorizationPayload.payload.id
-            }
-        }
-
-        return userIdFromToken
-    }
 }

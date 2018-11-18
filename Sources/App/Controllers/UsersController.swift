@@ -5,11 +5,7 @@
 //  Created by Marcin Czachurski on 25/10/2018.
 //
 
-import Foundation
 import Vapor
-import JWT
-import Crypto
-import Recaptcha
 import FluentPostgreSQL
 
 /// Controls basic operations for User object.
@@ -17,6 +13,8 @@ final class UsersController: RouteCollection {
 
     func boot(router: Router) throws {
         router.get("/users", String.parameter, use: profile)
+        router.put(UserDto.self, at: "/users", String.parameter, use: update)
+        router.delete("/users", String.parameter, use: delete)
     }
 
     /// User profile.
@@ -32,7 +30,8 @@ final class UsersController: RouteCollection {
 
             let userDto = UserDto(from: user)
 
-            let userNameFromToken = try self.getUserNameFromBearerToken(request: request)
+            let authorizationService = try request.make(AuthorizationService.self)
+            let userNameFromToken = try authorizationService.getUserNameFromBearerToken(request: request)
             let isProfileOwner = userNameFromToken == userNameNormalized
 
             if !isProfileOwner {
@@ -43,19 +42,60 @@ final class UsersController: RouteCollection {
         }
     }
 
-    private func getUserNameFromBearerToken(request: Request) throws -> String {
-        var userNameFromToken: String = ""
-        if let bearer = request.http.headers.bearerAuthorization {
+    func update(request: Request, userDto: UserDto) throws -> Future<UserDto> {
 
-            let settingsStorage = try request.make(SettingsStorage.self)
-            let rsaKey: RSAKey = try .private(pem: settingsStorage.privateKey)
-            let authorizationPayload = try JWT<AuthorizationPayload>(from: bearer.token, verifiedUsing: JWTSigner.rs512(key: rsaKey))
-
-            if authorizationPayload.payload.exp > Date() {
-                userNameFromToken = authorizationPayload.payload.userName.uppercased()
-            }
+        let authorizationService = try request.make(AuthorizationService.self)
+        guard let userNameFromToken = try authorizationService.getUserNameFromBearerToken(request: request) else {
+            throw Abort(.unauthorized)
         }
 
-        return userNameFromToken
+        let userNameNormalized = try request.parameters.next(String.self).uppercased().replacingOccurrences(of: "@", with: "")
+
+        return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().flatMap(to: User.self) { userFromDb in
+
+            guard let user = userFromDb else {
+                throw UserError.userNotExists
+            }
+
+            let isProfileOwner = userNameFromToken.uppercased() == userNameNormalized
+            guard isProfileOwner else {
+                throw UserError.someoneElseProfile
+            }
+
+            user.name = userDto.name
+            user.bio = userDto.bio
+            user.birthDate = userDto.birthDate
+            user.location = userDto.location
+            user.website = userDto.website
+
+            return user.update(on: request)
+        }.map(to: UserDto.self) { user in
+            let userDto = UserDto(from: user)
+            return userDto
+        }
+    }
+
+    func delete(request: Request) throws -> Future<HTTPStatus> {
+
+        let authorizationService = try request.make(AuthorizationService.self)
+        guard let userNameFromToken = try authorizationService.getUserNameFromBearerToken(request: request) else {
+            throw Abort(.unauthorized)
+        }
+
+        let userNameNormalized = try request.parameters.next(String.self).uppercased().replacingOccurrences(of: "@", with: "")
+
+        return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().flatMap(to: Void.self) { userFromDb in
+
+            guard let user = userFromDb else {
+                throw UserError.userNotExists
+            }
+
+            let isProfileOwner = userNameFromToken.uppercased() == userNameNormalized
+            guard isProfileOwner else {
+                throw UserError.someoneElseProfile
+            }
+
+            return user.delete(on: request)
+        }.transform(to: HTTPStatus.ok)
     }
 }

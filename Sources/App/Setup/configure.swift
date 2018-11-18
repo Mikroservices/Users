@@ -18,6 +18,9 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     /// Register routes to the router.
     try registerRoutes(services: &services)
 
+    /// Register custom services.
+    registerServices(services: &services)
+
     /// Register middleware.
     registerMiddlewares(services: &services)
 
@@ -96,4 +99,8 @@ private func configureDatabase(services: inout Services) throws {
     var migrations = MigrationConfig()
     migrations.add(model: User.self, database: .psql)
     services.register(migrations)
+}
+
+private func registerServices(services: inout Services) {
+    services.register(AuthorizationService.self)
 }

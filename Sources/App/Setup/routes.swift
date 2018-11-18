@@ -10,7 +10,7 @@ public func routes(_ router: Router) throws {
 
     // Configuring controllers.
     try router.register(collection: UsersController())
-    try router.register(collection: LoginController())
+    try router.register(collection: AccountController())
     try router.register(collection: RegisterController())
     try router.register(collection: ForgotPasswordController())
 }
