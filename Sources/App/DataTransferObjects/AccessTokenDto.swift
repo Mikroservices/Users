@@ -10,9 +10,11 @@ import Vapor
 final class AccessTokenDto {
 
     var accessToken: String
+    var refreshToken: String
 
-    init(_ accessToken: String) {
+    init(accessToken: String, refreshToken: String) {
         self.accessToken = accessToken
+        self.refreshToken = refreshToken
     }
 }
 

@@ -16,7 +16,7 @@ final class AccountController: RouteCollection {
 
     func boot(router: Router) throws {
         router.post(LoginRequestDto.self, at: "/account/login", use: login)
-        router.post(AccessTokenDto.self, at: "/account/refresh", use: refresh)
+        router.post(RefreshTokenDto.self, at: "/account/refresh", use: refresh)
         router.post(ChangePasswordRequestDto.self, at: "/account/change-password", use: changePassword)
     }
 
@@ -28,7 +28,7 @@ final class AccountController: RouteCollection {
         return User.query(on: request).group(.or) { userNameGroup in
                 userNameGroup.filter(\.userNameNormalized == userNameOrEmailNormalized)
                 userNameGroup.filter(\.emailNormalized == userNameOrEmailNormalized)
-            }.first().map(to: AccessTokenDto.self) { userFromDb in
+            }.first().flatMap(to: AccessTokenDto.self) { userFromDb in
 
             guard let user = userFromDb else {
                 throw LoginError.invalidLoginCredentials
@@ -47,44 +47,52 @@ final class AccountController: RouteCollection {
                 throw LoginError.userAccountIsBlocked
             }
 
-            // Create payload.
             let authorizationService = try request.make(AuthorizationService.self)
-            let accessToken = try authorizationService.createAccessToken(request: request, forUser: user)
-            return AccessTokenDto(accessToken)
+
+            return try authorizationService.createRefreshToken(request: request, forUser: user).map(to: AccessTokenDto.self) { refreshToken in
+                let accessToken = try authorizationService.createAccessToken(request: request, forUser: user)
+                return AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
+            }
         }
     }
 
     /// Refresh token.
-    func refresh(request: Request, accessTokenDto: AccessTokenDto) throws -> Future<AccessTokenDto> {
+    func refresh(request: Request, refreshTokenDto: RefreshTokenDto) throws -> Future<AccessTokenDto> {
 
-        let authorizationService = try request.make(AuthorizationService.self)
-        guard let userNameFromToken = try authorizationService.getUserNameFromBearerToken(request: request) else {
-            throw Abort(.unauthorized)
-        }
+        return RefreshToken.query(on: request).filter(\.token == refreshTokenDto.refreshToken)
+            .first().flatMap(to: (User?, RefreshToken).self) { refreshTokenFromDb in
 
-        let userNameNormalized = userNameFromToken.uppercased()
+            guard let refreshToken = refreshTokenFromDb else {
+                throw RefreshTokenError.refreshTokenNotExists
+            }
 
-        return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().map(to: AccessTokenDto.self) { userFromDb in
+            if refreshToken.revoked {
+                throw RefreshTokenError.refreshTokenNotExists
+            }
+
+            if refreshToken.expiryDate < Date()  {
+                throw RefreshTokenError.refreshTokenNotExists
+            }
+
+            return User.query(on: request).filter(\.id == refreshToken.userId).first().map { user in
+                return (user, refreshToken)
+            }
+        }.flatMap(to: AccessTokenDto.self) { (userFromDb, refreshToken) in
 
             guard let user = userFromDb else {
-                throw LoginError.invalidLoginCredentials
-            }
-
-            if !user.emailWasConfirmed {
-                throw LoginError.emailNotConfirmed
-            }
-
-            if user.isBlocked {
                 throw LoginError.userAccountIsBlocked
             }
 
-            // Create payload.
-            let accessToken = try authorizationService.createAccessToken(request: request, forUser: user)
-            return AccessTokenDto(accessToken)
+            let authorizationService = try request.make(AuthorizationService.self)
+
+            return try authorizationService.updateRefreshToken(request: request, forToken: refreshToken).map(to: AccessTokenDto.self) { refreshToken in
+                let accessToken = try authorizationService.createAccessToken(request: request, forUser: user)
+                return AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
+            }
         }
     }
 
-    /// Refresh token.
+    /// Change password.
     func changePassword(request: Request, changePasswordRequestDto: ChangePasswordRequestDto) throws -> Future<HTTPStatus> {
 
         let authorizationService = try request.make(AuthorizationService.self)

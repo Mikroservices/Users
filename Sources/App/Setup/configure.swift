@@ -84,7 +84,7 @@ private func configureDatabase(services: inout Services) throws {
     guard let connectionString = Environment.get("LETTERER_USERS_CONNECTION_STRING") else { throw Abort(.internalServerError) }
 
     // Configure a PostgreSQL database
-    guard let databaseConfig = PostgreSQLDatabaseConfig(url: connectionString) else {
+    guard let databaseConfig = PostgreSQLDatabaseConfig(url: connectionString, transport: .unverifiedTLS) else {
         return
     }
 
@@ -98,6 +98,7 @@ private func configureDatabase(services: inout Services) throws {
     /// Configure migrations
     var migrations = MigrationConfig()
     migrations.add(model: User.self, database: .psql)
+    migrations.add(model: RefreshToken.self, database: .psql)
     services.register(migrations)
 }
 

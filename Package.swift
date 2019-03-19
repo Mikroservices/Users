@@ -5,7 +5,7 @@ let package = Package(
     name: "Users",
     dependencies: [
         // 💧 A server-side Swift web framework.
-        .package(url: "https://github.com/vapor/vapor.git", from: "3.0.0"),
+        .package(url: "https://github.com/vapor/vapor.git", from: "3.2.2"),
 
         // 🐘 Swift ORM (queries, models, relations, etc) built on PostgreSQL.
         .package(url: "https://github.com/vapor/fluent-postgresql.git", from: "1.0.0"),
@@ -16,7 +16,7 @@ let package = Package(
         // 🔑 Google Recaptcha for securing anonymous endpoints.
         .package(url: "https://github.com/Letterer/Recaptcha.git", from: "1.0.1"),
 
-        // 🐞 Custom error middleware for Vapor
+        // 🐞 Custom error middleware for Vapor.
         .package(url: "https://github.com/Letterer/ExtendedError.git", from: "1.0.0")
     ],
     targets: [

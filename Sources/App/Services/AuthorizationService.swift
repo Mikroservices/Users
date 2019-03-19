@@ -11,6 +11,9 @@ import Crypto
 
 final class AuthorizationService: ServiceType {
 
+    private let refreshTokenTime: TimeInterval = 30 * 24 * 60 * 60  // 30 days
+    private let accessTokenTime: TimeInterval = 60 * 60             // 1 hour
+
     static func makeService(for worker: Container) throws -> AuthorizationService {
         return AuthorizationService()
     }
@@ -25,6 +28,26 @@ final class AuthorizationService: ServiceType {
         let accessToken = String(data: data, encoding: .utf8) ?? ""
 
         return accessToken
+    }
+
+    public func createRefreshToken(request: Request, forUser user: User) throws -> Future<String> {
+
+        guard let userId = user.id else {
+            throw RefreshTokenError.userIdNotSpecified
+        }
+
+        let token = self.createRefreshTokenString()
+        let expiryDate = Date().addingTimeInterval(self.refreshTokenTime)
+        let refreshToken = RefreshToken(userId: userId, token: token, expiryDate: expiryDate)
+
+        return refreshToken.save(on: request).transform(to: refreshToken.token)
+    }
+
+    public func updateRefreshToken(request: Request, forToken refreshToken: RefreshToken) throws -> Future<String> {
+        refreshToken.token = self.createRefreshTokenString()
+        refreshToken.expiryDate = Date().addingTimeInterval(self.refreshTokenTime)
+
+        return refreshToken.save(on: request).transform(to: refreshToken.token)
     }
 
     public func getUserIdFromBearerToken(request: Request) throws -> UUID? {
@@ -60,7 +83,7 @@ final class AuthorizationService: ServiceType {
     }
 
     private func createAuthorizationPayload(forUser user: User) -> AuthorizationPayload {
-        let expirationDate = Date().addingTimeInterval(TimeInterval(3600.0))
+        let expirationDate = Date().addingTimeInterval(TimeInterval(self.accessTokenTime))
         let authorizationPayload = AuthorizationPayload(
             id: user.id,
             userName: user.userName,
@@ -73,4 +96,8 @@ final class AuthorizationService: ServiceType {
         return authorizationPayload
     }
 
+    private func createRefreshTokenString() -> String {
+        let letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        return String((0 ... 40).map { _ in letters.randomElement()! })
+    }
 }
