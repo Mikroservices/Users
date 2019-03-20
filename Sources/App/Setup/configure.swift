@@ -9,12 +9,6 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     /// Register database providers first.
     try configureDatabaseProvider(services: &services)
 
-    // Register authorization key service.
-    try registerAuthorizationPrivateKey(services: &services)
-
-    // Register reCaptcha.
-    try registerRecaptchaServices(services: &services)
-
     /// Register routes to the router.
     try registerRoutes(services: &services)
 
@@ -44,6 +38,10 @@ private func registerMiddlewares(services: inout Services) {
     services.register(CustomErrorMiddleware.self)
     middlewares.use(CustomErrorMiddleware.self)
     
+    // Service for setting variables stored in database.
+    services.register(SettingsMiddleware.self)
+    middlewares.use(SettingsMiddleware.self)
+
     services.register(middlewares)
 }
 
@@ -51,28 +49,6 @@ private func registerRoutes(services: inout Services) throws {
     let router = EngineRouter.default()
     try routes(router)
     services.register(router, as: Router.self)
-}
-
-private func registerAuthorizationPrivateKey(services: inout Services) throws {
-    guard let privateKey = Environment.get("LETTERER_PRIVATE_KEY") else { throw Abort(.internalServerError) }
-    guard let emailServiceAddress = Environment.get("LETTERER_EMAIL_SERVICE_ADDRESS") else { throw Abort(.internalServerError) }
-
-    services.register { container -> SettingsStorage in
-        let privateKeyWithNewLines = privateKey.replacingOccurrences(of: "<br>", with: "\n")
-        return SettingsStorage(privateKey: privateKeyWithNewLines, emailServiceAddress: emailServiceAddress)
-    }
-}
-
-private func registerRecaptchaServices(services: inout Services) throws {
-    guard let recaptchaIsEnabled = Environment.get("LETTERER_RECAPTCHA_ENABLED") else { throw Abort(.internalServerError) }
-    if recaptchaIsEnabled == "YES" {
-        guard let recaptchaKey = Environment.get("LETTERER_RECAPTCHA_KEY") else { throw Abort(.internalServerError) }
-
-        let captchaConfig = GoogleCaptchaConfig(secretKey: recaptchaKey)
-        try services.register(GoogleCaptchaProvider(config: captchaConfig))
-    } else {
-        try services.register(MockCaptchaProvider())
-    }
 }
 
 private func configureDatabaseProvider(services: inout Services) throws {
@@ -99,9 +75,12 @@ private func configureDatabase(services: inout Services) throws {
     var migrations = MigrationConfig()
     migrations.add(model: User.self, database: .psql)
     migrations.add(model: RefreshToken.self, database: .psql)
+    migrations.add(model: Setting.self, database: .psql)
     services.register(migrations)
 }
 
 private func registerServices(services: inout Services) {
     services.register(AuthorizationService.self)
+    services.register(SettingsService.self)
+    services.register(CaptchaService.self)
 }

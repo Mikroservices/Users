@@ -40,7 +40,11 @@ final class ForgotPasswordController: RouteCollection {
             return user.save(on: request)
         }.flatMap(to: Response.self) { user in
             let client = try request.client()
-            let settingsStorage = try request.make(SettingsStorage.self)
+            
+            let settingsService = try request.make(SettingsService.self)
+            guard let emailServiceAddress = settingsService.getString(.emailServiceAddress) else {
+                throw Abort(.internalServerError, reason: "Email service is not configured in database.")
+            }
 
             guard let forgotPasswordGuid = user.forgotPasswordGuid else {
                 throw ForgotPasswordError.tokenNotGenerated
@@ -48,7 +52,7 @@ final class ForgotPasswordController: RouteCollection {
 
             let userName = user.getUserName()
 
-            return client.post("\(settingsStorage.emailServiceAddress)/emails") { httpRequest in
+            return client.post("\(emailServiceAddress)/emails") { httpRequest in
                 let emailAddress = EmailAddressDto(address: user.email, name: user.name)
                 let email = EmailDto(to: emailAddress,
                                      title: "Letterer - Forgot password",

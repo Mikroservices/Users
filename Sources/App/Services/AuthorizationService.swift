@@ -22,8 +22,12 @@ final class AuthorizationService: ServiceType {
 
         let authorizationPayload = self.createAuthorizationPayload(forUser: user)
 
-        let settingsStorage = try request.make(SettingsStorage.self)
-        let rsaKey: RSAKey = try .private(pem: settingsStorage.privateKey)
+        let settingsService = try request.make(SettingsService.self)
+        guard let jwtPrivateKey = settingsService.getString(.jwtPrivateKey) else {
+            throw Abort(.internalServerError, reason: "Private key is not configured in database.")
+        }
+
+        let rsaKey: RSAKey = try .private(pem: jwtPrivateKey)
         let data = try JWT(payload: authorizationPayload).sign(using: JWTSigner.rs512(key: rsaKey))
         let accessToken = String(data: data, encoding: .utf8) ?? ""
 
@@ -70,8 +74,12 @@ final class AuthorizationService: ServiceType {
 
         if let bearer = request.http.headers.bearerAuthorization {
 
-            let settingsStorage = try request.make(SettingsStorage.self)
-            let rsaKey: RSAKey = try .private(pem: settingsStorage.privateKey)
+            let settingsService = try request.make(SettingsService.self)
+            guard let jwtPrivateKey = settingsService.getString(.jwtPrivateKey) else {
+                throw Abort(.internalServerError, reason: "Private key is not configured in database.")
+            }
+
+            let rsaKey: RSAKey = try .private(pem: jwtPrivateKey)
             let authorizationPayload = try JWT<AuthorizationPayload>(from: bearer.token, verifiedUsing: JWTSigner.rs512(key: rsaKey))
 
             if authorizationPayload.payload.exp > Date() {

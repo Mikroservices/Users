@@ -34,8 +34,8 @@ final class RegisterController: RouteCollection {
             throw RegisterError.passwordIsRequired
         }
 
-        let captcha = try request.make(Captcha.self)
-        return try captcha.validate(captchaFormResponse: captchaToken).map(to: Void.self) { success in
+        let captchaService = try request.make(CaptchaService.self)
+        return try captchaService.validate(on: request, captchaFormResponse: captchaToken).map(to: Void.self) { success in
 
             if !success {
                 throw RegisterError.securityTokenIsInvalid
@@ -74,7 +74,11 @@ final class RegisterController: RouteCollection {
             return user.save(on: request)
         }.flatMap(to: UserDto.self) { user in
             let client = try request.client()
-            let settingsStorage = try request.make(SettingsStorage.self)
+            
+            let settingsService = try request.make(SettingsService.self)
+            guard let emailServiceAddress = settingsService.getString(.emailServiceAddress) else {
+                throw Abort(.internalServerError, reason: "Email service is not configured in database.")
+            }
 
             guard let userId = user.id else {
                 throw RegisterError.userIdNotExists
@@ -82,7 +86,7 @@ final class RegisterController: RouteCollection {
 
             let userName = user.getUserName()
 
-            return client.post("\(settingsStorage.emailServiceAddress)/emails") { httpRequest in
+            return client.post("\(emailServiceAddress)/emails") { httpRequest in
                 let emailAddress = EmailAddressDto(address: user.email, name: user.name)
                 let email = EmailDto(to: emailAddress,
                                      title: "Letterer - Confirm email",

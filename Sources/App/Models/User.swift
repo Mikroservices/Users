@@ -7,7 +7,6 @@
 
 import FluentPostgreSQL
 import Vapor
-import Crypto
 
 /// A single entry of a Voice list.
 final class User: PostgreSQLUUIDModel {
