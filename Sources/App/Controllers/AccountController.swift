@@ -49,9 +49,10 @@ final class AccountController: RouteCollection {
 
             let authorizationService = try request.make(AuthorizationService.self)
 
-            return try authorizationService.createRefreshToken(request: request, forUser: user).map(to: AccessTokenDto.self) { refreshToken in
-                let accessToken = try authorizationService.createAccessToken(request: request, forUser: user)
-                return AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
+            return try authorizationService.createRefreshToken(request: request, forUser: user).flatMap(to: AccessTokenDto.self) { refreshToken in
+                return try authorizationService.createAccessToken(request: request, forUser: user).map(to: AccessTokenDto.self) { accessToken in
+                    return AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
+                }
             }
         }
     }
@@ -85,9 +86,10 @@ final class AccountController: RouteCollection {
 
             let authorizationService = try request.make(AuthorizationService.self)
 
-            return try authorizationService.updateRefreshToken(request: request, forToken: refreshToken).map(to: AccessTokenDto.self) { refreshToken in
-                let accessToken = try authorizationService.createAccessToken(request: request, forUser: user)
-                return AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
+            return try authorizationService.updateRefreshToken(request: request, forToken: refreshToken).flatMap(to: AccessTokenDto.self) { refreshToken in
+                return try authorizationService.createAccessToken(request: request, forUser: user).map(to: AccessTokenDto.self) { accessToken in
+                    return AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
+                }
             }
         }
     }
@@ -96,38 +98,41 @@ final class AccountController: RouteCollection {
     func changePassword(request: Request, changePasswordRequestDto: ChangePasswordRequestDto) throws -> Future<HTTPStatus> {
 
         let authorizationService = try request.make(AuthorizationService.self)
-        guard let userNameFromToken = try authorizationService.getUserNameFromBearerToken(request: request) else {
-            throw Abort(.unauthorized)
-        }
+        return try authorizationService.getUserNameFromBearerToken(request: request).flatMap(to: User.self) { userNameFromToken in
 
-        let userNameNormalized = userNameFromToken.uppercased()
-
-        return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().flatMap(to: User.self) { userFromDb in
-
-            guard let user = userFromDb else {
-                throw LoginError.invalidLoginCredentials
+            guard let unwrapedUserNameFromToken = userNameFromToken else {
+                throw Abort(.unauthorized)
             }
 
-            let currentPasswordHash = try Password.hash(changePasswordRequestDto.currentPassword, withSalt: user.salt)
-            if user.password != currentPasswordHash {
-                throw LoginError.invalidLoginCredentials
+            let userNameNormalized = unwrapedUserNameFromToken.uppercased()
+
+            return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().flatMap(to: User.self) { userFromDb in
+
+                guard let user = userFromDb else {
+                    throw LoginError.invalidLoginCredentials
+                }
+
+                let currentPasswordHash = try Password.hash(changePasswordRequestDto.currentPassword, withSalt: user.salt)
+                if user.password != currentPasswordHash {
+                    throw LoginError.invalidLoginCredentials
+                }
+
+                if !user.emailWasConfirmed {
+                    throw LoginError.emailNotConfirmed
+                }
+
+                if user.isBlocked {
+                    throw LoginError.userAccountIsBlocked
+                }
+
+                let salt = try Password.generateSalt()
+                let newPasswordHash = try Password.hash(changePasswordRequestDto.newPassword, withSalt: salt)
+
+                user.password = newPasswordHash
+                user.salt = salt
+
+                return user.update(on: request)
             }
-
-            if !user.emailWasConfirmed {
-                throw LoginError.emailNotConfirmed
-            }
-
-            if user.isBlocked {
-                throw LoginError.userAccountIsBlocked
-            }
-
-            let salt = try Password.generateSalt()
-            let newPasswordHash = try Password.hash(changePasswordRequestDto.newPassword, withSalt: salt)
-
-            user.password = newPasswordHash
-            user.salt = salt
-
-            return user.update(on: request)
         }.transform(to: HTTPStatus.ok)
     }
 }

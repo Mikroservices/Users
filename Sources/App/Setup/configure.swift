@@ -37,10 +37,6 @@ private func registerMiddlewares(services: inout Services) {
     // Catches errors and converts to HTTP response
     services.register(CustomErrorMiddleware.self)
     middlewares.use(CustomErrorMiddleware.self)
-    
-    // Service for setting variables stored in database.
-    services.register(SettingsMiddleware.self)
-    middlewares.use(SettingsMiddleware.self)
 
     services.register(middlewares)
 }

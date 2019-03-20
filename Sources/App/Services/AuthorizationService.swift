@@ -18,20 +18,21 @@ final class AuthorizationService: ServiceType {
         return AuthorizationService()
     }
 
-    public func createAccessToken(request: Request, forUser user: User) throws -> String {
-
-        let authorizationPayload = self.createAuthorizationPayload(forUser: user)
-
+    public func createAccessToken(request: Request, forUser user: User) throws -> Future<String> {
         let settingsService = try request.make(SettingsService.self)
-        guard let jwtPrivateKey = settingsService.getString(.jwtPrivateKey) else {
-            throw Abort(.internalServerError, reason: "Private key is not configured in database.")
+        return try settingsService.get(on: request).map(to: String.self) { configuration in
+
+            guard let jwtPrivateKey = configuration.getString(.jwtPrivateKey) else {
+                throw Abort(.internalServerError, reason: "Private key is not configured in database.")
+            }
+
+            let rsaKey: RSAKey = try .private(pem: jwtPrivateKey)
+            let authorizationPayload = self.createAuthorizationPayload(forUser: user)
+            let data = try JWT(payload: authorizationPayload).sign(using: JWTSigner.rs512(key: rsaKey))
+            let accessToken = String(data: data, encoding: .utf8) ?? ""
+
+            return accessToken
         }
-
-        let rsaKey: RSAKey = try .private(pem: jwtPrivateKey)
-        let data = try JWT(payload: authorizationPayload).sign(using: JWTSigner.rs512(key: rsaKey))
-        let accessToken = String(data: data, encoding: .utf8) ?? ""
-
-        return accessToken
     }
 
     public func createRefreshToken(request: Request, forUser user: User) throws -> Future<String> {
@@ -54,40 +55,49 @@ final class AuthorizationService: ServiceType {
         return refreshToken.save(on: request).transform(to: refreshToken.token)
     }
 
-    public func getUserIdFromBearerToken(request: Request) throws -> UUID? {
-        guard let authorizationPayload = try self.geAuthorizationPayloadFromBearerToken(request: request) else {
-            return nil
-        }
+    public func getUserIdFromBearerToken(request: Request) throws -> Future<UUID?> {
+        return try self.geAuthorizationPayloadFromBearerToken(request: request).map(to: UUID?.self) { authorizationPayload in
+            guard let unwrapedAuthorizationPayload = authorizationPayload else {
+                return nil
+            }
 
-        return authorizationPayload.id
+            return unwrapedAuthorizationPayload.id
+        }
     }
 
-    public func getUserNameFromBearerToken(request: Request) throws -> String? {
-        guard let authorizationPayload = try self.geAuthorizationPayloadFromBearerToken(request: request) else {
-            return nil
-        }
+    public func getUserNameFromBearerToken(request: Request) throws -> Future<String?> {
+        return try self.geAuthorizationPayloadFromBearerToken(request: request).map(to: String?.self) { authorizationPayload in
+            guard let unwrapedAuthorizationPayload = authorizationPayload else {
+                return nil
+            }
 
-        return authorizationPayload.userName
+            return unwrapedAuthorizationPayload.userName
+        }
     }
 
-    private func geAuthorizationPayloadFromBearerToken(request: Request) throws -> AuthorizationPayload? {
+    private func geAuthorizationPayloadFromBearerToken(request: Request) throws -> Future<AuthorizationPayload?> {
 
         if let bearer = request.http.headers.bearerAuthorization {
 
             let settingsService = try request.make(SettingsService.self)
-            guard let jwtPrivateKey = settingsService.getString(.jwtPrivateKey) else {
-                throw Abort(.internalServerError, reason: "Private key is not configured in database.")
-            }
+            return try settingsService.get(on: request).map(to: AuthorizationPayload?.self) { configuration in
 
-            let rsaKey: RSAKey = try .private(pem: jwtPrivateKey)
-            let authorizationPayload = try JWT<AuthorizationPayload>(from: bearer.token, verifiedUsing: JWTSigner.rs512(key: rsaKey))
+                guard let jwtPrivateKey = configuration.getString(.jwtPrivateKey) else {
+                    throw Abort(.internalServerError, reason: "Private key is not configured in database.")
+                }
 
-            if authorizationPayload.payload.exp > Date() {
-                return authorizationPayload.payload
+                let rsaKey: RSAKey = try .private(pem: jwtPrivateKey)
+                let authorizationPayload = try JWT<AuthorizationPayload>(from: bearer.token, verifiedUsing: JWTSigner.rs512(key: rsaKey))
+
+                if authorizationPayload.payload.exp > Date() {
+                    return authorizationPayload.payload
+                }
+
+                return nil
             }
         }
 
-        return nil
+        return Future.map(on: request) { return nil }
     }
 
     private func createAuthorizationPayload(forUser user: User) -> AuthorizationPayload {

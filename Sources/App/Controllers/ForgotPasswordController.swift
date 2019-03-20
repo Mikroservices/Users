@@ -38,11 +38,14 @@ final class ForgotPasswordController: RouteCollection {
             user.forgotPasswordDate = Date()
 
             return user.save(on: request)
-        }.flatMap(to: Response.self) { user in
-            let client = try request.client()
-            
+        }.flatMap(to: (User, Configuration).self) { user in
             let settingsService = try request.make(SettingsService.self)
-            guard let emailServiceAddress = settingsService.getString(.emailServiceAddress) else {
+            return try settingsService.get(on: request).map(to: (User, Configuration).self) { configuration in
+                return (user, configuration)
+            }
+        }.flatMap(to: Response.self) { (user, configuration) in
+
+            guard let emailServiceAddress = configuration.getString(.emailServiceAddress) else {
                 throw Abort(.internalServerError, reason: "Email service is not configured in database.")
             }
 
@@ -52,6 +55,7 @@ final class ForgotPasswordController: RouteCollection {
 
             let userName = user.getUserName()
 
+            let client = try request.client()
             return client.post("\(emailServiceAddress)/emails") { httpRequest in
                 let emailAddress = EmailAddressDto(address: user.email, name: user.name)
                 let email = EmailDto(to: emailAddress,
@@ -60,6 +64,7 @@ final class ForgotPasswordController: RouteCollection {
 
                 try httpRequest.content.encode(email)
             }
+
         }.transform(to: HTTPStatus.ok)
     }
 

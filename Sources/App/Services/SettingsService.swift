@@ -16,44 +16,26 @@ public enum SettingKey: String {
 
 final class SettingsService: ServiceType {
 
-    fileprivate static var settings: [String: String] = [:]
+    private var configuration: Configuration?
 
     static func makeService(for worker: Container) throws -> SettingsService {
         return SettingsService()
     }
 
-    public func configure(settings: [Setting]) {
+    func get(on request: Request) throws -> Future<Configuration> {
 
-        if (SettingsService.settings.count > 0) {
-            return
+        if let unwrapedConfiguration = self.configuration {
+            return Future.map(on: request) { return unwrapedConfiguration }
         }
 
-        for setting in settings {
-            SettingsService.settings[setting.key] = setting.value
+        let logger = try request.make(Logger.self)
+        logger.info("Downloading application settings from database")
+
+        return Setting.query(on: request).all().map(to: Configuration.self) { settings in
+            let configuration = Configuration(settings: settings)
+            self.configuration = configuration
+
+            return configuration
         }
-    }
-
-    public func getInt(_ key: SettingKey) -> Int? {
-        guard let value = SettingsService.settings[key.rawValue] else {
-            return nil
-        }
-
-        return Int(value)
-    }
-
-    public func getString(_ key: SettingKey) -> String? {
-        guard let value = SettingsService.settings[key.rawValue] else {
-            return nil
-        }
-
-        return value
-    }
-
-    public func getBool(_ key: SettingKey) -> Bool? {
-        guard let value = SettingsService.settings[key.rawValue] else {
-            return nil
-        }
-
-        return Int(value) ?? 0 == 1
     }
 }

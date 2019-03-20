@@ -22,7 +22,7 @@ final class UsersController: RouteCollection {
 
         let userNameNormalized = try request.parameters.next(String.self).uppercased().replacingOccurrences(of: "@", with: "")
 
-        return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().map(to: UserDto.self) { userFromDb in
+        return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().flatMap(to: UserDto.self) { userFromDb in
 
             guard let user = userFromDb else {
                 throw UserError.userNotExists
@@ -31,44 +31,48 @@ final class UsersController: RouteCollection {
             let userDto = UserDto(from: user)
 
             let authorizationService = try request.make(AuthorizationService.self)
-            let userNameFromToken = try authorizationService.getUserNameFromBearerToken(request: request)
-            
-            let isProfileOwner = userNameFromToken?.uppercased() == userNameNormalized
-            if !isProfileOwner {
-                userDto.email = nil
-            }
+            return try authorizationService.getUserNameFromBearerToken(request: request).map(to: UserDto.self) { userNameFromToken in
+                let isProfileOwner = userNameFromToken?.uppercased() == userNameNormalized
+                if !isProfileOwner {
+                    userDto.email = nil
+                }
 
-            return userDto
+                return userDto
+            }
         }
     }
 
     func update(request: Request, userDto: UserDto) throws -> Future<UserDto> {
 
         let authorizationService = try request.make(AuthorizationService.self)
-        guard let userNameFromToken = try authorizationService.getUserNameFromBearerToken(request: request) else {
-            throw Abort(.unauthorized)
-        }
-
-        let userNameNormalized = try request.parameters.next(String.self).uppercased().replacingOccurrences(of: "@", with: "")
-
-        return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().flatMap(to: User.self) { userFromDb in
-
-            guard let user = userFromDb else {
-                throw UserError.userNotExists
+        return try authorizationService.getUserNameFromBearerToken(request: request).map(to: String.self) { userNameFromToken in
+            guard let unwrapedUserNameFromToken = userNameFromToken else {
+                throw Abort(.unauthorized)
             }
 
-            let isProfileOwner = userNameFromToken.uppercased() == userNameNormalized
-            guard isProfileOwner else {
-                throw UserError.someoneElseProfile
+            return unwrapedUserNameFromToken
+        }.flatMap(to: User.self) { userNameFromToken in
+            let userNameNormalized = try request.parameters.next(String.self).uppercased().replacingOccurrences(of: "@", with: "")
+
+            return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().flatMap(to: User.self) { userFromDb in
+
+                guard let user = userFromDb else {
+                    throw UserError.userNotExists
+                }
+
+                let isProfileOwner = userNameFromToken.uppercased() == userNameNormalized
+                guard isProfileOwner else {
+                    throw UserError.someoneElseProfile
+                }
+
+                user.name = userDto.name
+                user.bio = userDto.bio
+                user.birthDate = userDto.birthDate
+                user.location = userDto.location
+                user.website = userDto.website
+
+                return user.update(on: request)
             }
-
-            user.name = userDto.name
-            user.bio = userDto.bio
-            user.birthDate = userDto.birthDate
-            user.location = userDto.location
-            user.website = userDto.website
-
-            return user.update(on: request)
         }.map(to: UserDto.self) { user in
             let userDto = UserDto(from: user)
             return userDto
@@ -78,24 +82,29 @@ final class UsersController: RouteCollection {
     func delete(request: Request) throws -> Future<HTTPStatus> {
 
         let authorizationService = try request.make(AuthorizationService.self)
-        guard let userNameFromToken = try authorizationService.getUserNameFromBearerToken(request: request) else {
-            throw Abort(.unauthorized)
-        }
 
-        let userNameNormalized = try request.parameters.next(String.self).uppercased().replacingOccurrences(of: "@", with: "")
-
-        return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().flatMap(to: Void.self) { userFromDb in
-
-            guard let user = userFromDb else {
-                throw UserError.userNotExists
+        return try authorizationService.getUserNameFromBearerToken(request: request).map(to: String.self) { userNameFromToken in
+            guard let unwrapedUserNameFromToken = userNameFromToken else {
+                throw Abort(.unauthorized)
             }
 
-            let isProfileOwner = userNameFromToken.uppercased() == userNameNormalized
-            guard isProfileOwner else {
-                throw UserError.someoneElseProfile
-            }
+            return unwrapedUserNameFromToken
+        }.flatMap(to: Void.self) { userNameFromToken in
+            let userNameNormalized = try request.parameters.next(String.self).uppercased().replacingOccurrences(of: "@", with: "")
 
-            return user.delete(on: request)
+            return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().flatMap(to: Void.self) { userFromDb in
+
+                guard let user = userFromDb else {
+                    throw UserError.userNotExists
+                }
+
+                let isProfileOwner = userNameFromToken.uppercased() == userNameNormalized
+                guard isProfileOwner else {
+                    throw UserError.someoneElseProfile
+                }
+
+                return user.delete(on: request)
+            }
         }.transform(to: HTTPStatus.ok)
     }
 }

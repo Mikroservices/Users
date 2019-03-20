@@ -73,28 +73,31 @@ final class RegisterController: RouteCollection {
 
             return user.save(on: request)
         }.flatMap(to: UserDto.self) { user in
-            let client = try request.client()
-            
+
             let settingsService = try request.make(SettingsService.self)
-            guard let emailServiceAddress = settingsService.getString(.emailServiceAddress) else {
-                throw Abort(.internalServerError, reason: "Email service is not configured in database.")
-            }
+            return try settingsService.get(on: request).flatMap(to: UserDto.self) { configuration in
 
-            guard let userId = user.id else {
-                throw RegisterError.userIdNotExists
-            }
+                guard let emailServiceAddress = configuration.getString(.emailServiceAddress) else {
+                    throw Abort(.internalServerError, reason: "Email service is not configured in database.")
+                }
 
-            let userName = user.getUserName()
+                guard let userId = user.id else {
+                    throw RegisterError.userIdNotExists
+                }
 
-            return client.post("\(emailServiceAddress)/emails") { httpRequest in
-                let emailAddress = EmailAddressDto(address: user.email, name: user.name)
-                let email = EmailDto(to: emailAddress,
-                                     title: "Letterer - Confirm email",
-                                     body: "<html><body><div>Hi \(userName),</div><div>Please confirm your account by clicking following <a href='https://letterer.me/confirm-email?token=\(user.emailConfirmationGuid)&user=\(userId)'>link</a>.</div></body></html>")
+                let userName = user.getUserName()
 
-                try httpRequest.content.encode(email)
+                let client = try request.client()
+                return client.post("\(emailServiceAddress)/emails") { httpRequest in
+                    let emailAddress = EmailAddressDto(address: user.email, name: user.name)
+                    let email = EmailDto(to: emailAddress,
+                                         title: "Letterer - Confirm email",
+                                         body: "<html><body><div>Hi \(userName),</div><div>Please confirm your account by clicking following <a href='https://letterer.me/confirm-email?token=\(user.emailConfirmationGuid)&user=\(userId)'>link</a>.</div></body></html>")
+
+                    try httpRequest.content.encode(email)
                 }.map(to: UserDto.self) { _ in
                     return UserDto(from: user)
+                }
             }
         }
     }
