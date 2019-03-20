@@ -20,28 +20,29 @@ final class UsersController: RouteCollection {
     /// User profile.
     func profile(request: Request) throws -> Future<UserDto> {
 
+        let authorizationService = try request.make(AuthorizationService.self)
         let userNameNormalized = try request.parameters.next(String.self).uppercased().replacingOccurrences(of: "@", with: "")
 
-        return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().flatMap(to: UserDto.self) { userFromDb in
+        let userFuture = User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first()
+        let userNameFromTokenFuture = try authorizationService.getUserNameFromBearerToken(request: request)
 
+        return map(to: UserDto.self, userFuture, userNameFromTokenFuture) { userFromDb, userNameFromToken in
             guard let user = userFromDb else {
                 throw UserError.userNotExists
             }
 
             let userDto = UserDto(from: user)
 
-            let authorizationService = try request.make(AuthorizationService.self)
-            return try authorizationService.getUserNameFromBearerToken(request: request).map(to: UserDto.self) { userNameFromToken in
-                let isProfileOwner = userNameFromToken?.uppercased() == userNameNormalized
-                if !isProfileOwner {
-                    userDto.email = nil
-                }
-
-                return userDto
+            let isProfileOwner = userNameFromToken?.uppercased() == userNameNormalized
+            if !isProfileOwner {
+                userDto.email = nil
             }
+
+            return userDto
         }
     }
 
+    // Update user data.
     func update(request: Request, userDto: UserDto) throws -> Future<UserDto> {
 
         let authorizationService = try request.make(AuthorizationService.self)
@@ -79,6 +80,7 @@ final class UsersController: RouteCollection {
         }
     }
 
+    // Delete user.
     func delete(request: Request) throws -> Future<HTTPStatus> {
 
         let authorizationService = try request.make(AuthorizationService.self)

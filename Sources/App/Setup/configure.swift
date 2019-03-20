@@ -79,4 +79,6 @@ private func registerServices(services: inout Services) {
     services.register(AuthorizationService.self)
     services.register(SettingsService.self)
     services.register(CaptchaService.self)
+    services.register(UsersService.self)
+    services.register(EmailsService.self)
 }

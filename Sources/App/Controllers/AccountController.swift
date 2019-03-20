@@ -22,117 +22,58 @@ final class AccountController: RouteCollection {
 
     /// Sign-in user.
     func login(request: Request, loginRequestDto: LoginRequestDto) throws -> Future<AccessTokenDto> {
+        let usersService = try request.make(UsersService.self)
 
-        let userNameOrEmailNormalized = loginRequestDto.userNameOrEmail.uppercased()
-
-        return User.query(on: request).group(.or) { userNameGroup in
-                userNameGroup.filter(\.userNameNormalized == userNameOrEmailNormalized)
-                userNameGroup.filter(\.emailNormalized == userNameOrEmailNormalized)
-            }.first().flatMap(to: AccessTokenDto.self) { userFromDb in
-
-            guard let user = userFromDb else {
-                throw LoginError.invalidLoginCredentials
-            }
-
-            let passwordHash = try Password.hash(loginRequestDto.password, withSalt: user.salt)
-            if user.password != passwordHash {
-                throw LoginError.invalidLoginCredentials
-            }
-
-            if !user.emailWasConfirmed {
-                throw LoginError.emailNotConfirmed
-            }
-
-            if user.isBlocked {
-                throw LoginError.userAccountIsBlocked
-            }
+        return try usersService.login(on: request, userNameOrEmail: loginRequestDto.userNameOrEmail, password: loginRequestDto.password)
+        .flatMap(to: AccessTokenDto.self) { user in
 
             let authorizationService = try request.make(AuthorizationService.self)
 
-            return try authorizationService.createRefreshToken(request: request, forUser: user).flatMap(to: AccessTokenDto.self) { refreshToken in
-                return try authorizationService.createAccessToken(request: request, forUser: user).map(to: AccessTokenDto.self) { accessToken in
-                    return AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
-                }
+            let accessTokenFuture = try authorizationService.createAccessToken(request: request, forUser: user)
+            let refreshTokenFuture = try authorizationService.createRefreshToken(request: request, forUser: user)
+
+            return map(to: AccessTokenDto.self, accessTokenFuture, refreshTokenFuture) { accessToken, refreshToken in
+                return AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
             }
         }
     }
 
     /// Refresh token.
     func refresh(request: Request, refreshTokenDto: RefreshTokenDto) throws -> Future<AccessTokenDto> {
+        let authorizationService = try request.make(AuthorizationService.self)
 
-        return RefreshToken.query(on: request).filter(\.token == refreshTokenDto.refreshToken)
-            .first().flatMap(to: (User?, RefreshToken).self) { refreshTokenFromDb in
-
-            guard let refreshToken = refreshTokenFromDb else {
-                throw RefreshTokenError.refreshTokenNotExists
-            }
-
-            if refreshToken.revoked {
-                throw RefreshTokenError.refreshTokenNotExists
-            }
-
-            if refreshToken.expiryDate < Date()  {
-                throw RefreshTokenError.refreshTokenNotExists
-            }
-
-            return User.query(on: request).filter(\.id == refreshToken.userId).first().map { user in
-                return (user, refreshToken)
-            }
-        }.flatMap(to: AccessTokenDto.self) { (userFromDb, refreshToken) in
-
-            guard let user = userFromDb else {
-                throw LoginError.userAccountIsBlocked
-            }
+        return try authorizationService.validateRefreshToken(on: request, refreshToken: refreshTokenDto.refreshToken)
+        .flatMap(to: AccessTokenDto.self) { (user, refreshToken) in
 
             let authorizationService = try request.make(AuthorizationService.self)
 
-            return try authorizationService.updateRefreshToken(request: request, forToken: refreshToken).flatMap(to: AccessTokenDto.self) { refreshToken in
-                return try authorizationService.createAccessToken(request: request, forUser: user).map(to: AccessTokenDto.self) { accessToken in
-                    return AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
-                }
+            let accessTokenFuture = try authorizationService.createAccessToken(request: request, forUser: user)
+            let refreshTokenFuture = try authorizationService.updateRefreshToken(request: request, forToken: refreshToken)
+
+            return map(to: AccessTokenDto.self, accessTokenFuture, refreshTokenFuture) { accessToken, refreshToken in
+                return AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
             }
         }
     }
 
     /// Change password.
     func changePassword(request: Request, changePasswordRequestDto: ChangePasswordRequestDto) throws -> Future<HTTPStatus> {
-
         let authorizationService = try request.make(AuthorizationService.self)
-        return try authorizationService.getUserNameFromBearerToken(request: request).flatMap(to: User.self) { userNameFromToken in
+
+        return try authorizationService.getUserNameFromBearerToken(request: request)
+        .flatMap(to: User.self) { userNameFromToken in
 
             guard let unwrapedUserNameFromToken = userNameFromToken else {
                 throw Abort(.unauthorized)
             }
 
-            let userNameNormalized = unwrapedUserNameFromToken.uppercased()
-
-            return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().flatMap(to: User.self) { userFromDb in
-
-                guard let user = userFromDb else {
-                    throw LoginError.invalidLoginCredentials
-                }
-
-                let currentPasswordHash = try Password.hash(changePasswordRequestDto.currentPassword, withSalt: user.salt)
-                if user.password != currentPasswordHash {
-                    throw LoginError.invalidLoginCredentials
-                }
-
-                if !user.emailWasConfirmed {
-                    throw LoginError.emailNotConfirmed
-                }
-
-                if user.isBlocked {
-                    throw LoginError.userAccountIsBlocked
-                }
-
-                let salt = try Password.generateSalt()
-                let newPasswordHash = try Password.hash(changePasswordRequestDto.newPassword, withSalt: salt)
-
-                user.password = newPasswordHash
-                user.salt = salt
-
-                return user.update(on: request)
-            }
+            let usersService = try request.make(UsersService.self)
+            return try usersService.changePassword(
+                on: request,
+                userName: unwrapedUserNameFromToken,
+                currentPassword: changePasswordRequestDto.currentPassword,
+                newPassword: changePasswordRequestDto.newPassword
+            )
         }.transform(to: HTTPStatus.ok)
     }
 }

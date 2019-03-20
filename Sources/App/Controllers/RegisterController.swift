@@ -75,75 +75,40 @@ final class RegisterController: RouteCollection {
         }.flatMap(to: UserDto.self) { user in
 
             let settingsService = try request.make(SettingsService.self)
-            return try settingsService.get(on: request).flatMap(to: UserDto.self) { configuration in
-
-                guard let emailServiceAddress = configuration.getString(.emailServiceAddress) else {
-                    throw Abort(.internalServerError, reason: "Email service is not configured in database.")
-                }
-
-                guard let userId = user.id else {
-                    throw RegisterError.userIdNotExists
-                }
-
-                let userName = user.getUserName()
-
-                let client = try request.client()
-                return client.post("\(emailServiceAddress)/emails") { httpRequest in
-                    let emailAddress = EmailAddressDto(address: user.email, name: user.name)
-                    let email = EmailDto(to: emailAddress,
-                                         title: "Letterer - Confirm email",
-                                         body: "<html><body><div>Hi \(userName),</div><div>Please confirm your account by clicking following <a href='https://letterer.me/confirm-email?token=\(user.emailConfirmationGuid)&user=\(userId)'>link</a>.</div></body></html>")
-
-                    try httpRequest.content.encode(email)
-                }.map(to: UserDto.self) { _ in
-                    return UserDto(from: user)
-                }
-            }
+            return try settingsService.get(on: request).map(to: Void.self) { configuration in
+                let emailsService = try request.make(EmailsService.self)
+                _ = try emailsService.sendConfirmAccountEmail(on: request, configuration: configuration, user: user)
+            }.transform(to: UserDto(from: user))
         }
     }
 
-    /// Confirm email address.
+    // New account (email) confirmation.
     func confirm(request: Request, confirmEmailRequestDto: ConfirmEmailRequestDto) throws -> Future<HTTPResponseStatus> {
-        return User.find(confirmEmailRequestDto.id, on: request).flatMap(to: User.self) { userFromDb in
+        let usersService = try request.make(UsersService.self)
 
-            guard let user = userFromDb else {
-                throw RegisterError.invalidIdOrToken
-            }
-
-            guard user.emailConfirmationGuid == confirmEmailRequestDto.confirmationGuid else {
-                throw RegisterError.invalidIdOrToken
-            }
-
-            user.emailWasConfirmed = true
-            return user.save(on: request)
-        }.transform(to: HTTPStatus.ok)
+        return try usersService.confirmEmail(on: request, userId: confirmEmailRequestDto.id, confirmationGuid: confirmEmailRequestDto.confirmationGuid)
+        .transform(to: HTTPStatus.ok)
     }
 
+    // User name verification.
     func isUserNameTaken(request: Request) throws -> Future<BooleanResponseDto> {
 
-        let userNameNormalized = try request.parameters.next(String.self).uppercased()
+        let userName = try request.parameters.next(String.self)
+        let usersService = try request.make(UsersService.self)
 
-        return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().map(to: BooleanResponseDto.self) { userFromDb in
-
-            if userFromDb != nil {
-                return BooleanResponseDto(true)
-            }
-
-            return BooleanResponseDto(false)
+        return usersService.isUserNameTaken(on: request, userName: userName).map(to: BooleanResponseDto.self) { result in
+            return BooleanResponseDto(result)
         }
     }
 
+    // Email verification.
     func isEmailConnected(request: Request) throws -> Future<BooleanResponseDto> {
 
-        let emailNormalized = try request.parameters.next(String.self).uppercased()
+        let email = try request.parameters.next(String.self)
+        let usersService = try request.make(UsersService.self)
 
-        return User.query(on: request).filter(\.emailNormalized == emailNormalized).first().map(to: BooleanResponseDto.self) { userFromDb in
-
-            if userFromDb != nil {
-                return BooleanResponseDto(true)
-            }
-
-            return BooleanResponseDto(false)
+        return usersService.isEmailConnected(on: request, email: email).map(to: BooleanResponseDto.self) { result in
+            return BooleanResponseDto(result)
         }
     }
 }

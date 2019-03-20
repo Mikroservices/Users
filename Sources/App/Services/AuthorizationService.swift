@@ -1,6 +1,6 @@
 //
 //  AuthorizationService.swift
-//  App
+//  Letterer/Users
 //
 //  Created by Marcin Czachurski on 17/11/2018.
 //
@@ -8,6 +8,7 @@
 import Vapor
 import JWT
 import Crypto
+import FluentPostgreSQL
 
 final class AuthorizationService: ServiceType {
 
@@ -16,6 +17,33 @@ final class AuthorizationService: ServiceType {
 
     static func makeService(for worker: Container) throws -> AuthorizationService {
         return AuthorizationService()
+    }
+
+    public func validateRefreshToken(on request: Request, refreshToken: String) throws -> Future<(user: User, refreshToken: RefreshToken)> {
+        return RefreshToken.query(on: request).filter(\.token == refreshToken)
+            .first().flatMap(to: (user: User, refreshToken: RefreshToken).self) { refreshTokenFromDb in
+
+                guard let refreshToken = refreshTokenFromDb else {
+                    throw RefreshTokenError.refreshTokenNotExists
+                }
+
+                if refreshToken.revoked {
+                    throw RefreshTokenError.refreshTokenNotExists
+                }
+
+                if refreshToken.expiryDate < Date()  {
+                    throw RefreshTokenError.refreshTokenNotExists
+                }
+
+                return User.query(on: request).filter(\.id == refreshToken.userId).first().map { userFromDb in
+
+                    guard let user = userFromDb else {
+                        throw UserError.userNotExists
+                    }
+
+                    return (user, refreshToken)
+                }
+        }
     }
 
     public func createAccessToken(request: Request, forUser user: User) throws -> Future<String> {

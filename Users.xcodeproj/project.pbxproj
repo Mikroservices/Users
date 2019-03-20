@@ -22,6 +22,8 @@
 
 /* Begin PBXBuildFile section */
 		F8B567D722429CDE002E1F1B /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8B567D622429CDE002E1F1B /* Configuration.swift */; };
+		F8E399B72242C8D1006D3E41 /* UsersService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8E399B62242C8D1006D3E41 /* UsersService.swift */; };
+		F8E399B92242CC4B006D3E41 /* EmailsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8E399B82242CC4B006D3E41 /* EmailsService.swift */; };
 		OBJ_1046 /* AccountController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_12 /* AccountController.swift */; };
 		OBJ_1047 /* ForgotPasswordController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_13 /* ForgotPasswordController.swift */; };
 		OBJ_1048 /* RegisterController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_14 /* RegisterController.swift */; };
@@ -6134,6 +6136,8 @@
 		"DatabaseKit::DatabaseKit::Product" /* DatabaseKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DatabaseKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"ExtendedError::ExtendedError::Product" /* ExtendedError.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = ExtendedError.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F8B567D622429CDE002E1F1B /* Configuration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
+		F8E399B62242C8D1006D3E41 /* UsersService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsersService.swift; sourceTree = "<group>"; };
+		F8E399B82242CC4B006D3E41 /* EmailsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailsService.swift; sourceTree = "<group>"; };
 		"Fluent::Fluent::Product" /* Fluent.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Fluent.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"Fluent::FluentSQL::Product" /* FluentSQL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FluentSQL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"FluentPostgreSQL::FluentPostgreSQL::Product" /* FluentPostgreSQL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FluentPostgreSQL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -8732,6 +8736,8 @@
 				OBJ_44 /* AuthorizationService.swift */,
 				OBJ_45 /* CaptchaService.swift */,
 				OBJ_46 /* SettingsService.swift */,
+				F8E399B62242C8D1006D3E41 /* UsersService.swift */,
+				F8E399B82242CC4B006D3E41 /* EmailsService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -8931,7 +8937,7 @@
 			path = Pipeline;
 			sourceTree = "<group>";
 		};
-		OBJ_5 /*  */ = {
+		OBJ_5 = {
 			isa = PBXGroup;
 			children = (
 				OBJ_6 /* Package.swift */,
@@ -8940,7 +8946,6 @@
 				OBJ_59 /* Dependencies */,
 				OBJ_991 /* Products */,
 			);
-			name = "";
 			sourceTree = "<group>";
 		};
 		OBJ_504 /* Tag */ = {
@@ -12319,7 +12324,7 @@
 			knownRegions = (
 				en,
 			);
-			mainGroup = OBJ_5 /*  */;
+			mainGroup = OBJ_5;
 			productRefGroup = OBJ_991 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -12418,6 +12423,7 @@
 				OBJ_1055 /* EmailAddressDto.swift in Sources */,
 				OBJ_1056 /* EmailDto.swift in Sources */,
 				OBJ_1057 /* ForgotPasswordConfirmationRequestDto.swift in Sources */,
+				F8E399B72242C8D1006D3E41 /* UsersService.swift in Sources */,
 				OBJ_1058 /* ForgotPasswordRequestDto.swift in Sources */,
 				OBJ_1059 /* LoginRequestDto.swift in Sources */,
 				OBJ_1060 /* RefreshTokenDto.swift in Sources */,
@@ -12434,6 +12440,7 @@
 				OBJ_1072 /* AuthorizationService.swift in Sources */,
 				OBJ_1073 /* CaptchaService.swift in Sources */,
 				OBJ_1074 /* SettingsService.swift in Sources */,
+				F8E399B92242CC4B006D3E41 /* EmailsService.swift in Sources */,
 				OBJ_1075 /* app.swift in Sources */,
 				F8B567D722429CDE002E1F1B /* Configuration.swift in Sources */,
 				OBJ_1076 /* boot.swift in Sources */,
