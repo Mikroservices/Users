@@ -24,8 +24,8 @@ final class AccountController: RouteCollection {
     func login(request: Request, loginRequestDto: LoginRequestDto) throws -> Future<AccessTokenDto> {
         let usersService = try request.make(UsersService.self)
 
-        return try usersService.login(on: request, userNameOrEmail: loginRequestDto.userNameOrEmail, password: loginRequestDto.password)
-        .flatMap(to: AccessTokenDto.self) { user in
+        let loginFuture = try usersService.login(on: request, userNameOrEmail: loginRequestDto.userNameOrEmail, password: loginRequestDto.password)
+        return loginFuture.flatMap(to: AccessTokenDto.self) { user in
 
             let authorizationService = try request.make(AuthorizationService.self)
 
@@ -42,10 +42,8 @@ final class AccountController: RouteCollection {
     func refresh(request: Request, refreshTokenDto: RefreshTokenDto) throws -> Future<AccessTokenDto> {
         let authorizationService = try request.make(AuthorizationService.self)
 
-        return try authorizationService.validateRefreshToken(on: request, refreshToken: refreshTokenDto.refreshToken)
-        .flatMap(to: AccessTokenDto.self) { (user, refreshToken) in
-
-            let authorizationService = try request.make(AuthorizationService.self)
+        let validateRefreshTokenFuture = try authorizationService.validateRefreshToken(on: request, refreshToken: refreshTokenDto.refreshToken)
+        return validateRefreshTokenFuture.flatMap(to: AccessTokenDto.self) { (user, refreshToken) in
 
             let accessTokenFuture = try authorizationService.createAccessToken(request: request, forUser: user)
             let refreshTokenFuture = try authorizationService.updateRefreshToken(request: request, forToken: refreshToken)
@@ -60,8 +58,8 @@ final class AccountController: RouteCollection {
     func changePassword(request: Request, changePasswordRequestDto: ChangePasswordRequestDto) throws -> Future<HTTPStatus> {
         let authorizationService = try request.make(AuthorizationService.self)
 
-        return try authorizationService.getUserNameFromBearerToken(request: request)
-        .flatMap(to: User.self) { userNameFromToken in
+        let userNameFuture = try authorizationService.getUserNameFromBearerToken(request: request)
+        return userNameFuture.flatMap(to: User.self) { userNameFromToken in
 
             guard let unwrapedUserNameFromToken = userNameFromToken else {
                 throw Abort(.unauthorized)

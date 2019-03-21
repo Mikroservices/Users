@@ -53,11 +53,11 @@ private func configureDatabaseProvider(services: inout Services) throws {
 
 private func configureDatabase(services: inout Services) throws {
 
-    guard let connectionString = Environment.get("LETTERER_USERS_CONNECTION_STRING") else { throw Abort(.internalServerError) }
+    let connectionString = try Environment.require("LETTERER_USERS_CONNECTION_STRING")
 
     // Configure a PostgreSQL database
     guard let databaseConfig = PostgreSQLDatabaseConfig(url: connectionString, transport: .unverifiedTLS) else {
-        return
+        throw Abort(.internalServerError, reason: "Database connection string has wrong format.")
     }
 
     let postgresql = PostgreSQLDatabase(config: databaseConfig)

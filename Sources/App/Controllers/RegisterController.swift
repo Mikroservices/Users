@@ -35,28 +35,31 @@ final class RegisterController: RouteCollection {
         }
 
         let captchaService = try request.make(CaptchaService.self)
-        return try captchaService.validate(on: request, captchaFormResponse: captchaToken).map(to: Void.self) { success in
-
+        let captchaValidateFuture = try captchaService.validate(on: request, captchaFormResponse: captchaToken).map { success in
             if !success {
                 throw RegisterError.securityTokenIsInvalid
             }
-
-        }.flatMap(to: User?.self) { _ in
+        }
+        
+        let validateUserNameFuture = captchaValidateFuture.flatMap(to: Void.self) { 
             let userNameNormalized = userDto.userName.uppercased()
-            return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first()
-        }.flatMap(to: User?.self) { user in
-
-            if user != nil {
-                throw RegisterError.userNameIsAlreadyTaken
+            return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().map { user in
+                if user != nil {
+                    throw RegisterError.userNameIsAlreadyTaken
+                }
             }
+        }
 
+        let validateEmailFuture = validateUserNameFuture.flatMap(to: Void.self) { user in
             let emailNormalized = (userDto.email ?? "").uppercased()
-            return User.query(on: request).filter(\.emailNormalized == emailNormalized).first()
-        }.flatMap(to: User.self) { user in
-
-            if user != nil {
-                throw RegisterError.emailIsAlreadyConnected
+            return User.query(on: request).filter(\.emailNormalized == emailNormalized).first().map { user in
+                if user != nil {
+                    throw RegisterError.emailIsAlreadyConnected
+                }
             }
+        }
+
+        let createUserFuture = validateEmailFuture.flatMap(to: User.self) { user in
 
             let salt = try Password.generateSalt()
             let passwordHash = try Password.hash(password, withSalt: salt)
@@ -72,22 +75,26 @@ final class RegisterController: RouteCollection {
                             gravatarHash: gravatarHash)
 
             return user.save(on: request)
-        }.flatMap(to: UserDto.self) { user in
-
-            let settingsService = try request.make(SettingsService.self)
-            return try settingsService.get(on: request).map(to: Void.self) { configuration in
-                let emailsService = try request.make(EmailsService.self)
-                _ = try emailsService.sendConfirmAccountEmail(on: request, configuration: configuration, user: user)
-            }.transform(to: UserDto(from: user))
         }
+
+        let userDataFuture = createUserFuture.flatMap(to: UserDto.self) { user in
+            let emailsService = try request.make(EmailsService.self)
+            let sendEmailFuture = try emailsService.sendConfirmAccountEmail(on: request, user: user)
+            return sendEmailFuture.transform(to: UserDto(from: user))
+        }
+
+        return userDataFuture
     }
 
     // New account (email) confirmation.
     func confirm(request: Request, confirmEmailRequestDto: ConfirmEmailRequestDto) throws -> Future<HTTPResponseStatus> {
         let usersService = try request.make(UsersService.self)
 
-        return try usersService.confirmEmail(on: request, userId: confirmEmailRequestDto.id, confirmationGuid: confirmEmailRequestDto.confirmationGuid)
-        .transform(to: HTTPStatus.ok)
+        let confirmEmailFuture = try usersService.confirmEmail(on: request, 
+                                                               userId: confirmEmailRequestDto.id,
+                                                               confirmationGuid: confirmEmailRequestDto.confirmationGuid)
+
+        return confirmEmailFuture.transform(to: HTTPStatus.ok)
     }
 
     // User name verification.
@@ -96,7 +103,9 @@ final class RegisterController: RouteCollection {
         let userName = try request.parameters.next(String.self)
         let usersService = try request.make(UsersService.self)
 
-        return usersService.isUserNameTaken(on: request, userName: userName).map(to: BooleanResponseDto.self) { result in
+        let isUserNameTakenFuture = usersService.isUserNameTaken(on: request, userName: userName)
+
+        return isUserNameTakenFuture.map(to: BooleanResponseDto.self) { result in
             return BooleanResponseDto(result)
         }
     }
@@ -107,7 +116,9 @@ final class RegisterController: RouteCollection {
         let email = try request.parameters.next(String.self)
         let usersService = try request.make(UsersService.self)
 
-        return usersService.isEmailConnected(on: request, email: email).map(to: BooleanResponseDto.self) { result in
+        let isEmailConnectedFuture = usersService.isEmailConnected(on: request, email: email)
+
+        return isEmailConnectedFuture.map(to: BooleanResponseDto.self) { result in
             return BooleanResponseDto(result)
         }
     }

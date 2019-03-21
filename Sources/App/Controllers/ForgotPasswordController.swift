@@ -22,16 +22,16 @@ final class ForgotPasswordController: RouteCollection {
     /// Forgot password.
     func forgotPasswordToken(request: Request, forgotPasswordRequestDto: ForgotPasswordRequestDto) throws -> Future<HTTPResponseStatus> {
 
-        let settingsService = try request.make(SettingsService.self)
         let usersService = try request.make(UsersService.self)
         let emailsService = try request.make(EmailsService.self)
 
         let updateUserFuture = try usersService.forgotPassword(on: request, email: forgotPasswordRequestDto.email)
-        let configurationFuture = try settingsService.get(on: request)
 
-        return map(to: Void.self, updateUserFuture, configurationFuture) { user, configuration in
-            _ = try emailsService.sendForgotPasswordEmail(on: request, configuration: configuration, user: user)
-        }.transform(to: HTTPStatus.ok)
+        let sendEmailFuture = updateUserFuture.map(to: Void.self) { user in
+            _ = try emailsService.sendForgotPasswordEmail(on: request, user: user)
+        }
+
+        return sendEmailFuture.transform(to: HTTPStatus.ok)
     }
 
     /// Changing password.
@@ -40,10 +40,12 @@ final class ForgotPasswordController: RouteCollection {
         try confirmationDto.validate()
 
         let usersService = try request.make(UsersService.self)
-        return try usersService.confirmForgotPassword(
+        let confirmForgotPasswordFuture = try usersService.confirmForgotPassword(
             on: request,
             forgotPasswordGuid: confirmationDto.forgotPasswordGuid,
             password: confirmationDto.password
-        ).transform(to: HTTPStatus.ok)
+        )
+
+        return confirmForgotPasswordFuture.transform(to: HTTPStatus.ok)
     }
 }
