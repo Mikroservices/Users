@@ -30,60 +30,25 @@ final class RegisterController: RouteCollection {
             throw RegisterError.securityTokenIsMandatory
         }
 
-        guard let password = userDto.password else {
-            throw RegisterError.passwordIsRequired
-        }
-
-        let captchaService = try request.make(CaptchaService.self)
-        let captchaValidateFuture = try captchaService.validate(on: request, captchaFormResponse: captchaToken).map { success in
-            if !success {
-                throw RegisterError.securityTokenIsInvalid
-            }
-        }
+        let captchaValidateFuture = try self.validateCaptcha(on: request, captchaToken: captchaToken)
         
-        let validateUserNameFuture = captchaValidateFuture.flatMap(to: Void.self) { 
-            let userNameNormalized = userDto.userName.uppercased()
-            return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().map { user in
-                if user != nil {
-                    throw RegisterError.userNameIsAlreadyTaken
-                }
-            }
+        let validateUserNameFuture = captchaValidateFuture.flatMap {
+            try self.validateUserName(on: request, userName: userDto.userName)
         }
 
-        let validateEmailFuture = validateUserNameFuture.flatMap(to: Void.self) { user in
-            let emailNormalized = (userDto.email ?? "").uppercased()
-            return User.query(on: request).filter(\.emailNormalized == emailNormalized).first().map { user in
-                if user != nil {
-                    throw RegisterError.emailIsAlreadyConnected
-                }
-            }
+        let validateEmailFuture = validateUserNameFuture.flatMap {
+            try self.validateEmail(on: request, email: userDto.email)
         }
 
-        let createUserFuture = validateEmailFuture.flatMap(to: User.self) { user in
-
-            let salt = try Password.generateSalt()
-            let passwordHash = try Password.hash(password, withSalt: salt)
-            let emailConfirmationGuid = UUID.init().uuidString
-
-            let gravatarEmail = (userDto.email ?? "").lowercased().trimmingCharacters(in: [" "])
-            let gravatarHash = try MD5.hash(gravatarEmail).hexEncodedString()
-
-            let user = User(from: userDto,
-                            withPassword: passwordHash,
-                            salt: salt,
-                            emailConfirmationGuid: emailConfirmationGuid,
-                            gravatarHash: gravatarHash)
-
-            return user.save(on: request)
+        let createUserFuture = validateEmailFuture.flatMap {
+            try self.createUser(on: request, userDto: userDto)
         }
 
-        let userDataFuture = createUserFuture.flatMap(to: UserDto.self) { user in
-            let emailsService = try request.make(EmailsService.self)
-            let sendEmailFuture = try emailsService.sendConfirmAccountEmail(on: request, user: user)
-            return sendEmailFuture.transform(to: UserDto(from: user))
+        let sendEmailFuture = createUserFuture.flatMap { user in
+            try self.sendNewUserEmail(on: request, user: user)
         }
 
-        return userDataFuture
+        return sendEmailFuture.map { user in UserDto(from: user) }
     }
 
     // New account (email) confirmation.
@@ -105,8 +70,8 @@ final class RegisterController: RouteCollection {
 
         let isUserNameTakenFuture = usersService.isUserNameTaken(on: request, userName: userName)
 
-        return isUserNameTakenFuture.map(to: BooleanResponseDto.self) { result in
-            return BooleanResponseDto(result)
+        return isUserNameTakenFuture.map { result in
+            BooleanResponseDto(result)
         }
     }
 
@@ -118,8 +83,63 @@ final class RegisterController: RouteCollection {
 
         let isEmailConnectedFuture = usersService.isEmailConnected(on: request, email: email)
 
-        return isEmailConnectedFuture.map(to: BooleanResponseDto.self) { result in
-            return BooleanResponseDto(result)
+        return isEmailConnectedFuture.map { result in
+            BooleanResponseDto(result)
         }
+    }
+
+    private func validateCaptcha(on request: Request, captchaToken: String) throws -> Future<Void> {
+        let captchaService = try request.make(CaptchaService.self)
+        return try captchaService.validate(on: request, captchaFormResponse: captchaToken).map { success in
+            if !success {
+                throw RegisterError.securityTokenIsInvalid
+            }
+        }
+    }
+
+    private func validateUserName(on request: Request, userName: String) throws -> Future<Void> {
+        let userNameNormalized = userName.uppercased()
+        return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().map { user in
+            if user != nil {
+                throw RegisterError.userNameIsAlreadyTaken
+            }
+        }
+    }
+
+    private func validateEmail(on request: Request, email: String?) throws -> Future<Void> {
+        let emailNormalized = (email ?? "").uppercased()
+        return User.query(on: request).filter(\.emailNormalized == emailNormalized).first().map { user in
+            if user != nil {
+                throw RegisterError.emailIsAlreadyConnected
+            }
+        }
+    }
+
+    private func createUser(on request: Request, userDto: UserDto) throws -> Future<User> {
+
+        guard let password = userDto.password else {
+            throw RegisterError.passwordIsRequired
+        }
+
+        let salt = try Password.generateSalt()
+        let passwordHash = try Password.hash(password, withSalt: salt)
+        let emailConfirmationGuid = UUID.init().uuidString
+
+        let gravatarEmail = (userDto.email ?? "").lowercased().trimmingCharacters(in: [" "])
+        let gravatarHash = try MD5.hash(gravatarEmail).hexEncodedString()
+
+        let user = User(from: userDto,
+                        withPassword: passwordHash,
+                        salt: salt,
+                        emailConfirmationGuid: emailConfirmationGuid,
+                        gravatarHash: gravatarHash)
+
+        return user.save(on: request)
+    }
+
+    private func sendNewUserEmail(on request: Request, user: User) throws -> Future<User> {
+        let emailsService = try request.make(EmailsService.self)
+        let sendEmailFuture = try emailsService.sendConfirmAccountEmail(on: request, user: user)
+        return sendEmailFuture.transform(to: user)
     }
 }

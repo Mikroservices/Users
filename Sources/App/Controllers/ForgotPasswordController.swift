@@ -27,8 +27,8 @@ final class ForgotPasswordController: RouteCollection {
 
         let updateUserFuture = try usersService.forgotPassword(on: request, email: forgotPasswordRequestDto.email)
 
-        let sendEmailFuture = updateUserFuture.map(to: Void.self) { user in
-            _ = try emailsService.sendForgotPasswordEmail(on: request, user: user)
+        let sendEmailFuture = updateUserFuture.map { user in
+            try emailsService.sendForgotPasswordEmail(on: request, user: user)
         }
 
         return sendEmailFuture.transform(to: HTTPStatus.ok)

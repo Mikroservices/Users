@@ -21,60 +21,33 @@ final class UsersController: RouteCollection {
     func profile(request: Request) throws -> Future<UserDto> {
 
         let authorizationService = try request.make(AuthorizationService.self)
-        let userNameNormalized = try request.parameters.next(String.self).uppercased().replacingOccurrences(of: "@", with: "")
+        let userNameNormalized = try request.parameters.next(String.self).replacingOccurrences(of: "@", with: "")
 
         let userFuture = User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first()
         let userNameFromTokenFuture = try authorizationService.getUserNameFromBearerToken(request: request)
 
         return map(to: UserDto.self, userFuture, userNameFromTokenFuture) { userFromDb, userNameFromToken in
-            guard let user = userFromDb else {
-                throw UserError.userNotExists
-            }
-
-            let userDto = UserDto(from: user)
-
-            let isProfileOwner = userNameFromToken?.uppercased() == userNameNormalized
-            if !isProfileOwner {
-                userDto.email = nil
-            }
-
-            return userDto
+            try self.transferUserToForProfile(on: request,
+                                          userFromDb: userFromDb,
+                                          userNameFromRequest: userNameNormalized,
+                                          userNameFromToken: userNameFromToken)
         }
     }
 
     // Update user data.
     func update(request: Request, userDto: UserDto) throws -> Future<UserDto> {
 
-        let authorizationService = try request.make(AuthorizationService.self)
-        return try authorizationService.getUserNameFromBearerToken(request: request).map(to: String.self) { userNameFromToken in
-            guard let unwrapedUserNameFromToken = userNameFromToken else {
-                throw Abort(.unauthorized)
-            }
-
-            return unwrapedUserNameFromToken
-        }.flatMap(to: User.self) { userNameFromToken in
+        let userNameFuture = try self.getUserNameFromBearerTokenOrAbort(on: request)
+        return userNameFuture.flatMap(to: User.self) { userNameFromToken in
             let userNameNormalized = try request.parameters.next(String.self).uppercased().replacingOccurrences(of: "@", with: "")
 
-            return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().flatMap(to: User.self) { userFromDb in
-
-                guard let user = userFromDb else {
-                    throw UserError.userNotExists
-                }
-
-                let isProfileOwner = userNameFromToken.uppercased() == userNameNormalized
-                guard isProfileOwner else {
-                    throw UserError.someoneElseProfile
-                }
-
-                user.name = userDto.name
-                user.bio = userDto.bio
-                user.birthDate = userDto.birthDate
-                user.location = userDto.location
-                user.website = userDto.website
-
-                return user.update(on: request)
+            let isProfileOwner = userNameFromToken.uppercased() == userNameNormalized
+            guard isProfileOwner else {
+                throw UserError.someoneElseProfile
             }
-        }.map(to: UserDto.self) { user in
+
+            return try self.updateUser(on: request, userDto: userDto, userNameNormalized: userNameNormalized)
+        }.map { user in
             let userDto = UserDto(from: user)
             return userDto
         }
@@ -83,15 +56,8 @@ final class UsersController: RouteCollection {
     // Delete user.
     func delete(request: Request) throws -> Future<HTTPStatus> {
 
-        let authorizationService = try request.make(AuthorizationService.self)
-
-        return try authorizationService.getUserNameFromBearerToken(request: request).map(to: String.self) { userNameFromToken in
-            guard let unwrapedUserNameFromToken = userNameFromToken else {
-                throw Abort(.unauthorized)
-            }
-
-            return unwrapedUserNameFromToken
-        }.flatMap(to: Void.self) { userNameFromToken in
+        let userNameFuture = try self.getUserNameFromBearerTokenOrAbort(on: request)
+        return userNameFuture.flatMap(to: Void.self) { userNameFromToken in
             let userNameNormalized = try request.parameters.next(String.self).uppercased().replacingOccurrences(of: "@", with: "")
 
             return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().flatMap(to: Void.self) { userFromDb in
@@ -108,5 +74,53 @@ final class UsersController: RouteCollection {
                 return user.delete(on: request)
             }
         }.transform(to: HTTPStatus.ok)
+    }
+
+    private func transferUserToForProfile(on request: Request,
+                                          userFromDb: User?,
+                                          userNameFromRequest: String,
+                                          userNameFromToken: String?) throws -> UserDto {
+        guard let user = userFromDb else {
+            throw UserError.userNotExists
+        }
+
+        let userDto = UserDto(from: user)
+
+        
+        let isProfileOwner = userNameFromToken?.uppercased() == userNameFromRequest
+        if !isProfileOwner {
+            userDto.email = nil
+        }
+
+        return userDto
+    }
+
+    private func getUserNameFromBearerTokenOrAbort(on request: Request) throws -> Future<String> {
+        let authorizationService = try request.make(AuthorizationService.self)
+
+        return try authorizationService.getUserNameFromBearerToken(request: request).map(to: String.self) { userNameFromToken in
+            guard let unwrapedUserNameFromToken = userNameFromToken else {
+                throw Abort(.unauthorized)
+            }
+
+            return unwrapedUserNameFromToken
+        }
+    }
+
+    private func updateUser(on request: Request, userDto: UserDto, userNameNormalized: String) throws -> Future<User> {
+        return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().flatMap(to: User.self) { userFromDb in
+
+            guard let user = userFromDb else {
+                throw UserError.userNotExists
+            }
+
+            user.name = userDto.name
+            user.bio = userDto.bio
+            user.birthDate = userDto.birthDate
+            user.location = userDto.location
+            user.website = userDto.website
+
+            return user.update(on: request)
+        }
     }
 }

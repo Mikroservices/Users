@@ -25,7 +25,7 @@ final class AccountController: RouteCollection {
         let usersService = try request.make(UsersService.self)
 
         let loginFuture = try usersService.login(on: request, userNameOrEmail: loginRequestDto.userNameOrEmail, password: loginRequestDto.password)
-        return loginFuture.flatMap(to: AccessTokenDto.self) { user in
+        return loginFuture.flatMap { user in
 
             let authorizationService = try request.make(AuthorizationService.self)
 
@@ -43,7 +43,7 @@ final class AccountController: RouteCollection {
         let authorizationService = try request.make(AuthorizationService.self)
 
         let validateRefreshTokenFuture = try authorizationService.validateRefreshToken(on: request, refreshToken: refreshTokenDto.refreshToken)
-        return validateRefreshTokenFuture.flatMap(to: AccessTokenDto.self) { (user, refreshToken) in
+        return validateRefreshTokenFuture.flatMap { (user, refreshToken) in
 
             let accessTokenFuture = try authorizationService.createAccessToken(request: request, forUser: user)
             let refreshTokenFuture = try authorizationService.updateRefreshToken(request: request, forToken: refreshToken)
@@ -59,7 +59,7 @@ final class AccountController: RouteCollection {
         let authorizationService = try request.make(AuthorizationService.self)
 
         let userNameFuture = try authorizationService.getUserNameFromBearerToken(request: request)
-        return userNameFuture.flatMap(to: User.self) { userNameFromToken in
+        return userNameFuture.flatMap { userNameFromToken in
 
             guard let unwrapedUserNameFromToken = userNameFromToken else {
                 throw Abort(.unauthorized)
@@ -71,7 +71,7 @@ final class AccountController: RouteCollection {
                 userName: unwrapedUserNameFromToken,
                 currentPassword: changePasswordRequestDto.currentPassword,
                 newPassword: changePasswordRequestDto.newPassword
-            )
-        }.transform(to: HTTPStatus.ok)
+            ).transform(to: HTTPStatus.ok)
+        }
     }
 }
