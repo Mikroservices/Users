@@ -1,6 +1,6 @@
 //
 //  SharedApplication.swift
-//  AppTests
+//  Letterer/Users
 //
 //  Created by Marcin Czachurski on 21/03/2019.
 //
@@ -11,10 +11,6 @@ import XCTest
 import Vapor
 import XCTest
 import FluentPostgreSQL
-
-enum SharedApplicationError: Error {
-    case unknown
-}
 
 final class SharedApplication {
 
