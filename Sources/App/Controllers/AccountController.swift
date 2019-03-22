@@ -22,12 +22,12 @@ final class AccountController: RouteCollection {
 
     /// Sign-in user.
     func login(request: Request, loginRequestDto: LoginRequestDto) throws -> Future<AccessTokenDto> {
-        let usersService = try request.make(UsersService.self)
+        let usersService = try request.make(UsersServiceType.self)
 
         let loginFuture = try usersService.login(on: request, userNameOrEmail: loginRequestDto.userNameOrEmail, password: loginRequestDto.password)
         return loginFuture.flatMap { user in
 
-            let authorizationService = try request.make(AuthorizationService.self)
+            let authorizationService = try request.make(AuthorizationServiceType.self)
 
             let accessTokenFuture = try authorizationService.createAccessToken(request: request, forUser: user)
             let refreshTokenFuture = try authorizationService.createRefreshToken(request: request, forUser: user)
@@ -40,7 +40,7 @@ final class AccountController: RouteCollection {
 
     /// Refresh token.
     func refresh(request: Request, refreshTokenDto: RefreshTokenDto) throws -> Future<AccessTokenDto> {
-        let authorizationService = try request.make(AuthorizationService.self)
+        let authorizationService = try request.make(AuthorizationServiceType.self)
 
         let validateRefreshTokenFuture = try authorizationService.validateRefreshToken(on: request, refreshToken: refreshTokenDto.refreshToken)
         return validateRefreshTokenFuture.flatMap { (user, refreshToken) in
@@ -56,7 +56,7 @@ final class AccountController: RouteCollection {
 
     /// Change password.
     func changePassword(request: Request, changePasswordRequestDto: ChangePasswordRequestDto) throws -> Future<HTTPStatus> {
-        let authorizationService = try request.make(AuthorizationService.self)
+        let authorizationService = try request.make(AuthorizationServiceType.self)
 
         let userNameFuture = try authorizationService.getUserNameFromBearerToken(request: request)
         return userNameFuture.flatMap { userNameFromToken in
@@ -65,7 +65,7 @@ final class AccountController: RouteCollection {
                 throw Abort(.unauthorized)
             }
 
-            let usersService = try request.make(UsersService.self)
+            let usersService = try request.make(UsersServiceType.self)
             return try usersService.changePassword(
                 on: request,
                 userName: unwrapedUserNameFromToken,

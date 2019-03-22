@@ -5,8 +5,8 @@
 //  Created by Marcin Czachurski on 21/03/2019.
 //
 
+@testable import App
 import Foundation
-import App
 import XCTest
 import Vapor
 import XCTest
@@ -19,6 +19,7 @@ final class SharedApplication {
             var config = Config.default()
             var env = Environment.testing
             var services = Services.default()
+            Services.appendMocks(&services)
             try App.configure(&config, &env, &services)
             let app = try Application(config: config, environment: env, services: services)
             try App.boot(app)

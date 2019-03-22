@@ -20,7 +20,7 @@ final class UsersController: RouteCollection {
     /// User profile.
     func profile(request: Request) throws -> Future<UserDto> {
 
-        let authorizationService = try request.make(AuthorizationService.self)
+        let authorizationService = try request.make(AuthorizationServiceType.self)
         let userNameNormalized = try request.parameters.next(String.self).replacingOccurrences(of: "@", with: "")
 
         let userFuture = User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first()
@@ -96,7 +96,7 @@ final class UsersController: RouteCollection {
     }
 
     private func getUserNameFromBearerTokenOrAbort(on request: Request) throws -> Future<String> {
-        let authorizationService = try request.make(AuthorizationService.self)
+        let authorizationService = try request.make(AuthorizationServiceType.self)
 
         return try authorizationService.getUserNameFromBearerToken(request: request).map(to: String.self) { userNameFromToken in
             guard let unwrapedUserNameFromToken = userNameFromToken else {

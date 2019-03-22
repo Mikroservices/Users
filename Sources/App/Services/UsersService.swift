@@ -9,10 +9,17 @@ import Foundation
 import Vapor
 import FluentPostgreSQL
 
-final class UsersService: ServiceType {
-    static func makeService(for container: Container) throws -> UsersService {
-        return UsersService()
-    }
+protocol UsersServiceType: Service {
+    func login(on request: Request, userNameOrEmail: String, password: String) throws -> Future<User>
+    func forgotPassword(on request: Request, email: String) throws -> Future<User>
+    func confirmForgotPassword(on request: Request, forgotPasswordGuid: String, password: String) throws -> Future<User>
+    func changePassword(on request: Request, userName: String, currentPassword: String, newPassword: String) throws -> Future<User>
+    func confirmEmail(on request: Request, userId: UUID, confirmationGuid: String) throws -> Future<User>
+    func isUserNameTaken(on request: Request, userName: String) -> Future<Bool>
+    func isEmailConnected(on request: Request, email: String) -> Future<Bool>
+}
+
+final class UsersService: UsersServiceType {
 
     func login(on request: Request, userNameOrEmail: String, password: String) throws -> Future<User> {
 

@@ -10,14 +10,19 @@ import JWT
 import Crypto
 import FluentPostgreSQL
 
-final class AuthorizationService: ServiceType {
+protocol AuthorizationServiceType: Service {
+    func validateRefreshToken(on request: Request, refreshToken: String) throws -> Future<(user: User, refreshToken: RefreshToken)>
+    func createAccessToken(request: Request, forUser user: User) throws -> Future<String>
+    func createRefreshToken(request: Request, forUser user: User) throws -> Future<String>
+    func updateRefreshToken(request: Request, forToken refreshToken: RefreshToken) throws -> Future<String>
+    func getUserIdFromBearerToken(request: Request) throws -> Future<UUID?>
+    func getUserNameFromBearerToken(request: Request) throws -> Future<String?>
+}
+
+final class AuthorizationService: AuthorizationServiceType {
 
     private let refreshTokenTime: TimeInterval = 30 * 24 * 60 * 60  // 30 days
     private let accessTokenTime: TimeInterval = 60 * 60             // 1 hour
-
-    static func makeService(for worker: Container) throws -> AuthorizationService {
-        return AuthorizationService()
-    }
 
     public func validateRefreshToken(on request: Request, refreshToken: String) throws -> Future<(user: User, refreshToken: RefreshToken)> {
         return RefreshToken.query(on: request).filter(\.token == refreshToken)
@@ -47,7 +52,7 @@ final class AuthorizationService: ServiceType {
     }
 
     public func createAccessToken(request: Request, forUser user: User) throws -> Future<String> {
-        let settingsService = try request.make(SettingsService.self)
+        let settingsService = try request.make(SettingsServiceType.self)
         return try settingsService.get(on: request).map(to: String.self) { configuration in
 
             guard let jwtPrivateKey = configuration.getString(.jwtPrivateKey) else {
@@ -107,7 +112,7 @@ final class AuthorizationService: ServiceType {
 
         if let bearer = request.http.headers.bearerAuthorization {
 
-            let settingsService = try request.make(SettingsService.self)
+            let settingsService = try request.make(SettingsServiceType.self)
             return try settingsService.get(on: request).map(to: AuthorizationPayload?.self) { configuration in
 
                 guard let jwtPrivateKey = configuration.getString(.jwtPrivateKey) else {

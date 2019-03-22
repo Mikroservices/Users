@@ -12,9 +12,6 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     /// Register routes to the router.
     try registerRoutes(services: &services)
 
-    /// Register custom services.
-    registerServices(services: &services)
-
     /// Register middleware.
     registerMiddlewares(services: &services)
 
@@ -73,12 +70,4 @@ private func configureDatabase(services: inout Services) throws {
     migrations.add(model: RefreshToken.self, database: .psql)
     migrations.add(model: Setting.self, database: .psql)
     services.register(migrations)
-}
-
-private func registerServices(services: inout Services) {
-    services.register(AuthorizationService.self)
-    services.register(SettingsService.self)
-    services.register(CaptchaService.self)
-    services.register(UsersService.self)
-    services.register(EmailsService.self)
 }

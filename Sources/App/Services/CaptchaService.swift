@@ -8,21 +8,15 @@
 import Vapor
 import Recaptcha
 
-final class CaptchaService: ServiceType {
+protocol CaptchaServiceType: Service {
+    func validate(on request: Request, captchaFormResponse: String) throws -> Future<Bool>
+}
 
-    private let googleCaptcha: GoogleCaptcha?
-
-    static func makeService(for container: Container) throws -> CaptchaService {
-        return CaptchaService()
-    }
-
-    private init(_ googleCaptcha: GoogleCaptcha? = nil) {
-        self.googleCaptcha = googleCaptcha
-    }
+final class CaptchaService: CaptchaServiceType {
 
     public func validate(on request: Request, captchaFormResponse: String) throws -> Future<Bool> {
 
-        let settingsService = try request.make(SettingsService.self)
+        let settingsService = try request.make(SettingsServiceType.self)
 
         return try settingsService.get(on: request).flatMap(to: Bool.self) { configuration in
             guard let isRecaptchaEnabled = configuration.getBool(.isRecaptchaEnabled) else {

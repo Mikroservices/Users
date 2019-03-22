@@ -14,13 +14,13 @@ public enum SettingKey: String {
     case recaptchaKey
 }
 
-final class SettingsService: ServiceType {
+protocol SettingsServiceType: Service {
+    func get(on request: Request) throws -> Future<Configuration>
+}
+
+final class SettingsService: SettingsServiceType {
 
     private var configuration: Configuration?
-
-    static func makeService(for worker: Container) throws -> SettingsService {
-        return SettingsService()
-    }
 
     func get(on request: Request) throws -> Future<Configuration> {
 

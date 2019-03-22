@@ -9,14 +9,16 @@ import Foundation
 import Vapor
 import FluentPostgreSQL
 
-final class EmailsService: ServiceType {
-    static func makeService(for container: Container) throws -> EmailsService {
-        return EmailsService()
-    }
+protocol EmailsServiceType: Service {
+    func sendForgotPasswordEmail(on request: Request, user: User) throws -> Future<Bool>
+    func sendConfirmAccountEmail(on request: Request, user: User) throws -> Future<Bool>
+}
 
-    func sendForgotPasswordEmail(on request: Request, user: User) throws -> Future<Response> {
+final class EmailsService: EmailsServiceType {
 
-        let settingsService = try request.make(SettingsService.self)
+    func sendForgotPasswordEmail(on request: Request, user: User) throws -> Future<Bool> {
+
+        let settingsService = try request.make(SettingsServiceType.self)
         let configurationFuture = try settingsService.get(on: request)
 
         return configurationFuture.flatMap(to: Response.self) { configuration in
@@ -40,12 +42,12 @@ final class EmailsService: ServiceType {
 
                 try httpRequest.content.encode(email)
             }
-        }
+        }.transform(to: true)
     }
 
-    func sendConfirmAccountEmail(on request: Request, user: User) throws -> Future<Response> {
+    func sendConfirmAccountEmail(on request: Request, user: User) throws -> Future<Bool> {
 
-        let settingsService = try request.make(SettingsService.self)
+        let settingsService = try request.make(SettingsServiceType.self)
         let configurationFuture = try settingsService.get(on: request)
 
         return configurationFuture.flatMap(to: Response.self) { configuration in
@@ -69,6 +71,6 @@ final class EmailsService: ServiceType {
 
                 try httpRequest.content.encode(email)
             }
-        }
+        }.transform(to: true)
     }
 }

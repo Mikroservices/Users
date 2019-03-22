@@ -53,7 +53,7 @@ final class RegisterController: RouteCollection {
 
     // New account (email) confirmation.
     func confirm(request: Request, confirmEmailRequestDto: ConfirmEmailRequestDto) throws -> Future<HTTPResponseStatus> {
-        let usersService = try request.make(UsersService.self)
+        let usersService = try request.make(UsersServiceType.self)
 
         let confirmEmailFuture = try usersService.confirmEmail(on: request, 
                                                                userId: confirmEmailRequestDto.id,
@@ -66,7 +66,7 @@ final class RegisterController: RouteCollection {
     func isUserNameTaken(request: Request) throws -> Future<BooleanResponseDto> {
 
         let userName = try request.parameters.next(String.self)
-        let usersService = try request.make(UsersService.self)
+        let usersService = try request.make(UsersServiceType.self)
 
         let isUserNameTakenFuture = usersService.isUserNameTaken(on: request, userName: userName)
 
@@ -79,7 +79,7 @@ final class RegisterController: RouteCollection {
     func isEmailConnected(request: Request) throws -> Future<BooleanResponseDto> {
 
         let email = try request.parameters.next(String.self)
-        let usersService = try request.make(UsersService.self)
+        let usersService = try request.make(UsersServiceType.self)
 
         let isEmailConnectedFuture = usersService.isEmailConnected(on: request, email: email)
 
@@ -89,7 +89,7 @@ final class RegisterController: RouteCollection {
     }
 
     private func validateCaptcha(on request: Request, captchaToken: String) throws -> Future<Void> {
-        let captchaService = try request.make(CaptchaService.self)
+        let captchaService = try request.make(CaptchaServiceType.self)
         return try captchaService.validate(on: request, captchaFormResponse: captchaToken).map { success in
             if !success {
                 throw RegisterError.securityTokenIsInvalid
@@ -138,8 +138,9 @@ final class RegisterController: RouteCollection {
     }
 
     private func sendNewUserEmail(on request: Request, user: User) throws -> Future<User> {
-        let emailsService = try request.make(EmailsService.self)
+        let emailsService = try request.make(EmailsServiceType.self)
         let sendEmailFuture = try emailsService.sendConfirmAccountEmail(on: request, user: user)
         return sendEmailFuture.transform(to: user)
     }
 }
+
