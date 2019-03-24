@@ -2,5 +2,8 @@ import XCTest
 @testable import AppTests
 
 XCTMain([
-    testCase(RegisterControllerTests.allTests)
+    testCase(ConfirmActionTests.allTests)
+    testCase(EmailActionTests.allTests)
+    testCase(RegisterActionTests.allTests)
+    testCase(UserNameActionTests.allTests)
 ])

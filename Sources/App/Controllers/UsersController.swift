@@ -11,10 +11,12 @@ import FluentPostgreSQL
 /// Controls basic operations for User object.
 final class UsersController: RouteCollection {
 
+    public static let uri = "/users"
+
     func boot(router: Router) throws {
-        router.get("/users", String.parameter, use: profile)
-        router.put(UserDto.self, at: "/users", String.parameter, use: update)
-        router.delete("/users", String.parameter, use: delete)
+        router.get(UsersController.uri, String.parameter, use: profile)
+        router.put(UserDto.self, at: UsersController.uri, String.parameter, use: update)
+        router.delete(UsersController.uri, String.parameter, use: delete)
     }
 
     /// User profile.

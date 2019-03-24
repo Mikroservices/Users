@@ -62,13 +62,6 @@
             ReferencedContainer = "container:Users.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
-      <EnvironmentVariables>
-         <EnvironmentVariable
-            key = "LETTERER_USERS_CONNECTION_STRING"
-            value = "postgresql://user:password@host:5432/users?sslmode=require"
-            isEnabled = "YES">
-         </EnvironmentVariable>
-      </EnvironmentVariables>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>

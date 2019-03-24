@@ -6,14 +6,14 @@ import ExtendedError
 /// Called before your application initializes.
 public func configure(_ config: inout Config, _ env: inout Environment, _ services: inout Services) throws {
 
-    /// Register database providers first.
-    try configureDatabaseProvider(services: &services)
-
     /// Register routes to the router.
     try registerRoutes(services: &services)
 
     /// Register middleware.
     registerMiddlewares(services: &services)
+
+    /// Register database providers first.
+    try configureDatabaseProvider(services: &services)
 
     // Configure database.
     try configureDatabase(services: &services)

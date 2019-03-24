@@ -14,15 +14,17 @@ import FluentPostgreSQL
 
 final class RegisterController: RouteCollection {
 
+    public static let uri = "/register"
+
     func boot(router: Router) throws {
-        router.post(UserDto.self, at: "/register", use: register)
-        router.post(ConfirmEmailRequestDto.self, at: "/register/confirm", use: confirm)
-        router.get("/register/userName", String.parameter, use: isUserNameTaken)
-        router.get("/register/email", String.parameter, use: isEmailConnected)
+        router.post(UserDto.self, at: RegisterController.uri, use: register)
+        router.post(ConfirmEmailRequestDto.self, at: "\(RegisterController.uri)/confirm", use: confirm)
+        router.get("\(RegisterController.uri)/userName", String.parameter, use: isUserNameTaken)
+        router.get("\(RegisterController.uri)/email", String.parameter, use: isEmailConnected)
     }
 
     // Register new user.
-    func register(request: Request, userDto: UserDto) throws -> Future<UserDto> {
+    func register(request: Request, userDto: UserDto) throws -> Future<Response> {
 
         try userDto.validate()
 
@@ -48,7 +50,9 @@ final class RegisterController: RouteCollection {
             try self.sendNewUserEmail(on: request, user: user)
         }
 
-        return sendEmailFuture.map { user in UserDto(from: user) }
+        return sendEmailFuture.flatMap { user in
+            try self.createNewUserResponse(on: request, user: user)
+        }
     }
 
     // New account (email) confirmation.
@@ -141,6 +145,16 @@ final class RegisterController: RouteCollection {
         let emailsService = try request.make(EmailsServiceType.self)
         let sendEmailFuture = try emailsService.sendConfirmAccountEmail(on: request, user: user)
         return sendEmailFuture.transform(to: user)
+    }
+
+    private func createNewUserResponse(on request: Request, user: User) throws -> Future<Response> {
+        let createdUserDto = UserDto(from: user)
+        return try createdUserDto.encode(for: request).map { response in
+            response.http.headers.replaceOrAdd(name: .location, value: "\(UsersController.uri)/\(user.id?.uuidString ?? "")")
+            response.http.status = .created
+
+            return response
+        }
     }
 }
 

@@ -14,10 +14,12 @@ import FluentPostgreSQL
 
 final class AccountController: RouteCollection {
 
+    public static let uri = "/account"
+
     func boot(router: Router) throws {
-        router.post(LoginRequestDto.self, at: "/account/login", use: login)
-        router.post(RefreshTokenDto.self, at: "/account/refresh", use: refresh)
-        router.post(ChangePasswordRequestDto.self, at: "/account/change-password", use: changePassword)
+        router.post(LoginRequestDto.self, at: "\(AccountController.uri)/login", use: login)
+        router.post(RefreshTokenDto.self, at: "\(AccountController.uri)/refresh", use: refresh)
+        router.post(ChangePasswordRequestDto.self, at: "\(AccountController.uri)/change-password", use: changePassword)
     }
 
     /// Sign-in user.

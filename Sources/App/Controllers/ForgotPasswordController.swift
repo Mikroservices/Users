@@ -14,9 +14,11 @@ import FluentPostgreSQL
 
 final class ForgotPasswordController: RouteCollection {
 
+    public static let uri = "/forgot"
+
     func boot(router: Router) throws {
-        router.post(ForgotPasswordRequestDto.self, at: "/forgot/token", use: forgotPasswordToken)
-        router.post(ForgotPasswordConfirmationRequestDto.self, at: "/forgot/confirm", use: forgotPasswordConfirm)
+        router.post(ForgotPasswordRequestDto.self, at: "\(ForgotPasswordController.uri)/token", use: forgotPasswordToken)
+        router.post(ForgotPasswordConfirmationRequestDto.self, at: "\(ForgotPasswordController.uri)/confirm", use: forgotPasswordConfirm)
     }
 
     /// Forgot password.

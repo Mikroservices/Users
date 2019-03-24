@@ -4,8 +4,7 @@ import Vapor
 public func app(_ env: Environment) throws -> Application {
     var config = Config.default()
     var env = env
-    var services = Services.default()
-    Services.append(&services)
+    var services = Services.common()
     try configure(&config, &env, &services)
     let app = try Application(config: config, environment: env, services: services)
     try boot(app)

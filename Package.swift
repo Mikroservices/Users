@@ -7,6 +7,9 @@ let package = Package(
         // 💧 A server-side Swift web framework.
         .package(url: "https://github.com/vapor/vapor.git", from: "3.2.2"),
 
+        // 🐘 Non-blocking, event-driven Swift client for PostgreSQL.
+        .package(url: "https://github.com/vapor/postgresql.git", from: "1.0.0"),
+
         // 🐘 Swift ORM (queries, models, relations, etc) built on PostgreSQL.
         .package(url: "https://github.com/vapor/fluent-postgresql.git", from: "1.0.0"),
 
@@ -22,7 +25,7 @@ let package = Package(
     targets: [
         .target(name: "App", dependencies: ["FluentPostgreSQL", "Vapor", "JWT", "Recaptcha", "ExtendedError"]),
         .target(name: "Run", dependencies: ["App"]),
-        .testTarget(name: "AppTests", dependencies: ["App"])
+        .testTarget(name: "AppTests", dependencies: ["App", "PostgreSQL"])
     ]
 )
 
