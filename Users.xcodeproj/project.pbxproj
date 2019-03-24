@@ -27,6 +27,7 @@
 		F82296BF2247C715004B4A10 /* UserNameActionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F82296BE2247C715004B4A10 /* UserNameActionTests.swift */; };
 		F82296C12247C766004B4A10 /* EmailActionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F82296C02247C766004B4A10 /* EmailActionTests.swift */; };
 		F82296C32247C7BA004B4A10 /* ConfirmActionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F82296C22247C7BA004B4A10 /* ConfirmActionTests.swift */; };
+		F82296C6224804D3004B4A10 /* LoginActionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F82296C5224804D3004B4A10 /* LoginActionTests.swift */; };
 		OBJ_1060 /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_12 /* Configuration.swift */; };
 		OBJ_1061 /* AccountController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_14 /* AccountController.swift */; };
 		OBJ_1062 /* ForgotPasswordController.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_15 /* ForgotPasswordController.swift */; };
@@ -6153,6 +6154,7 @@
 		F82296BE2247C715004B4A10 /* UserNameActionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserNameActionTests.swift; sourceTree = "<group>"; };
 		F82296C02247C766004B4A10 /* EmailActionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmailActionTests.swift; sourceTree = "<group>"; };
 		F82296C22247C7BA004B4A10 /* ConfirmActionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmActionTests.swift; sourceTree = "<group>"; };
+		F82296C5224804D3004B4A10 /* LoginActionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginActionTests.swift; sourceTree = "<group>"; };
 		"Fluent::Fluent::Product" /* Fluent.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Fluent.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"Fluent::FluentSQL::Product" /* FluentSQL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FluentSQL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		"FluentPostgreSQL::FluentPostgreSQL::Product" /* FluentPostgreSQL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = FluentPostgreSQL.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -8008,6 +8010,7 @@
 		F82296BA2247C66F004B4A10 /* AcceptanceTests */ = {
 			isa = PBXGroup;
 			children = (
+				F82296C422480492004B4A10 /* AccountController */,
 				F82296BB2247C67C004B4A10 /* RegisterController */,
 			);
 			path = AcceptanceTests;
@@ -8022,6 +8025,14 @@
 				F82296C22247C7BA004B4A10 /* ConfirmActionTests.swift */,
 			);
 			path = RegisterController;
+			sourceTree = "<group>";
+		};
+		F82296C422480492004B4A10 /* AccountController */ = {
+			isa = PBXGroup;
+			children = (
+				F82296C5224804D3004B4A10 /* LoginActionTests.swift */,
+			);
+			path = AccountController;
 			sourceTree = "<group>";
 		};
 		OBJ_10 /* App */ = {
@@ -12561,6 +12572,7 @@
 				OBJ_1242 /* SharedApplicationError.swift in Sources */,
 				F82296C12247C766004B4A10 /* EmailActionTests.swift in Sources */,
 				F82296C32247C7BA004B4A10 /* ConfirmActionTests.swift in Sources */,
+				F82296C6224804D3004B4A10 /* LoginActionTests.swift in Sources */,
 				F82296BF2247C715004B4A10 /* UserNameActionTests.swift in Sources */,
 				OBJ_1243 /* Application.swift in Sources */,
 				F82296BD2247C6A0004B4A10 /* RegisterActionTests.swift in Sources */,

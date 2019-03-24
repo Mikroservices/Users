@@ -6,4 +6,5 @@ XCTMain([
     testCase(EmailActionTests.allTests)
     testCase(RegisterActionTests.allTests)
     testCase(UserNameActionTests.allTests)
+    testCase(LoginActionTests.allTests)
 ])

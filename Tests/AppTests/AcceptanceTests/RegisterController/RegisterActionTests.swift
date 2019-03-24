@@ -1,3 +1,10 @@
+//
+//  RegisterActionTests.swift
+//  Letterer/Users
+//
+//  Created by Marcin Czachurski on 24/03/2019.
+//
+
 @testable import App
 import XCTest
 import Vapor
