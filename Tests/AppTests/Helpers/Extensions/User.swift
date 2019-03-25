@@ -19,7 +19,7 @@ extension User {
                      emailWasConfirmed: Bool = true,
                      isBlocked: Bool = false,
                      emailConfirmationGuid: String = "",
-                     gravatarHash: String = "") throws  {
+                     gravatarHash: String = "") throws -> User {
 
         let connection = try application.newConnection(to: .psql).wait()
         let user = User(userName: userName,
@@ -33,6 +33,8 @@ extension User {
                   gravatarHash: gravatarHash)
 
         _ = try user.save(on: connection).wait()
+
+        return user
     }
 
     static func get(on application: Application, userName: String) throws -> User {
@@ -42,5 +44,10 @@ extension User {
         }
 
         return user
+    }
+
+    func update(on application: Application) throws {
+        let connection = try application.newConnection(to: .psql).wait()
+        _ = try self.save(on: connection).wait()
     }
 }

@@ -16,12 +16,12 @@ final class LoginActionTests: XCTestCase {
     func testUserWithCorrectCredentialsShouldBeSignedInByUsername() throws {
 
         // Arrange.
-        try User.create(on: SharedApplication.application(),
-                        userName: "nickfury",
-                        email: "nickfury@testemail.com",
-                        name: "Nick Fury",
-                        password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                        salt: "TNhZYL4F66KY7fUuqS/Juw==")
+        _ = try User.create(on: SharedApplication.application(),
+                            userName: "nickfury",
+                            email: "nickfury@testemail.com",
+                            name: "Nick Fury",
+                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
+                            salt: "TNhZYL4F66KY7fUuqS/Juw==")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "nickfury", password: "p@ssword")
 
         // Act.
@@ -38,12 +38,12 @@ final class LoginActionTests: XCTestCase {
     func testUserWithCorrectCredentialsShouldBeSignedInByEmail() throws {
 
         // Arrange.
-        try User.create(on: SharedApplication.application(),
-                        userName: "stevenfury",
-                        email: "stevenfury@testemail.com",
-                        name: "Steven Fury",
-                        password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                        salt: "TNhZYL4F66KY7fUuqS/Juw==")
+        _ = try User.create(on: SharedApplication.application(),
+                            userName: "stevenfury",
+                            email: "stevenfury@testemail.com",
+                            name: "Steven Fury",
+                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
+                            salt: "TNhZYL4F66KY7fUuqS/Juw==")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "stevenfury@testemail.com", password: "p@ssword")
 
         // Act.
@@ -60,12 +60,12 @@ final class LoginActionTests: XCTestCase {
     func testUserWithIncorrectPasswordShouldNotBeSignedIn() throws {
 
         // Arrange.
-        try User.create(on: SharedApplication.application(),
-                        userName: "martafury",
-                        email: "martafury@testemail.com",
-                        name: "Marta Fury",
-                        password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                        salt: "TNhZYL4F66KY7fUuqS/Juw==")
+        _ = try User.create(on: SharedApplication.application(),
+                            userName: "martafury",
+                            email: "martafury@testemail.com",
+                            name: "Marta Fury",
+                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
+                            salt: "TNhZYL4F66KY7fUuqS/Juw==")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "martafury", password: "incorrect")
 
         // Act.
@@ -79,13 +79,13 @@ final class LoginActionTests: XCTestCase {
     func testUserWithNotConfirmedAccountShouldNotBeSignedIn() throws {
 
         // Arrange.
-        try User.create(on: SharedApplication.application(),
-                        userName: "josefury",
-                        email: "josefury@testemail.com",
-                        name: "Jose Fury",
-                        password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                        salt: "TNhZYL4F66KY7fUuqS/Juw==",
-                        emailWasConfirmed: false
+        _ = try User.create(on: SharedApplication.application(),
+                            userName: "josefury",
+                            email: "josefury@testemail.com",
+                            name: "Jose Fury",
+                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
+                            salt: "TNhZYL4F66KY7fUuqS/Juw==",
+                            emailWasConfirmed: false
         )
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "josefury", password: "p@ssword")
 
@@ -100,13 +100,13 @@ final class LoginActionTests: XCTestCase {
     func testUserWithBlockedAccountShouldNotBeSignedIn() throws {
 
         // Arrange.
-        try User.create(on: SharedApplication.application(),
-                        userName: "tomfury",
-                        email: "tomfury@testemail.com",
-                        name: "Tom Fury",
-                        password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                        salt: "TNhZYL4F66KY7fUuqS/Juw==",
-                        isBlocked: true
+        _ = try User.create(on: SharedApplication.application(),
+                            userName: "tomfury",
+                            email: "tomfury@testemail.com",
+                            name: "Tom Fury",
+                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
+                            salt: "TNhZYL4F66KY7fUuqS/Juw==",
+                            isBlocked: true
         )
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "tomfury", password: "p@ssword")
 

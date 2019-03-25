@@ -16,11 +16,11 @@ final class ConfirmActionTests: XCTestCase {
     func testAccountShouldBeConfirmedWithCorrectConfirmationGuid() throws {
 
         // Arrange.
-        try User.create(on: SharedApplication.application(),
-                        userName: "samanthasmith",
-                        email: "samanthasmith@testemail.com",
-                        name: "Samantha Smith",
-                        emailWasConfirmed: false)
+        _ = try User.create(on: SharedApplication.application(),
+                            userName: "samanthasmith",
+                            email: "samanthasmith@testemail.com",
+                            name: "Samantha Smith",
+                            emailWasConfirmed: false)
         let user = try User.get(on: SharedApplication.application(), userName: "samanthasmith")
         let confirmEmailRequestDto = ConfirmEmailRequestDto(id: user.id!, confirmationGuid: user.emailConfirmationGuid)
 
@@ -36,11 +36,11 @@ final class ConfirmActionTests: XCTestCase {
     func testAccountShouldNotBeConfirmedWithIncorrectConfirmationGuid() throws {
 
         // Arrange.
-        try User.create(on: SharedApplication.application(),
-                        userName: "eriksmith",
-                        email: "eriksmith@testemail.com",
-                        name: "Erik Smith",
-                        emailWasConfirmed: false)
+        _ = try User.create(on: SharedApplication.application(),
+                            userName: "eriksmith",
+                            email: "eriksmith@testemail.com",
+                            name: "Erik Smith",
+                            emailWasConfirmed: false)
         let user = try User.get(on: SharedApplication.application(), userName: "eriksmith")
         let confirmEmailRequestDto = ConfirmEmailRequestDto(id: user.id!, confirmationGuid: UUID().uuidString)
 
