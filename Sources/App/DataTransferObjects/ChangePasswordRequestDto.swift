@@ -1,13 +1,13 @@
 //
 //  ChangePasswordRequestDto.swift
-//  App
+//  Letterer/Users
 //
 //  Created by Marcin Czachurski on 18/11/2018.
 //
 
 import Vapor
 
-final class ChangePasswordRequestDto {
+final class ChangePasswordRequestDto: Reflectable {
 
     var currentPassword: String
     var newPassword: String
@@ -19,3 +19,16 @@ final class ChangePasswordRequestDto {
 }
 
 extension ChangePasswordRequestDto: Content { }
+
+extension ChangePasswordRequestDto: Validatable {
+
+    /// See `Validatable`.
+    static func validations() throws -> Validations<ChangePasswordRequestDto> {
+        var validations = Validations(ChangePasswordRequestDto.self)
+
+        try validations.add(\.newPassword, .count(8...32))
+
+        return validations
+    }
+}
+

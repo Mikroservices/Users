@@ -58,8 +58,10 @@ final class AccountController: RouteCollection {
 
     /// Change password.
     func changePassword(request: Request, changePasswordRequestDto: ChangePasswordRequestDto) throws -> Future<HTTPStatus> {
-        let authorizationService = try request.make(AuthorizationServiceType.self)
 
+        try changePasswordRequestDto.validate()
+
+        let authorizationService = try request.make(AuthorizationServiceType.self)
         let userNameFuture = try authorizationService.getUserNameFromBearerToken(request: request)
         return userNameFuture.flatMap { userNameFromToken in
 

@@ -76,43 +76,20 @@ final class ChangePasswordActionTests: XCTestCase {
         XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
     }
 
-    func testBadRequestStatusCodeShouldBeReturnedWhenUserAccountIsNotConfirmed() throws {
-
-        // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "henrywhite",
-                            email: "henrywhite@testemail.com",
-                            name: "Henry White",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==",
-                            emailWasConfirmed: false)
-        let loginRequestDto = LoginRequestDto(userNameOrEmail: "henrywhite", password: "p@ssword")
-        let accessTokenDto = try SharedApplication.application()
-            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
-        let headers: HTTPHeaders = [ HTTPHeaderName.authorization.description: "Bearer \(accessTokenDto.accessToken)" ]
-        let changePasswordRequestDto = ChangePasswordRequestDto(currentPassword: "p@ssword", newPassword: "newP@ssword")
-
-        // Act.
-        let response = try SharedApplication.application()
-            .sendRequest(to: "/account/change-password", method: .POST, headers: headers, body: changePasswordRequestDto)
-
-        // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
-    }
-
     func testBadRequestStatusCodeShouldBeReturnedWhenUserAccountIsBlocked() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
+        let user = try User.create(on: SharedApplication.application(),
                             userName: "willwhite",
                             email: "willwhite@testemail.com",
                             name: "Will White",
                             password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==",
-                            isBlocked: true)
+                            salt: "TNhZYL4F66KY7fUuqS/Juw==")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "willwhite", password: "p@ssword")
         let accessTokenDto = try SharedApplication.application()
             .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
+        user.isBlocked = true
+        try user.update(on: SharedApplication.application())
         let headers: HTTPHeaders = [ HTTPHeaderName.authorization.description: "Bearer \(accessTokenDto.accessToken)" ]
         let changePasswordRequestDto = ChangePasswordRequestDto(currentPassword: "p@ssword", newPassword: "newP@ssword")
 
@@ -132,8 +109,7 @@ final class ChangePasswordActionTests: XCTestCase {
                             email: "timwhite@testemail.com",
                             name: "Tim White",
                             password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==",
-                            isBlocked: true)
+                            salt: "TNhZYL4F66KY7fUuqS/Juw==")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "timwhite", password: "p@ssword")
         let accessTokenDto = try SharedApplication.application()
             .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
@@ -156,8 +132,7 @@ final class ChangePasswordActionTests: XCTestCase {
                             email: "timwhite@testemail.com",
                             name: "Tim White",
                             password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==",
-                            isBlocked: true)
+                            salt: "TNhZYL4F66KY7fUuqS/Juw==")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "timwhite", password: "p@ssword")
         let accessTokenDto = try SharedApplication.application()
             .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
@@ -176,7 +151,6 @@ final class ChangePasswordActionTests: XCTestCase {
         ("testPasswordShouldBeChangedWhenAuthorizedUserChangePassword", testPasswordShouldBeChangedWhenAuthorizedUserChangePassword),
         ("testUnauthorizationStatusCodeShouldBeReturnedWhenNotAuthorizedUserTriesToChangePassword", testUnauthorizationStatusCodeShouldBeReturnedWhenNotAuthorizedUserTriesToChangePassword),
         ("testBadRequestStatusCodeShouldBeReturnedWhenAuthorizedUserEntersWrongOldPassword", testBadRequestStatusCodeShouldBeReturnedWhenAuthorizedUserEntersWrongOldPassword),
-        ("testBadRequestStatusCodeShouldBeReturnedWhenUserAccountIsNotConfirmed", testBadRequestStatusCodeShouldBeReturnedWhenUserAccountIsNotConfirmed),
         ("testBadRequestStatusCodeShouldBeReturnedWhenUserAccountIsBlocked", testBadRequestStatusCodeShouldBeReturnedWhenUserAccountIsBlocked),
         ("testBadRequestStatusCodeShouldBeReturnedWhenPasswordIsTooShort", testBadRequestStatusCodeShouldBeReturnedWhenPasswordIsTooShort),
         ("testBadRequestStatusCodeShouldBeReturnedWhenPasswordIsTooLong", testBadRequestStatusCodeShouldBeReturnedWhenPasswordIsTooLong)

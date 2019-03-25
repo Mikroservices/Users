@@ -46,6 +46,10 @@ final class AuthorizationService: AuthorizationServiceType {
                         throw UserError.userNotExists
                     }
 
+                    if user.isBlocked {
+                        throw LoginError.userAccountIsBlocked
+                    }
+
                     return (user, refreshToken)
                 }
         }
