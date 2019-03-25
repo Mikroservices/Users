@@ -19,7 +19,13 @@ extension User {
                      emailWasConfirmed: Bool = true,
                      isBlocked: Bool = false,
                      emailConfirmationGuid: String = "",
-                     gravatarHash: String = "") throws -> User {
+                     gravatarHash: String = "",
+                     forgotPasswordGuid: String? = nil,
+                     forgotPasswordDate: Date? = nil,
+                     bio: String? = nil,
+                     location: String? = nil,
+                     website: String? = nil,
+                     birthDate: Date? = nil) throws -> User {
 
         let connection = try application.newConnection(to: .psql).wait()
         let user = User(userName: userName,
@@ -30,7 +36,13 @@ extension User {
                   emailWasConfirmed: emailWasConfirmed,
                   isBlocked: isBlocked,
                   emailConfirmationGuid: emailConfirmationGuid,
-                  gravatarHash: gravatarHash)
+                  gravatarHash: gravatarHash,
+                  forgotPasswordGuid: forgotPasswordGuid,
+                  forgotPasswordDate: forgotPasswordDate,
+                  bio: bio,
+                  location: location,
+                  website: website,
+                  birthDate: birthDate)
 
         _ = try user.save(on: connection).wait()
 

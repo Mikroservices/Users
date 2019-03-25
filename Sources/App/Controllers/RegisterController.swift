@@ -23,7 +23,7 @@ final class RegisterController: RouteCollection {
         router.get("\(RegisterController.uri)/email", String.parameter, use: isEmailConnected)
     }
 
-    // Register new user.
+    /// Register new user.
     func register(request: Request, userDto: UserDto) throws -> Future<Response> {
 
         try userDto.validate()
@@ -55,7 +55,7 @@ final class RegisterController: RouteCollection {
         }
     }
 
-    // New account (email) confirmation.
+    /// New account (email) confirmation.
     func confirm(request: Request, confirmEmailRequestDto: ConfirmEmailRequestDto) throws -> Future<HTTPResponseStatus> {
         let usersService = try request.make(UsersServiceType.self)
 
@@ -66,7 +66,7 @@ final class RegisterController: RouteCollection {
         return confirmEmailFuture.transform(to: HTTPStatus.ok)
     }
 
-    // User name verification.
+    /// User name verification.
     func isUserNameTaken(request: Request) throws -> Future<BooleanResponseDto> {
 
         let userName = try request.parameters.next(String.self)
@@ -79,7 +79,7 @@ final class RegisterController: RouteCollection {
         }
     }
 
-    // Email verification.
+    /// Email verification.
     func isEmailConnected(request: Request) throws -> Future<BooleanResponseDto> {
 
         let email = try request.parameters.next(String.self)

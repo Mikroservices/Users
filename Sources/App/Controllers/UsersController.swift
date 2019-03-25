@@ -36,7 +36,7 @@ final class UsersController: RouteCollection {
         }
     }
 
-    // Update user data.
+    /// Update user data.
     func update(request: Request, userDto: UserDto) throws -> Future<UserDto> {
 
         let userNameFuture = try self.getUserNameFromBearerTokenOrAbort(on: request)
@@ -55,7 +55,7 @@ final class UsersController: RouteCollection {
         }
     }
 
-    // Delete user.
+    /// Delete user.
     func delete(request: Request) throws -> Future<HTTPStatus> {
 
         let userNameFuture = try self.getUserNameFromBearerTokenOrAbort(on: request)

@@ -7,5 +7,7 @@ XCTMain([
     testCase(RegisterActionTests.allTests),
     testCase(UserNameActionTests.allTests),
     testCase(LoginActionTests.allTests),
-    testCase(ChangePasswordActionTests.allTests)
+    testCase(ChangePasswordActionTests.allTests),
+    testCase(TokenActionTests.allTests),
+    testCase(ForgotConfirmActionTests.allTests)
 ])

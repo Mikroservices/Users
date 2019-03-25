@@ -36,7 +36,7 @@ final class ChangePasswordActionTests: XCTestCase {
         XCTAssertEqual(response.http.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
         let newLoginRequestDto = LoginRequestDto(userNameOrEmail: "markuswhite", password: "newP@ssword")
         let newAccessTokenDto = try SharedApplication.application()
-            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
+            .getResponse(to: "/account/login", method: .POST, data: newLoginRequestDto, decodeTo: AccessTokenDto.self)
         XCTAssert(newAccessTokenDto.accessToken.count > 0, "User should be signed in with new password.")
     }
 
@@ -124,11 +124,61 @@ final class ChangePasswordActionTests: XCTestCase {
         XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
     }
 
+    func testBadRequestStatusCodeShouldBeReturnedWhenPasswordIsTooShort() throws {
+
+        // Arrange.
+        _ = try User.create(on: SharedApplication.application(),
+                            userName: "timwhite",
+                            email: "timwhite@testemail.com",
+                            name: "Tim White",
+                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
+                            salt: "TNhZYL4F66KY7fUuqS/Juw==",
+                            isBlocked: true)
+        let loginRequestDto = LoginRequestDto(userNameOrEmail: "timwhite", password: "p@ssword")
+        let accessTokenDto = try SharedApplication.application()
+            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
+        let headers: HTTPHeaders = [ HTTPHeaderName.authorization.description: "Bearer \(accessTokenDto.accessToken)" ]
+        let changePasswordRequestDto = ChangePasswordRequestDto(currentPassword: "p@ssword", newPassword: "1234567")
+
+        // Act.
+        let response = try SharedApplication.application()
+            .sendRequest(to: "/account/change-password", method: .POST, headers: headers, body: changePasswordRequestDto)
+
+        // Assert.
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+    }
+
+    func testBadRequestStatusCodeShouldBeReturnedWhenPasswordIsTooLong() throws {
+
+        // Arrange.
+        _ = try User.create(on: SharedApplication.application(),
+                            userName: "timwhite",
+                            email: "timwhite@testemail.com",
+                            name: "Tim White",
+                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
+                            salt: "TNhZYL4F66KY7fUuqS/Juw==",
+                            isBlocked: true)
+        let loginRequestDto = LoginRequestDto(userNameOrEmail: "timwhite", password: "p@ssword")
+        let accessTokenDto = try SharedApplication.application()
+            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
+        let headers: HTTPHeaders = [ HTTPHeaderName.authorization.description: "Bearer \(accessTokenDto.accessToken)" ]
+        let changePasswordRequestDto = ChangePasswordRequestDto(currentPassword: "p@ssword", newPassword: "123456789012345678901234567890123")
+
+        // Act.
+        let response = try SharedApplication.application()
+            .sendRequest(to: "/account/change-password", method: .POST, headers: headers, body: changePasswordRequestDto)
+
+        // Assert.
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+    }
+
     static let allTests = [
         ("testPasswordShouldBeChangedWhenAuthorizedUserChangePassword", testPasswordShouldBeChangedWhenAuthorizedUserChangePassword),
         ("testUnauthorizationStatusCodeShouldBeReturnedWhenNotAuthorizedUserTriesToChangePassword", testUnauthorizationStatusCodeShouldBeReturnedWhenNotAuthorizedUserTriesToChangePassword),
         ("testBadRequestStatusCodeShouldBeReturnedWhenAuthorizedUserEntersWrongOldPassword", testBadRequestStatusCodeShouldBeReturnedWhenAuthorizedUserEntersWrongOldPassword),
         ("testBadRequestStatusCodeShouldBeReturnedWhenUserAccountIsNotConfirmed", testBadRequestStatusCodeShouldBeReturnedWhenUserAccountIsNotConfirmed),
-        ("testBadRequestStatusCodeShouldBeReturnedWhenUserAccountIsBlocked", testBadRequestStatusCodeShouldBeReturnedWhenUserAccountIsBlocked)
+        ("testBadRequestStatusCodeShouldBeReturnedWhenUserAccountIsBlocked", testBadRequestStatusCodeShouldBeReturnedWhenUserAccountIsBlocked),
+        ("testBadRequestStatusCodeShouldBeReturnedWhenPasswordIsTooShort", testBadRequestStatusCodeShouldBeReturnedWhenPasswordIsTooShort),
+        ("testBadRequestStatusCodeShouldBeReturnedWhenPasswordIsTooLong", testBadRequestStatusCodeShouldBeReturnedWhenPasswordIsTooLong)
     ]
 }
