@@ -32,14 +32,13 @@ final class ProfileActionTests: XCTestCase {
                                    location: "Cupertino",
                                    website: "http://johnbush.com",
                                    birthDate: Date())
-        let loginRequestDto = LoginRequestDto(userNameOrEmail: "johnbush", password: "p@ssword")
-        let accessTokenDto = try SharedApplication.application()
-            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
-        let headers: HTTPHeaders = [ HTTPHeaderName.authorization.description: "Bearer \(accessTokenDto.accessToken)" ]
 
         // Act.
-        let userDto = try SharedApplication.application()
-            .getResponse(to: "/users/@johnbush", headers: headers, decodeTo: UserDto.self)
+        let userDto = try SharedApplication.application().getResponse(
+            as: .user(userName: "johnbush", password: "p@ssword"),
+            to: "/users/@johnbush",
+            decodeTo: UserDto.self
+        )
 
         // Assert.
         XCTAssertEqual(userDto.id, user.id, "Property 'id' should be equal.")

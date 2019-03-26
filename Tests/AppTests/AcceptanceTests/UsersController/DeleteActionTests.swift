@@ -20,14 +20,13 @@ final class DeleteActionTests: XCTestCase {
                             userName: "zibibonjek",
                             email: "zibibonjek@testemail.com",
                             name: "Zibi Bonjek")
-        let loginRequestDto = LoginRequestDto(userNameOrEmail: "zibibonjek", password: "p@ssword")
-        let accessTokenDto = try SharedApplication.application()
-            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
-        let headers: HTTPHeaders = [ HTTPHeaderName.authorization.description: "Bearer \(accessTokenDto.accessToken)" ]
 
         // Act.
-        let response = try SharedApplication.application()
-            .sendRequest(to: "/users/@zibibonjek", method: .DELETE, headers: headers)
+        let response = try SharedApplication.application().sendRequest(
+            as: .user(userName: "zibibonjek", password: "p@ssword"),
+            to: "/users/@zibibonjek",
+            method: .DELETE
+        )
 
         // Assert.
         XCTAssertEqual(response.http.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
@@ -64,15 +63,12 @@ final class DeleteActionTests: XCTestCase {
                             email: "kingabonjek@testemail.com",
                             name: "Kinga Bonjek")
 
-
-        let loginRequestDto = LoginRequestDto(userNameOrEmail: "martabonjek", password: "p@ssword")
-        let accessTokenDto = try SharedApplication.application()
-            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
-        let headers: HTTPHeaders = [ HTTPHeaderName.authorization.description: "Bearer \(accessTokenDto.accessToken)" ]
-
         // Act.
-        let response = try SharedApplication.application()
-            .sendRequest(to: "/users/@kingabonjek", method: .DELETE, headers: headers)
+        let response = try SharedApplication.application().sendRequest(
+            as: .user(userName: "martabonjek", password: "p@ssword"),
+            to: "/users/@kingabonjek",
+            method: .DELETE
+        )
 
         // Assert.
         XCTAssertEqual(response.http.status, HTTPResponseStatus.forbidden, "Response http status code should be forbidden (403).")
@@ -85,14 +81,13 @@ final class DeleteActionTests: XCTestCase {
                             userName: "henrybonjek",
                             email: "henrybonjek@testemail.com",
                             name: "Henry Bonjek")
-        let loginRequestDto = LoginRequestDto(userNameOrEmail: "henrybonjek", password: "p@ssword")
-        let accessTokenDto = try SharedApplication.application()
-            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
-        let headers: HTTPHeaders = [ HTTPHeaderName.authorization.description: "Bearer \(accessTokenDto.accessToken)" ]
 
         // Act.
-        let response = try SharedApplication.application()
-            .sendRequest(to: "/users/@notexists", method: .DELETE, headers: headers)
+        let response = try SharedApplication.application().sendRequest(
+            as: .user(userName: "henrybonjek", password: "p@ssword"),
+            to: "/users/@notexists",
+            method: .DELETE
+        )
 
         // Assert.
         XCTAssertEqual(response.http.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")

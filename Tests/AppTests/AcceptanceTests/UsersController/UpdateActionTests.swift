@@ -32,10 +32,6 @@ final class UpdateActionTests: XCTestCase {
                                    location: "Cupertino",
                                    website: "http://nickperry.com",
                                    birthDate: Date())
-        let loginRequestDto = LoginRequestDto(userNameOrEmail: "nickperry", password: "p@ssword")
-        let accessTokenDto = try SharedApplication.application()
-            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
-        let headers: HTTPHeaders = [ HTTPHeaderName.authorization.description: "Bearer \(accessTokenDto.accessToken)" ]
 
         let userDto = UserDto(id: UUID(),
                               userName: "user name should not be changed",
@@ -50,8 +46,13 @@ final class UpdateActionTests: XCTestCase {
                               securityToken: "security")
 
         // Act.
-        let updatedUserDto = try SharedApplication.application()
-            .getResponse(to: "/users/@nickperry", method: .PUT, headers: headers, data: userDto, decodeTo: UserDto.self)
+        let updatedUserDto = try SharedApplication.application().getResponse(
+            as: .user(userName: "nickperry", password: "p@ssword"),
+            to: "/users/@nickperry",
+            method: .PUT,
+            data: userDto,
+            decodeTo: UserDto.self
+        )
 
         // Assert.
         XCTAssertEqual(updatedUserDto.id, user.id, "Property 'user' should not be changed.")
@@ -142,16 +143,15 @@ final class UpdateActionTests: XCTestCase {
                             website: "http://chrisperry.com",
                             birthDate: Date())
 
-        let loginRequestDto = LoginRequestDto(userNameOrEmail: "annaperry", password: "p@ssword")
-        let accessTokenDto = try SharedApplication.application()
-            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
-        let headers: HTTPHeaders = [ HTTPHeaderName.authorization.description: "Bearer \(accessTokenDto.accessToken)" ]
-
         let userDto = UserDto(id: UUID(), userName: "chrisperry", email: "chrisperry@testemail.com", name: "Tiger Perry")
 
         // Act.
-        let response = try SharedApplication.application()
-            .sendRequest(to: "/users/@josepfperry", method: .PUT, headers: headers, body: userDto)
+        let response = try SharedApplication.application().sendRequest(
+            as: .user(userName: "annaperry", password: "p@ssword"),
+            to: "/users/@josepfperry",
+            method: .PUT,
+            body: userDto
+        )
 
         // Assert.
         XCTAssertEqual(response.http.status, HTTPResponseStatus.forbidden, "Response http status code should be forbidden (403).")
@@ -165,18 +165,17 @@ final class UpdateActionTests: XCTestCase {
                             email: "brianperry@testemail.com",
                             name: "Brian Perry")
 
-        let loginRequestDto = LoginRequestDto(userNameOrEmail: "brianperry", password: "p@ssword")
-        let accessTokenDto = try SharedApplication.application()
-            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
-        let headers: HTTPHeaders = [ HTTPHeaderName.authorization.description: "Bearer \(accessTokenDto.accessToken)" ]
-
         let userDto = UserDto(userName: "brianperry",
                               email: "gregsmith@testemail.com",
                               name: "123456789012345678901234567890123456789012345678901")
 
         // Act.
-        let response = try SharedApplication.application()
-            .sendRequest(to: "/users/@brianperry", method: .PUT, headers: headers, body: userDto)
+        let response = try SharedApplication.application().sendRequest(
+            as: .user(userName: "brianperry", password: "p@ssword"),
+            to: "/users/@brianperry",
+            method: .PUT,
+            body: userDto
+        )
 
         // Assert.
         XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
@@ -190,19 +189,18 @@ final class UpdateActionTests: XCTestCase {
                             email: "chrisperry@testemail.com",
                             name: "Chris Perry")
 
-        let loginRequestDto = LoginRequestDto(userNameOrEmail: "chrisperry", password: "p@ssword")
-        let accessTokenDto = try SharedApplication.application()
-            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
-        let headers: HTTPHeaders = [ HTTPHeaderName.authorization.description: "Bearer \(accessTokenDto.accessToken)" ]
-
         let userDto = UserDto(userName: "chrisperry",
                               email: "gregsmith@testemail.com",
                               name: "Chris Perry",
                               location: "123456789012345678901234567890123456789012345678901")
 
         // Act.
-        let response = try SharedApplication.application()
-            .sendRequest(to: "/users/@chrisperry", method: .PUT, headers: headers, body: userDto)
+        let response = try SharedApplication.application().sendRequest(
+            as: .user(userName: "chrisperry", password: "p@ssword"),
+            to: "/users/@chrisperry",
+            method: .PUT,
+            body: userDto
+        )
 
         // Assert.
         XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
@@ -216,19 +214,18 @@ final class UpdateActionTests: XCTestCase {
                             email: "lukeperry@testemail.com",
                             name: "Luke Perry")
 
-        let loginRequestDto = LoginRequestDto(userNameOrEmail: "lukeperry", password: "p@ssword")
-        let accessTokenDto = try SharedApplication.application()
-            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
-        let headers: HTTPHeaders = [ HTTPHeaderName.authorization.description: "Bearer \(accessTokenDto.accessToken)" ]
-
         let userDto = UserDto(userName: "lukeperry",
                               email: "gregsmith@testemail.com",
                               name: "Chris Perry",
                               website: "123456789012345678901234567890123456789012345678901")
 
         // Act.
-        let response = try SharedApplication.application()
-            .sendRequest(to: "/users/@lukeperry", method: .PUT, headers: headers, body: userDto)
+        let response = try SharedApplication.application().sendRequest(
+            as: .user(userName: "lukeperry", password: "p@ssword"),
+            to: "/users/@lukeperry",
+            method: .PUT,
+            body: userDto
+        )
 
         // Assert.
         XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
@@ -242,11 +239,6 @@ final class UpdateActionTests: XCTestCase {
                             email: "francisperry@testemail.com",
                             name: "Francis Perry")
 
-        let loginRequestDto = LoginRequestDto(userNameOrEmail: "francisperry", password: "p@ssword")
-        let accessTokenDto = try SharedApplication.application()
-            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
-        let headers: HTTPHeaders = [ HTTPHeaderName.authorization.description: "Bearer \(accessTokenDto.accessToken)" ]
-
         let userDto = UserDto(userName: "francisperry",
                               email: "gregsmith@testemail.com",
                               name: "Chris Perry",
@@ -256,8 +248,12 @@ final class UpdateActionTests: XCTestCase {
                                 "123456789012345678901234567890123456789012345678901")
 
         // Act.
-        let response = try SharedApplication.application()
-            .sendRequest(to: "/users/@francisperry", method: .PUT, headers: headers, body: userDto)
+        let response = try SharedApplication.application().sendRequest(
+            as: .user(userName: "francisperry", password: "p@ssword"),
+            to: "/users/@francisperry",
+            method: .PUT,
+            body: userDto
+        )
 
         // Assert.
         XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
