@@ -1,3 +1,10 @@
+//
+//  Password.swift
+//  Letterer/Validator
+//
+//  Created by Marcin Czachurski on 28/10/2018.
+//
+
 import Vapor
 
 extension Validator where T == String {

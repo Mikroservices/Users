@@ -1,6 +1,6 @@
 //
 //  MockEmailsService.swift
-//  AppTests
+//  Letterer/Users
 //
 //  Created by Marcin Czachurski on 22/03/2019.
 //

@@ -134,12 +134,222 @@ final class RegisterActionTests: XCTestCase {
         XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be created (201).")
     }
 
+    func testUserShouldNotBeCreatedIfUserNameWasNotSpecified() throws {
+
+        // Arrange.
+        let userDto = UserDto(userName: "",
+                              email: "gregsmith@testemail.com",
+                              name: "Greg Smith",
+                              password: "p@ssword",
+                              securityToken: "123")
+
+        // Act.
+        let response = try SharedApplication.application().sendRequest(to: "/register", method: .POST, body: userDto)
+
+        // Assert.
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+    }
+
+    func testUserShouldNotBeCreatedIfUserNameWasTooLong() throws {
+    
+        // Arrange.
+        let userDto = UserDto(userName: "123456789012345678901234567890123456789012345678901",
+                              email: "gregsmith@testemail.com",
+                              name: "Greg Smith",
+                              password: "p@ssword",
+                              securityToken: "123")
+
+        // Act.
+        let response = try SharedApplication.application().sendRequest(to: "/register", method: .POST, body: userDto)
+
+        // Assert.
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+    }
+
+    func testUserShouldNotBeCreatedIfEmailWasNotSpecified() throws {
+
+        // Arrange.
+        let userDto = UserDto(userName: "gregsmith",
+                              email: "",
+                              name: "Greg Smith",
+                              password: "p@ssword",
+                              securityToken: "123")
+
+        // Act.
+        let response = try SharedApplication.application().sendRequest(to: "/register", method: .POST, body: userDto)
+
+        // Assert.
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+    }
+
+    func testUserShouldNotBeCreatedIfEmailHasWrongFormat() throws {
+
+        // Arrange.
+        let userDto = UserDto(userName: "gregsmith",
+                              email: "gregsmithtestemail.com",
+                              name: "Greg Smith",
+                              password: "p@ssword",
+                              securityToken: "123")
+
+        // Act.
+        let response = try SharedApplication.application().sendRequest(to: "/register", method: .POST, body: userDto)
+
+        // Assert.
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+    }
+
+    func testUserShouldNotBeCreatedIfPasswordWasNotSpecified() throws {
+
+        // Arrange.
+        let userDto = UserDto(userName: "gregsmith",
+                              email: "gregsmith@testemail.com",
+                              name: "Greg Smith",
+                              password: "",
+                              securityToken: "123")
+
+        // Act.
+        let response = try SharedApplication.application().sendRequest(to: "/register", method: .POST, body: userDto)
+
+        // Assert.
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+    }
+
+    func testUserShouldNotBeCreatedIfPasswordIsTooShort() throws {
+
+        // Arrange.
+        let userDto = UserDto(userName: "gregsmith",
+                              email: "gregsmith@testemail.com",
+                              name: "Greg Smith",
+                              password: "1234567",
+                              securityToken: "123")
+
+        // Act.
+        let response = try SharedApplication.application().sendRequest(to: "/register", method: .POST, body: userDto)
+
+        // Assert.
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+    }
+
+    func testUserShouldNotBeCreatedIfPasswordIsTooLong() throws {
+
+        // Arrange.
+        let userDto = UserDto(userName: "gregsmith",
+                              email: "gregsmith@testemail.com",
+                              name: "Greg Smith",
+                              password: "123456789012345678901234567890123",
+                              securityToken: "123")
+
+        // Act.
+        let response = try SharedApplication.application().sendRequest(to: "/register", method: .POST, body: userDto)
+
+        // Assert.
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+    }
+
+    func testUserShouldNotBeCreatedIfNameIsTooLong() throws {
+
+        // Arrange.
+        let userDto = UserDto(userName: "gregsmith",
+                              email: "gregsmith@testemail.com",
+                              name: "123456789012345678901234567890123456789012345678901",
+                              password: "p@ssword",
+                              securityToken: "123")
+
+        // Act.
+        let response = try SharedApplication.application().sendRequest(to: "/register", method: .POST, body: userDto)
+
+        // Assert.
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+    }
+
+    func testUserShouldNotBeCreatedIfLocationIsTooLong() throws {
+
+        // Arrange.
+        let userDto = UserDto(userName: "gregsmith",
+                              email: "gregsmith@testemail.com",
+                              name: "Greg Smith",
+                              password: "p@ssword",
+                              location: "123456789012345678901234567890123456789012345678901",
+                              securityToken: "123")
+
+        // Act.
+        let response = try SharedApplication.application().sendRequest(to: "/register", method: .POST, body: userDto)
+
+        // Assert.
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+    }
+
+    func testUserShouldNotBeCreatedIfWebsiteIsTooLong() throws {
+
+        // Arrange.
+        let userDto = UserDto(userName: "gregsmith",
+                              email: "gregsmith@testemail.com",
+                              name: "Greg Smith",
+                              password: "p@ssword",
+                              website: "123456789012345678901234567890123456789012345678901",
+                              securityToken: "123")
+
+        // Act.
+        let response = try SharedApplication.application().sendRequest(to: "/register", method: .POST, body: userDto)
+
+        // Assert.
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+    }
+
+    func testUserShouldNotBeCreatedIfBioIsTooLong() throws {
+
+        // Arrange.
+        let userDto = UserDto(userName: "gregsmith",
+                              email: "gregsmith@testemail.com",
+                              name: "Greg Smith",
+                              password: "p@ssword",
+                              bio: "12345678901234567890123456789012345678901234567890" +
+                                "12345678901234567890123456789012345678901234567890" +
+                                "12345678901234567890123456789012345678901234567890" +
+                                "123456789012345678901234567890123456789012345678901",
+                              securityToken: "123")
+
+        // Act.
+        let response = try SharedApplication.application().sendRequest(to: "/register", method: .POST, body: userDto)
+
+        // Assert.
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+    }
+
+    func testUserShouldNotBeCreatedIfSecurityTokenWasNotSpecified() throws {
+
+        // Arrange.
+        let userDto = UserDto(userName: "gregsmith",
+                              email: "gregsmith@testemail.com",
+                              name: "Greg Smith",
+                              password: "p@ssword",
+                              securityToken: "")
+
+        // Act.
+        let response = try SharedApplication.application().sendRequest(to: "/register", method: .POST, body: userDto)
+
+        // Assert.
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+    }
+
     static let allTests = [
         ("testUserAccountShouldBeCreatedForValidUserData", testUserAccountShouldBeCreatedForValidUserData),
         ("testStatusCodeShouldBeReturnedAfterCreatingNewUser", testStatusCodeShouldBeReturnedAfterCreatingNewUser),
         ("testHeaderLocationShouldBeReturnedAfterCreatingNewUser", testHeaderLocationShouldBeReturnedAfterCreatingNewUser),
         ("testCorrectUserDataShouldBeReturnedAfterCreatingNewUser", testCorrectUserDataShouldBeReturnedAfterCreatingNewUser),
         ("testUserShouldNotBeCreatedIfUserWithTheSameEmailExists", testUserShouldNotBeCreatedIfUserWithTheSameEmailExists),
-        ("testUserShouldNotBeCreatedIfUserWithTheSameUserNameExists", testUserShouldNotBeCreatedIfUserWithTheSameUserNameExists)
+        ("testUserShouldNotBeCreatedIfUserWithTheSameUserNameExists", testUserShouldNotBeCreatedIfUserWithTheSameUserNameExists),
+        ("testUserShouldNotBeCreatedIfUserNameWasNotSpecified", testUserShouldNotBeCreatedIfUserNameWasNotSpecified),
+        ("testUserShouldNotBeCreatedIfUserNameWasTooLong", testUserShouldNotBeCreatedIfUserNameWasTooLong),
+        ("testUserShouldNotBeCreatedIfEmailWasNotSpecified", testUserShouldNotBeCreatedIfEmailWasNotSpecified),
+        ("testUserShouldNotBeCreatedIfEmailHasWrongFormat", testUserShouldNotBeCreatedIfEmailHasWrongFormat),
+        ("testUserShouldNotBeCreatedIfPasswordWasNotSpecified", testUserShouldNotBeCreatedIfPasswordWasNotSpecified),
+        ("testUserShouldNotBeCreatedIfPasswordIsTooShort", testUserShouldNotBeCreatedIfPasswordIsTooShort),
+        ("testUserShouldNotBeCreatedIfPasswordIsTooLong", testUserShouldNotBeCreatedIfPasswordIsTooLong),
+        ("testUserShouldNotBeCreatedIfNameIsTooLong", testUserShouldNotBeCreatedIfNameIsTooLong),
+        ("testUserShouldNotBeCreatedIfLocationIsTooLong", testUserShouldNotBeCreatedIfLocationIsTooLong),
+        ("testUserShouldNotBeCreatedIfWebsiteIsTooLong", testUserShouldNotBeCreatedIfWebsiteIsTooLong),
+        ("testUserShouldNotBeCreatedIfBioIsTooLong", testUserShouldNotBeCreatedIfBioIsTooLong),
+        ("testUserShouldNotBeCreatedIfSecurityTokenWasNotSpecified", testUserShouldNotBeCreatedIfSecurityTokenWasNotSpecified)
     ]
 }

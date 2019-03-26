@@ -1,10 +1,3 @@
-//
-//  seed.swift
-//  App
-//
-//  Created by Marcin Czachurski on 23/03/2019.
-//
-
 import Vapor
 import FluentPostgreSQL
 

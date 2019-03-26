@@ -1,6 +1,6 @@
 //
 //  ProfileActionTests.swift
-//  AppTests
+//  Letterer/Users
 //
 //  Created by Marcin Czachurski on 25/03/2019.
 //
