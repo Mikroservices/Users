@@ -21,8 +21,6 @@ final class ForgotConfirmActionTests: XCTestCase {
                             userName: "annapink",
                             email: "annapink@testemail.com",
                             name: "Anna Pink",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==",
                             forgotPasswordGuid: "ANNAPINKGUID",
                             forgotPasswordDate: Date())
         let confirmationRequestDto = ForgotPasswordConfirmationRequestDto(forgotPasswordGuid: "ANNAPINKGUID", password: "newP@ssword")
@@ -59,8 +57,6 @@ final class ForgotConfirmActionTests: XCTestCase {
                             userName: "josephpink",
                             email: "josephpink@testemail.com",
                             name: "Joseph Pink",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==",
                             isBlocked: true,
                             forgotPasswordGuid: "JOSEPHPINKGUID",
                             forgotPasswordDate: Date())
@@ -83,8 +79,6 @@ final class ForgotConfirmActionTests: XCTestCase {
                             userName: "mariapink",
                             email: "mariapink@testemail.com",
                             name: "Maria Pink",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==",
                             forgotPasswordGuid: "JOSEPHPINKGUID",
                             forgotPasswordDate: yesterday)
         let confirmationRequestDto = ForgotPasswordConfirmationRequestDto(forgotPasswordGuid: "JOSEPHPINKGUID", password: "newP@ssword")
@@ -104,8 +98,6 @@ final class ForgotConfirmActionTests: XCTestCase {
                             userName: "tatianapink",
                             email: "tatianapink@testemail.com",
                             name: "Tatiana Pink",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==",
                             forgotPasswordGuid: "TATIANAGUID",
                             forgotPasswordDate: Date())
         let confirmationRequestDto = ForgotPasswordConfirmationRequestDto(forgotPasswordGuid: "TATIANAGUID", password: "1234567")
@@ -125,8 +117,6 @@ final class ForgotConfirmActionTests: XCTestCase {
                             userName: "ewelinapink",
                             email: "ewelinapink@testemail.com",
                             name: "Ewelina Pink",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==",
                             forgotPasswordGuid: "EWELINAGUID",
                             forgotPasswordDate: Date())
         let confirmationRequestDto = ForgotPasswordConfirmationRequestDto(forgotPasswordGuid: "EWELINAGUID", password: "123456789012345678901234567890123")

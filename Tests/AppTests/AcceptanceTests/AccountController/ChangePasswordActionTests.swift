@@ -19,18 +19,17 @@ final class ChangePasswordActionTests: XCTestCase {
         _ = try User.create(on: SharedApplication.application(),
                             userName: "markuswhite",
                             email: "markuswhite@testemail.com",
-                            name: "Markus White",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==")
-        let loginRequestDto = LoginRequestDto(userNameOrEmail: "markuswhite", password: "p@ssword")
-        let accessTokenDto = try SharedApplication.application()
-            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
-        let headers: HTTPHeaders = [ HTTPHeaderName.authorization.description: "Bearer \(accessTokenDto.accessToken)" ]
+                            name: "Markus White")
+
         let changePasswordRequestDto = ChangePasswordRequestDto(currentPassword: "p@ssword", newPassword: "newP@ssword")
 
         // Act.
-        let response = try SharedApplication.application()
-            .sendRequest(to: "/account/change-password", method: .POST, headers: headers, body: changePasswordRequestDto)
+        let response = try SharedApplication.application().sendRequest(
+            as: .user(userName: "markuswhite", password: "p@ssword"),
+            to: "/account/change-password",
+            method: .POST, 
+            body: changePasswordRequestDto
+        )
 
         // Assert.
         XCTAssertEqual(response.http.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
@@ -59,18 +58,16 @@ final class ChangePasswordActionTests: XCTestCase {
         _ = try User.create(on: SharedApplication.application(),
                             userName: "annawhite",
                             email: "annawhite@testemail.com",
-                            name: "Anna White",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==")
-        let loginRequestDto = LoginRequestDto(userNameOrEmail: "annawhite", password: "p@ssword")
-        let accessTokenDto = try SharedApplication.application()
-            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
-        let headers: HTTPHeaders = [ HTTPHeaderName.authorization.description: "Bearer \(accessTokenDto.accessToken)" ]
+                            name: "Anna White")
         let changePasswordRequestDto = ChangePasswordRequestDto(currentPassword: "p@ssword-bad", newPassword: "newP@ssword")
 
         // Act.
-        let response = try SharedApplication.application()
-            .sendRequest(to: "/account/change-password", method: .POST, headers: headers, body: changePasswordRequestDto)
+        let response = try SharedApplication.application().sendRequest(
+            as: .user(userName: "annawhite", password: "p@ssword"),
+            to: "/account/change-password", 
+            method: .POST,
+            body: changePasswordRequestDto
+        )
 
         // Assert.
         XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
@@ -82,9 +79,7 @@ final class ChangePasswordActionTests: XCTestCase {
         let user = try User.create(on: SharedApplication.application(),
                             userName: "willwhite",
                             email: "willwhite@testemail.com",
-                            name: "Will White",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==")
+                            name: "Will White")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "willwhite", password: "p@ssword")
         let accessTokenDto = try SharedApplication.application()
             .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
@@ -107,18 +102,16 @@ final class ChangePasswordActionTests: XCTestCase {
         _ = try User.create(on: SharedApplication.application(),
                             userName: "timwhite",
                             email: "timwhite@testemail.com",
-                            name: "Tim White",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==")
-        let loginRequestDto = LoginRequestDto(userNameOrEmail: "timwhite", password: "p@ssword")
-        let accessTokenDto = try SharedApplication.application()
-            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
-        let headers: HTTPHeaders = [ HTTPHeaderName.authorization.description: "Bearer \(accessTokenDto.accessToken)" ]
+                            name: "Tim White")
         let changePasswordRequestDto = ChangePasswordRequestDto(currentPassword: "p@ssword", newPassword: "1234567")
 
         // Act.
-        let response = try SharedApplication.application()
-            .sendRequest(to: "/account/change-password", method: .POST, headers: headers, body: changePasswordRequestDto)
+        let response = try SharedApplication.application().sendRequest(
+            as: .user(userName: "timwhite", password: "p@ssword"),
+            to: "/account/change-password",
+            method: .POST,
+            body: changePasswordRequestDto
+        )
 
         // Assert.
         XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
@@ -128,20 +121,18 @@ final class ChangePasswordActionTests: XCTestCase {
 
         // Arrange.
         _ = try User.create(on: SharedApplication.application(),
-                            userName: "timwhite",
-                            email: "timwhite@testemail.com",
-                            name: "Tim White",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==")
-        let loginRequestDto = LoginRequestDto(userNameOrEmail: "timwhite", password: "p@ssword")
-        let accessTokenDto = try SharedApplication.application()
-            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
-        let headers: HTTPHeaders = [ HTTPHeaderName.authorization.description: "Bearer \(accessTokenDto.accessToken)" ]
+                            userName: "robinwhite",
+                            email: "robinwhite@testemail.com",
+                            name: "Robin White")
         let changePasswordRequestDto = ChangePasswordRequestDto(currentPassword: "p@ssword", newPassword: "123456789012345678901234567890123")
 
         // Act.
-        let response = try SharedApplication.application()
-            .sendRequest(to: "/account/change-password", method: .POST, headers: headers, body: changePasswordRequestDto)
+        let response = try SharedApplication.application().sendRequest(
+            as: .user(userName: "robinwhite", password: "p@ssword"),
+            to: "/account/change-password",
+            method: .POST,
+            body: changePasswordRequestDto
+        )
 
         // Assert.
         XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")

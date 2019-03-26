@@ -55,8 +55,6 @@ final class ProfileActionTests: XCTestCase {
 
     func testUserProfileShouldNotBeReturnedForNotExistingUser() throws {
 
-        // Arrange.
-
         // Act.
         let response = try SharedApplication.application().sendRequest(to: "/users/@not-exists", method: .GET)
 

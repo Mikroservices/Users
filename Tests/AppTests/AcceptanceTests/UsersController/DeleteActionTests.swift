@@ -19,9 +19,7 @@ final class DeleteActionTests: XCTestCase {
         _ = try User.create(on: SharedApplication.application(),
                             userName: "zibibonjek",
                             email: "zibibonjek@testemail.com",
-                            name: "Zibi Bonjek",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==")
+                            name: "Zibi Bonjek")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "zibibonjek", password: "p@ssword")
         let accessTokenDto = try SharedApplication.application()
             .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
@@ -43,9 +41,7 @@ final class DeleteActionTests: XCTestCase {
         _ = try User.create(on: SharedApplication.application(),
                             userName: "victoriabonjek",
                             email: "victoriabonjek@testemail.com",
-                            name: "Victoria Bonjek",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==")
+                            name: "Victoria Bonjek")
 
         // Act.
         let response = try SharedApplication.application()
@@ -61,16 +57,12 @@ final class DeleteActionTests: XCTestCase {
         _ = try User.create(on: SharedApplication.application(),
                             userName: "martabonjek",
                             email: "martabonjek@testemail.com",
-                            name: "Marta Bonjek",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==")
+                            name: "Marta Bonjek")
 
         _ = try User.create(on: SharedApplication.application(),
                             userName: "kingabonjek",
                             email: "kingabonjek@testemail.com",
-                            name: "Kinga Bonjek",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==")
+                            name: "Kinga Bonjek")
 
 
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "martabonjek", password: "p@ssword")
@@ -92,9 +84,7 @@ final class DeleteActionTests: XCTestCase {
         _ = try User.create(on: SharedApplication.application(),
                             userName: "henrybonjek",
                             email: "henrybonjek@testemail.com",
-                            name: "Henry Bonjek",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==")
+                            name: "Henry Bonjek")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "henrybonjek", password: "p@ssword")
         let accessTokenDto = try SharedApplication.application()
             .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)

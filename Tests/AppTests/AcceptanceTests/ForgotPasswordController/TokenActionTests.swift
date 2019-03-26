@@ -19,9 +19,7 @@ final class TokenActionTests: XCTestCase {
         _ = try User.create(on: SharedApplication.application(),
                             userName: "johnred",
                             email: "johnred@testemail.com",
-                            name: "John Red",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==")
+                            name: "John Red")
         let forgotPasswordRequestDto = ForgotPasswordRequestDto(email: "johnred@testemail.com")
 
         // Act.
@@ -52,8 +50,6 @@ final class TokenActionTests: XCTestCase {
                             userName: "wikired",
                             email: "wikired@testemail.com",
                             name: "Wiki Red",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==",
                             isBlocked: true)
         let forgotPasswordRequestDto = ForgotPasswordRequestDto(email: "wikired@testemail.com")
 

@@ -157,9 +157,119 @@ final class UpdateActionTests: XCTestCase {
         XCTAssertEqual(response.http.status, HTTPResponseStatus.forbidden, "Response http status code should be forbidden (403).")
     }
 
+    func testUserShouldNotBeUpdatedIfNameIsTooLong() throws {
+
+        // Arrange.
+        _ = try User.create(on: SharedApplication.application(),
+                            userName: "brianperry",
+                            email: "brianperry@testemail.com",
+                            name: "Brian Perry")
+
+        let loginRequestDto = LoginRequestDto(userNameOrEmail: "brianperry", password: "p@ssword")
+        let accessTokenDto = try SharedApplication.application()
+            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
+        let headers: HTTPHeaders = [ HTTPHeaderName.authorization.description: "Bearer \(accessTokenDto.accessToken)" ]
+
+        let userDto = UserDto(userName: "brianperry",
+                              email: "gregsmith@testemail.com",
+                              name: "123456789012345678901234567890123456789012345678901")
+
+        // Act.
+        let response = try SharedApplication.application()
+            .sendRequest(to: "/users/@brianperry", method: .PUT, headers: headers, body: userDto)
+
+        // Assert.
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+    }
+
+    func testUserShouldNotBeUpdatedIfLocationIsTooLong() throws {
+
+        // Arrange.
+        _ = try User.create(on: SharedApplication.application(),
+                            userName: "chrisperry",
+                            email: "chrisperry@testemail.com",
+                            name: "Chris Perry")
+
+        let loginRequestDto = LoginRequestDto(userNameOrEmail: "chrisperry", password: "p@ssword")
+        let accessTokenDto = try SharedApplication.application()
+            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
+        let headers: HTTPHeaders = [ HTTPHeaderName.authorization.description: "Bearer \(accessTokenDto.accessToken)" ]
+
+        let userDto = UserDto(userName: "chrisperry",
+                              email: "gregsmith@testemail.com",
+                              name: "Chris Perry",
+                              location: "123456789012345678901234567890123456789012345678901")
+
+        // Act.
+        let response = try SharedApplication.application()
+            .sendRequest(to: "/users/@chrisperry", method: .PUT, headers: headers, body: userDto)
+
+        // Assert.
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+    }
+
+    func testUserShouldNotBeUpdatedIfWebsiteIsTooLong() throws {
+
+        // Arrange.
+        _ = try User.create(on: SharedApplication.application(),
+                            userName: "lukeperry",
+                            email: "lukeperry@testemail.com",
+                            name: "Luke Perry")
+
+        let loginRequestDto = LoginRequestDto(userNameOrEmail: "lukeperry", password: "p@ssword")
+        let accessTokenDto = try SharedApplication.application()
+            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
+        let headers: HTTPHeaders = [ HTTPHeaderName.authorization.description: "Bearer \(accessTokenDto.accessToken)" ]
+
+        let userDto = UserDto(userName: "lukeperry",
+                              email: "gregsmith@testemail.com",
+                              name: "Chris Perry",
+                              website: "123456789012345678901234567890123456789012345678901")
+
+        // Act.
+        let response = try SharedApplication.application()
+            .sendRequest(to: "/users/@lukeperry", method: .PUT, headers: headers, body: userDto)
+
+        // Assert.
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+    }
+
+    func testUserShouldNotBeUpdatedIfBioIsTooLong() throws {
+
+        // Arrange.
+        _ = try User.create(on: SharedApplication.application(),
+                            userName: "francisperry",
+                            email: "francisperry@testemail.com",
+                            name: "Francis Perry")
+
+        let loginRequestDto = LoginRequestDto(userNameOrEmail: "francisperry", password: "p@ssword")
+        let accessTokenDto = try SharedApplication.application()
+            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
+        let headers: HTTPHeaders = [ HTTPHeaderName.authorization.description: "Bearer \(accessTokenDto.accessToken)" ]
+
+        let userDto = UserDto(userName: "francisperry",
+                              email: "gregsmith@testemail.com",
+                              name: "Chris Perry",
+                              bio: "12345678901234567890123456789012345678901234567890" +
+                                "12345678901234567890123456789012345678901234567890" +
+                                "12345678901234567890123456789012345678901234567890" +
+                                "123456789012345678901234567890123456789012345678901")
+
+        // Act.
+        let response = try SharedApplication.application()
+            .sendRequest(to: "/users/@francisperry", method: .PUT, headers: headers, body: userDto)
+
+        // Assert.
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+    }
+
     static let allTests = [
         ("testUserDataShouldBeUpdatedForAuthorizedUser", testUserDataShouldBeUpdatedForAuthorizedUser),
         ("testUnauthorizedStatusCodeShouldBeReturnedForUnauthorizedUser", testUnauthorizedStatusCodeShouldBeReturnedForUnauthorizedUser),
-        ("testForbiddenStatusCodeShouldBeReturnedForOtherUserData", testForbiddenStatusCodeShouldBeReturnedForOtherUserData)
+        ("testForbiddenStatusCodeShouldBeReturnedForOtherUserData", testForbiddenStatusCodeShouldBeReturnedForOtherUserData),
+        ("testUserShouldNotBeUpdatedIfNameIsTooLong", testUserShouldNotBeUpdatedIfNameIsTooLong),
+        ("testUserShouldNotBeUpdatedIfLocationIsTooLong", testUserShouldNotBeUpdatedIfLocationIsTooLong),
+        ("testUserShouldNotBeUpdatedIfWebsiteIsTooLong", testUserShouldNotBeUpdatedIfWebsiteIsTooLong),
+        ("testUserShouldNotBeUpdatedIfBioIsTooLong", testUserShouldNotBeUpdatedIfBioIsTooLong)
     ]
 }

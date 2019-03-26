@@ -19,9 +19,7 @@ final class RefreshActionTests: XCTestCase {
         _ = try User.create(on: SharedApplication.application(),
                             userName: "sandragreen",
                             email: "sandragreen@testemail.com",
-                            name: "Sandra Green",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==")
+                            name: "Sandra Green")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "sandragreen", password: "p@ssword")
         let accessTokenDto = try SharedApplication.application()
             .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
@@ -41,9 +39,7 @@ final class RefreshActionTests: XCTestCase {
         _ = try User.create(on: SharedApplication.application(),
                             userName: "johngreen",
                             email: "johngreen@testemail.com",
-                            name: "John Green",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==")
+                            name: "John Green")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "johngreen", password: "p@ssword")
         let accessTokenDto = try SharedApplication.application()
             .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
@@ -63,9 +59,7 @@ final class RefreshActionTests: XCTestCase {
         let user = try User.create(on: SharedApplication.application(),
                             userName: "timothygreen",
                             email: "timothygreen@testemail.com",
-                            name: "Timothy Green",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==")
+                            name: "Timothy Green")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "timothygreen", password: "p@ssword")
         let accessTokenDto = try SharedApplication.application()
             .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
