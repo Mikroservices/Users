@@ -63,7 +63,7 @@ final class UpdateActionTests: XCTestCase {
         XCTAssertEqual(updatedUserDto.bio, userDto.bio, "Property 'bio' should be changed.")
         XCTAssertEqual(updatedUserDto.location, userDto.location, "Property 'location' should be changed.")
         XCTAssertEqual(updatedUserDto.website, userDto.website, "Property 'website' should be changed.")
-        XCTAssertEqual(updatedUserDto.birthDate, userDto.birthDate, "Property 'birthDate' should be changed.")
+        XCTAssertEqual(updatedUserDto.birthDate?.description, userDto.birthDate?.description, "Property 'birthDate' should be changed.")
     }
 
     func testUnauthorizedStatusCodeShouldBeReturnedForUnauthorizedUser() throws {

@@ -323,7 +323,7 @@ final class RegisterActionTests: XCTestCase {
                               email: "gregsmith@testemail.com",
                               name: "Greg Smith",
                               password: "p@ssword",
-                              securityToken: "")
+                              securityToken: nil)
 
         // Act.
         let response = try SharedApplication.application().sendRequest(to: "/register", method: .POST, body: userDto)

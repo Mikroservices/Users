@@ -26,6 +26,7 @@ extension Application {
                         body: T? = nil) throws -> Response where T: Content {
 
         let responder = try self.make(Responder.self)
+        var allHeaders = HTTPHeaders()
 
         switch authorizationType {
         case .user(let userName, let password):
@@ -33,15 +34,19 @@ extension Application {
             let loginRequestDto = LoginRequestDto(userNameOrEmail: userName, password: password)
             let accessTokenDto = try SharedApplication.application()
                 .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
-            // headers.add(name: HTTPHeaderName.authorization.description, value: "Bearer \(accessTokenDto.accessToken)")
+            allHeaders.add(name: HTTPHeaderName.authorization.description, value: "Bearer \(accessTokenDto.accessToken)")
 
         break;
         default: break;
         }
 
+        headers.forEach { header in
+            allHeaders.add(name: header.name, value: header.value)
+        }
+
         let request = HTTPRequest(method: method, 
                                   url: URL(string: path)!,
-                                  headers: headers)
+                                  headers: allHeaders)
 
         let wrappedRequest = Request(http: request, using: self)
 

@@ -23,7 +23,7 @@ final class UsersController: RouteCollection {
     func profile(request: Request) throws -> Future<UserDto> {
 
         let authorizationService = try request.make(AuthorizationServiceType.self)
-        let userNameNormalized = try request.parameters.next(String.self).replacingOccurrences(of: "@", with: "")
+        let userNameNormalized = try request.parameters.next(String.self).replacingOccurrences(of: "@", with: "").uppercased()
 
         let userFuture = User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first()
         let userNameFromTokenFuture = try authorizationService.getUserNameFromBearerToken(request: request)
@@ -92,6 +92,7 @@ final class UsersController: RouteCollection {
         let isProfileOwner = userNameFromToken?.uppercased() == userNameFromRequest
         if !isProfileOwner {
             userDto.email = nil
+            userDto.birthDate = nil
         }
 
         return userDto
