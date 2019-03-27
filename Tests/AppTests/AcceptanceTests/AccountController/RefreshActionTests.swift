@@ -76,9 +76,61 @@ final class RefreshActionTests: XCTestCase {
         XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
     }
 
+    func testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsExpired() throws {
+
+        // Arrange.
+        _ = try User.create(on: SharedApplication.application(),
+                            userName: "wandagreen",
+                            email: "wandagreen@testemail.com",
+                            name: "Wanda Green")
+        let loginRequestDto = LoginRequestDto(userNameOrEmail: "wandagreen", password: "p@ssword")
+        let accessTokenDto = try SharedApplication.application()
+            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
+
+        let refreshToken = try RefreshToken.get(on: SharedApplication.application(), token: accessTokenDto.refreshToken)
+        refreshToken.expiryDate = Calendar.current.date(byAdding: .day, value: -31, to: Date())!
+        try refreshToken.update(on: SharedApplication.application())
+
+        let refreshTokenDto = RefreshTokenDto(refreshToken: accessTokenDto.refreshToken)
+
+        // Act.
+        let response = try SharedApplication.application()
+            .sendRequest(to: "/account/refresh", method: .POST, body: refreshTokenDto)
+
+        // Assert.
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+    }
+
+    func testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsRevoked() throws {
+
+        // Arrange.
+        _ = try User.create(on: SharedApplication.application(),
+                            userName: "alexagreen",
+                            email: "alexagreen@testemail.com",
+                            name: "Alexa Green")
+        let loginRequestDto = LoginRequestDto(userNameOrEmail: "alexagreen", password: "p@ssword")
+        let accessTokenDto = try SharedApplication.application()
+            .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
+
+        let refreshToken = try RefreshToken.get(on: SharedApplication.application(), token: accessTokenDto.refreshToken)
+        refreshToken.revoked = true
+        try refreshToken.update(on: SharedApplication.application())
+
+        let refreshTokenDto = RefreshTokenDto(refreshToken: accessTokenDto.refreshToken)
+
+        // Act.
+        let response = try SharedApplication.application()
+            .sendRequest(to: "/account/refresh", method: .POST, body: refreshTokenDto)
+
+        // Assert.
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+    }
+
     static let allTests = [
         ("testNewTokensShouldBeReturnedWhenOldRefreshTokenIsValid", testNewTokensShouldBeReturnedWhenOldRefreshTokenIsValid),
         ("testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsNotValid", testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsNotValid),
-        ("testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsValidButUserIsBlocked", testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsValidButUserIsBlocked)
+        ("testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsValidButUserIsBlocked", testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsValidButUserIsBlocked),
+        ("testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsExpired", testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsExpired),
+        ("testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsRevoked", testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsRevoked)
     ]
 }

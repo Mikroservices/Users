@@ -29,15 +29,17 @@ final class UsersController: RouteCollection {
         let userNameFromTokenFuture = try authorizationService.getUserNameFromBearerToken(request: request)
 
         return map(to: UserDto.self, userFuture, userNameFromTokenFuture) { userFromDb, userNameFromToken in
-            try self.transferUserToForProfile(on: request,
-                                          userFromDb: userFromDb,
-                                          userNameFromRequest: userNameNormalized,
-                                          userNameFromToken: userNameFromToken)
+            try self.getUserProfile(on: request,
+                                    userFromDb: userFromDb,
+                                    userNameFromRequest: userNameNormalized,
+                                    userNameFromToken: userNameFromToken)
         }
     }
 
     /// Update user data.
     func update(request: Request, userDto: UserDto) throws -> Future<UserDto> {
+
+        try userDto.validate()
 
         let userNameFuture = try self.getUserNameFromBearerTokenOrAbort(on: request)
         return userNameFuture.flatMap(to: User.self) { userNameFromToken in
@@ -78,10 +80,10 @@ final class UsersController: RouteCollection {
         }.transform(to: HTTPStatus.ok)
     }
 
-    private func transferUserToForProfile(on request: Request,
-                                          userFromDb: User?,
-                                          userNameFromRequest: String,
-                                          userNameFromToken: String?) throws -> UserDto {
+    private func getUserProfile(on request: Request,
+                                userFromDb: User?,
+                                userNameFromRequest: String,
+                                userNameFromToken: String?) throws -> UserDto {
         guard let user = userFromDb else {
             throw UserError.userNotExists
         }

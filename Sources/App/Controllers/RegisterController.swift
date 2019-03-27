@@ -17,33 +17,33 @@ final class RegisterController: RouteCollection {
     public static let uri = "/register"
 
     func boot(router: Router) throws {
-        router.post(UserDto.self, at: RegisterController.uri, use: register)
+        router.post(RegisterUserDto.self, at: RegisterController.uri, use: register)
         router.post(ConfirmEmailRequestDto.self, at: "\(RegisterController.uri)/confirm", use: confirm)
         router.get("\(RegisterController.uri)/userName", String.parameter, use: isUserNameTaken)
         router.get("\(RegisterController.uri)/email", String.parameter, use: isEmailConnected)
     }
 
     /// Register new user.
-    func register(request: Request, userDto: UserDto) throws -> Future<Response> {
+    func register(request: Request, registerUserDto: RegisterUserDto) throws -> Future<Response> {
 
-        try userDto.validate()
+        try registerUserDto.validate()
 
-        guard let captchaToken = userDto.securityToken else {
+        guard let captchaToken = registerUserDto.securityToken else {
             throw RegisterError.securityTokenIsMandatory
         }
 
         let captchaValidateFuture = try self.validateCaptcha(on: request, captchaToken: captchaToken)
         
         let validateUserNameFuture = captchaValidateFuture.flatMap {
-            try self.validateUserName(on: request, userName: userDto.userName)
+            try self.validateUserName(on: request, userName: registerUserDto.userName)
         }
 
         let validateEmailFuture = validateUserNameFuture.flatMap {
-            try self.validateEmail(on: request, email: userDto.email)
+            try self.validateEmail(on: request, email: registerUserDto.email)
         }
 
         let createUserFuture = validateEmailFuture.flatMap {
-            try self.createUser(on: request, userDto: userDto)
+            try self.createUser(on: request, registerUserDto: registerUserDto)
         }
 
         let sendEmailFuture = createUserFuture.flatMap { user in
@@ -119,9 +119,9 @@ final class RegisterController: RouteCollection {
         }
     }
 
-    private func createUser(on request: Request, userDto: UserDto) throws -> Future<User> {
+    private func createUser(on request: Request, registerUserDto: RegisterUserDto) throws -> Future<User> {
 
-        guard let password = userDto.password else {
+        guard let password = registerUserDto.password else {
             throw RegisterError.passwordIsRequired
         }
 
@@ -129,10 +129,10 @@ final class RegisterController: RouteCollection {
         let passwordHash = try Password.hash(password, withSalt: salt)
         let emailConfirmationGuid = UUID.init().uuidString
 
-        let gravatarEmail = (userDto.email ?? "").lowercased().trimmingCharacters(in: [" "])
+        let gravatarEmail = (registerUserDto.email ?? "").lowercased().trimmingCharacters(in: [" "])
         let gravatarHash = try MD5.hash(gravatarEmail).hexEncodedString()
 
-        let user = User(from: userDto,
+        let user = User(from: registerUserDto,
                         withPassword: passwordHash,
                         salt: salt,
                         emailConfirmationGuid: emailConfirmationGuid,

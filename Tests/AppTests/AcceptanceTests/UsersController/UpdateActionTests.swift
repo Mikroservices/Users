@@ -38,12 +38,10 @@ final class UpdateActionTests: XCTestCase {
                               email: "email should not be changed",
                               gravatarHash: "gravatarHash should not be changed",
                               name: "Nick Perry-Fear",
-                              password: "password?",
                               bio: "Architect in most innovative company.",
                               location: "San Francisco",
                               website: "http://architect.com",
-                              birthDate: Date(),
-                              securityToken: "security")
+                              birthDate: Date())
 
         // Act.
         let updatedUserDto = try SharedApplication.application().getResponse(
@@ -91,12 +89,10 @@ final class UpdateActionTests: XCTestCase {
                               email: "email should not be changed",
                               gravatarHash: "gravatarHash should not be changed",
                               name: "Nick Perry-Fear",
-                              password: "password?",
                               bio: "Architect in most innovative company.",
                               location: "San Francisco",
                               website: "http://architect.com",
-                              birthDate: Date(),
-                              securityToken: "security")
+                              birthDate: Date())
 
         // Act.
         let response = try SharedApplication.application()

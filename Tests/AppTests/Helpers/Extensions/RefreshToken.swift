@@ -1,0 +1,27 @@
+//
+//  RefreshToken.swift
+//  Users/Letterer
+//
+//  Created by Marcin Czachurski on 28/03/2019.
+//
+
+@testable import App
+import Vapor
+import FluentPostgreSQL
+
+extension RefreshToken {
+
+    static func get(on application: Application, token: String) throws -> RefreshToken {
+        let connection = try application.newConnection(to: .psql).wait()
+        guard let refreshToken = try RefreshToken.query(on: connection).filter(\.token == token).first().wait() else {
+            throw SharedApplicationError.unwrap
+        }
+
+        return refreshToken
+    }
+
+    func update(on application: Application) throws {
+        let connection = try application.newConnection(to: .psql).wait()
+        _ = try self.save(on: connection).wait()
+    }
+}

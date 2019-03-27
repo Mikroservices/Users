@@ -81,25 +81,25 @@ extension User: Content { }
 extension User: Parameter { }
 
 extension User {
-    convenience init(from userDto: UserDto,
+    convenience init(from registerUserDto: RegisterUserDto,
                      withPassword password: String,
                      salt: String,
                      emailConfirmationGuid: String,
                      gravatarHash: String) {
         self.init(
-            userName: userDto.userName,
-            email: userDto.email ?? "",
-            name: userDto.name,
+            userName: registerUserDto.userName,
+            email: registerUserDto.email ?? "",
+            name: registerUserDto.name,
             password: password,
             salt: salt,
             emailWasConfirmed: false,
             isBlocked: false,
             emailConfirmationGuid: emailConfirmationGuid,
             gravatarHash: gravatarHash,
-            bio: userDto.bio,
-            location: userDto.location,
-            website: userDto.website,
-            birthDate: userDto.birthDate
+            bio: registerUserDto.bio,
+            location: registerUserDto.location,
+            website: registerUserDto.website,
+            birthDate: registerUserDto.birthDate
         )
     }
 
