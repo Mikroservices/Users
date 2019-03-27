@@ -1,10 +1,3 @@
-//
-//  ChangePasswordRequestDto.swift
-//  Letterer/Users
-//
-//  Created by Marcin Czachurski on 18/11/2018.
-//
-
 import Vapor
 
 final class ChangePasswordRequestDto: Reflectable {

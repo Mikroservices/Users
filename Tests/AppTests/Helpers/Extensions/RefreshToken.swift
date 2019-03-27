@@ -1,10 +1,3 @@
-//
-//  RefreshToken.swift
-//  Users/Letterer
-//
-//  Created by Marcin Czachurski on 28/03/2019.
-//
-
 @testable import App
 import Vapor
 import FluentPostgreSQL

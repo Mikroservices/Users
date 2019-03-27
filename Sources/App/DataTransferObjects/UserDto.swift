@@ -1,10 +1,3 @@
-//
-//  UserDto.swift
-//  Letterer/Users
-//
-//  Created by Marcin Czachurski on 08/10/2018.
-//
-
 import Vapor
 
 final class UserDto: Reflectable {

@@ -1,10 +1,3 @@
-//
-//  User.swift
-//  Letterer/Users
-//
-//  Created by Marcin Czachurski on 08/10/2018.
-//
-
 import FluentPostgreSQL
 import Vapor
 

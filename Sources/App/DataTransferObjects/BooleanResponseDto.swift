@@ -1,10 +1,3 @@
-//
-//  BooleanResponseDto.swift
-//  Letterer/Users
-//
-//  Created by Marcin Czachurski on 15/11/2018.
-//
-
 import Vapor
 
 final class BooleanResponseDto {

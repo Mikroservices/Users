@@ -1,10 +1,3 @@
-//
-//  DeleteActionTests.swift
-//  Letterer/Users
-//
-//  Created by Marcin Czachurski on 26/03/2019.
-//
-
 @testable import App
 import XCTest
 import Vapor

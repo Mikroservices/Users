@@ -1,10 +1,3 @@
-//
-//  RefreshTokenError.swift
-//  Letterer/Users
-//
-//  Created by Marcin Czachurski on 18/03/2019.
-//
-
 import Vapor
 import ExtendedError
 

@@ -1,10 +1,3 @@
-//
-//  UserError.swift
-//  Letterer/Users
-//
-//  Created by Marcin Czachurski on 14/11/2018.
-//
-
 import Vapor
 import ExtendedError
 

@@ -1,10 +1,3 @@
-//
-//  User.swift
-//  Users/Letterer
-//
-//  Created by Marcin Czachurski on 24/03/2019.
-//
-
 @testable import App
 import Vapor
 import FluentPostgreSQL

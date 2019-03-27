@@ -1,10 +1,3 @@
-//
-//  Services.swift
-//  Letterer/Services
-//
-//  Created by Marcin Czachurski on 22/03/2019.
-//
-
 @testable import App
 import Foundation
 import Vapor

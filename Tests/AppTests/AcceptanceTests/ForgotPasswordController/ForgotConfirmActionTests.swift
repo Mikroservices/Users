@@ -1,10 +1,3 @@
-//
-//  TokenActionTests.swift
-//  Letterer/Users
-//
-//  Created by Marcin Czachurski on 25/03/2019.
-//
-
 @testable import App
 import Foundation
 import XCTest

@@ -1,10 +1,3 @@
-//
-//  AuthorizationService.swift
-//  Letterer/Users
-//
-//  Created by Marcin Czachurski on 17/11/2018.
-//
-
 import Vapor
 import JWT
 import Crypto

@@ -1,10 +1,3 @@
-//
-//  RefreshTokenDto.swift
-//  App
-//
-//  Created by Marcin Czachurski on 19/03/2019.
-//
-
 import Vapor
 
 final class RefreshTokenDto {

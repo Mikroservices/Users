@@ -1,10 +1,3 @@
-//
-//  RegisterUserDto.swift
-//  Letterer/Users
-//
-//  Created by Marcin Czachurski on 27/03/2019.
-//
-
 import Vapor
 
 final class RegisterUserDto: Reflectable {

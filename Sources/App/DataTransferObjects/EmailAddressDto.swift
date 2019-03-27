@@ -1,10 +1,3 @@
-//
-//  EmailAddressDto.swift
-//  Letterer/Users
-//
-//  Created by Marcin Czachurski on 05/11/2018.
-//
-
 import Vapor
 
 final class EmailAddressDto {

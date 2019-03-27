@@ -1,10 +1,3 @@
-//
-//  AuthorizationPayload.swift
-//  Letterer/Users
-//
-//  Created by Marcin Czachurski on 25/10/2018.
-//
-
 import Foundation
 import JWT
 

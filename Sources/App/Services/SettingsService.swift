@@ -1,10 +1,3 @@
-//
-//  Settings.swift
-//  Letterer/Users
-//
-//  Created by Marcin Czachurski on 20/03/2019.
-//
-
 import Vapor
 
 public enum SettingKey: String {
