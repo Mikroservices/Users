@@ -22,21 +22,21 @@ final class AuthorizationService: AuthorizationServiceType {
             .first().flatMap(to: (user: User, refreshToken: RefreshToken).self) { refreshTokenFromDb in
 
                 guard let refreshToken = refreshTokenFromDb else {
-                    throw RefreshTokenError.refreshTokenNotExists
+                    throw EntityNotFoundError.refreshTokenNotFound
                 }
 
                 if refreshToken.revoked {
-                    throw RefreshTokenError.refreshTokenNotExists
+                    throw RefreshTokenError.refreshTokenRevoked
                 }
 
                 if refreshToken.expiryDate < Date()  {
-                    throw RefreshTokenError.refreshTokenNotExists
+                    throw RefreshTokenError.refreshTokenExpired
                 }
 
                 return User.query(on: request).filter(\.id == refreshToken.userId).first().map { userFromDb in
 
                     guard let user = userFromDb else {
-                        throw UserError.userNotExists
+                        throw EntityNotFoundError.userNotFound
                     }
 
                     if user.isBlocked {

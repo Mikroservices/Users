@@ -33,7 +33,7 @@ final class TokenActionTests: XCTestCase {
             .sendRequest(to: "/forgot/token", method: .POST, body: forgotPasswordRequestDto)
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")
     }
 
     func testForgotPasswordTokenShouldNotBeGEneratedIfUserIsBlocked() throws {

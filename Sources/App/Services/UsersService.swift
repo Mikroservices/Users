@@ -50,7 +50,7 @@ final class UsersService: UsersServiceType {
         return User.query(on: request).filter(\.emailNormalized == emailNormalized).first().flatMap(to: User.self) { userFromDb in
 
             guard let user = userFromDb else {
-                throw ForgotPasswordError.userNotExists
+                throw EntityNotFoundError.userNotFound
             }
 
             if user.isBlocked {
@@ -68,7 +68,7 @@ final class UsersService: UsersServiceType {
         return User.query(on: request).filter(\.forgotPasswordGuid == forgotPasswordGuid).first().flatMap(to: User.self) { userFromDb in
 
             guard let user = userFromDb else {
-                throw ForgotPasswordError.userNotExists
+                throw EntityNotFoundError.userNotFound
             }
 
             if user.isBlocked {

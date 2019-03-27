@@ -40,7 +40,7 @@ final class UsersController: RouteCollection {
 
             let isProfileOwner = userNameFromToken.uppercased() == userNameNormalized
             guard isProfileOwner else {
-                throw UserError.someoneElseProfile
+                throw EntityForbiddenError.userForbidden
             }
 
             return try self.updateUser(on: request, userDto: userDto, userNameNormalized: userNameNormalized)
@@ -60,12 +60,12 @@ final class UsersController: RouteCollection {
             return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().flatMap(to: Void.self) { userFromDb in
 
                 guard let user = userFromDb else {
-                    throw UserError.userNotExists
+                    throw EntityNotFoundError.userNotFound
                 }
 
                 let isProfileOwner = userNameFromToken.uppercased() == userNameNormalized
                 guard isProfileOwner else {
-                    throw UserError.someoneElseProfile
+                    throw EntityForbiddenError.userForbidden
                 }
 
                 return user.delete(on: request)
@@ -78,7 +78,7 @@ final class UsersController: RouteCollection {
                                 userNameFromRequest: String,
                                 userNameFromToken: String?) throws -> UserDto {
         guard let user = userFromDb else {
-            throw UserError.userNotExists
+            throw EntityNotFoundError.userNotFound
         }
 
         let userDto = UserDto(from: user)
@@ -109,7 +109,7 @@ final class UsersController: RouteCollection {
         return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().flatMap(to: User.self) { userFromDb in
 
             guard let user = userFromDb else {
-                throw UserError.userNotExists
+                throw EntityNotFoundError.userNotFound
             }
 
             user.name = userDto.name

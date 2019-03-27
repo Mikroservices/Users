@@ -40,7 +40,7 @@ final class ForgotConfirmActionTests: XCTestCase {
             .sendRequest(to: "/forgot/confirm", method: .POST, body: confirmationRequestDto)
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be ok (200).")
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")
     }
 
     func testPasswordShouldNotBeChangedForBlockedUser() throws {
@@ -60,7 +60,7 @@ final class ForgotConfirmActionTests: XCTestCase {
             .sendRequest(to: "/forgot/confirm", method: .POST, body: confirmationRequestDto)
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be ok (200).")
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")
     }
 
     func testPasswordShouldNotBeChangedForOverdueToken() throws {
