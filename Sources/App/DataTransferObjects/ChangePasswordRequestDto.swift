@@ -19,7 +19,7 @@ extension ChangePasswordRequestDto: Validatable {
     static func validations() throws -> Validations<ChangePasswordRequestDto> {
         var validations = Validations(ChangePasswordRequestDto.self)
 
-        try validations.add(\.newPassword, .count(8...32))
+        try validations.add(\.newPassword, .count(8...32) && .password)
 
         return validations
     }

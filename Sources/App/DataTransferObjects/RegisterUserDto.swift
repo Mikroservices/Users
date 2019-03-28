@@ -3,9 +3,9 @@ import Vapor
 final class RegisterUserDto: Reflectable {
 
     var userName: String
-    var email: String?
+    var email: String
+    var password: String
     var name: String?
-    var password: String?
     var bio: String?
     var location: String?
     var website: String?
@@ -14,10 +14,10 @@ final class RegisterUserDto: Reflectable {
     var securityToken: String?
 
     init(userName: String,
-         email: String?,
+         email: String,
+         password: String,
          gravatarHash: String? = nil,
          name: String? = nil,
-         password: String? = nil,
          bio: String? = nil,
          location: String? = nil,
          website: String? = nil,
@@ -26,13 +26,13 @@ final class RegisterUserDto: Reflectable {
     ) {
         self.userName = userName
         self.email = email
+        self.password = password
         self.gravatarHash = gravatarHash
         self.name = name
         self.bio = bio
         self.location = location
         self.website = website
         self.birthDate = birthDate
-        self.password = password
         self.securityToken = securityToken
     }
 }
@@ -46,8 +46,8 @@ extension RegisterUserDto: Validatable {
         var validations = Validations(RegisterUserDto.self)
 
         try validations.add(\.userName, .count(1...50) && .alphanumeric)
-        try validations.add(\.email, .email && !.nil)
-        try validations.add(\.password, .count(8...32) && .password && !.nil)
+        try validations.add(\.email, .email)
+        try validations.add(\.password, .count(8...32) && .password)
 
         try validations.add(\.name, .count(...50) || .nil)
         try validations.add(\.location, .count(...50) || .nil)

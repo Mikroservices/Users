@@ -32,7 +32,7 @@ final class ChangePasswordActionTests: XCTestCase {
         XCTAssert(newAccessTokenDto.accessToken.count > 0, "User should be signed in with new password.")
     }
 
-    func testUnauthorizationStatusCodeShouldBeReturnedWhenNotAuthorizedUserTriesToChangePassword() throws {
+    func testPasswordShouldNotBeChangedWhenNotAuthorizedUserTriesToChangePassword() throws {
 
         // Arrange.
         let changePasswordRequestDto = ChangePasswordRequestDto(currentPassword: "p@ssword", newPassword: "newP@ssword")
@@ -45,7 +45,7 @@ final class ChangePasswordActionTests: XCTestCase {
         XCTAssertEqual(response.http.status, HTTPResponseStatus.unauthorized, "Response http status code should be unauthorized (401).")
     }
 
-    func testBadRequestStatusCodeShouldBeReturnedWhenAuthorizedUserEntersWrongOldPassword() throws {
+    func testPasswordShouldNotBeChangedWhenAuthorizedUserEntersWrongOldPassword() throws {
 
         // Arrange.
         _ = try User.create(on: SharedApplication.application(),
@@ -55,18 +55,19 @@ final class ChangePasswordActionTests: XCTestCase {
         let changePasswordRequestDto = ChangePasswordRequestDto(currentPassword: "p@ssword-bad", newPassword: "newP@ssword")
 
         // Act.
-        let response = try SharedApplication.application().sendRequest(
+        let errorResponse = try SharedApplication.application().getErrorResponse(
             as: .user(userName: "annawhite", password: "p@ssword"),
             to: "/account/change-password", 
             method: .POST,
-            body: changePasswordRequestDto
+            data: changePasswordRequestDto
         )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+        XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
+        XCTAssertEqual(errorResponse.error.code, "invalidLoginCredentials", "Error code should be equal 'invalidLoginCredentials'.")
     }
 
-    func testBadRequestStatusCodeShouldBeReturnedWhenUserAccountIsBlocked() throws {
+    func testPasswordShouldNotBeChangedWhenUserAccountIsBlocked() throws {
 
         // Arrange.
         let user = try User.create(on: SharedApplication.application(),
@@ -82,14 +83,19 @@ final class ChangePasswordActionTests: XCTestCase {
         let changePasswordRequestDto = ChangePasswordRequestDto(currentPassword: "p@ssword", newPassword: "newP@ssword")
 
         // Act.
-        let response = try SharedApplication.application()
-            .sendRequest(to: "/account/change-password", method: .POST, headers: headers, body: changePasswordRequestDto)
+        let errorResponse = try SharedApplication.application().getErrorResponse(
+            to: "/account/change-password",
+            method: .POST,
+            headers: headers,
+            data: changePasswordRequestDto
+        )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+        XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
+        XCTAssertEqual(errorResponse.error.code, "userAccountIsBlocked", "Error code should be equal 'userAccountIsBlocked'.")
     }
 
-    func testBadRequestStatusCodeShouldBeReturnedWhenPasswordIsTooShort() throws {
+    func testValidationErrorShouldBeReturnedWhenPasswordIsTooShort() throws {
 
         // Arrange.
         _ = try User.create(on: SharedApplication.application(),
@@ -99,18 +105,20 @@ final class ChangePasswordActionTests: XCTestCase {
         let changePasswordRequestDto = ChangePasswordRequestDto(currentPassword: "p@ssword", newPassword: "1234567")
 
         // Act.
-        let response = try SharedApplication.application().sendRequest(
+        let errorResponse = try SharedApplication.application().getErrorResponse(
             as: .user(userName: "timwhite", password: "p@ssword"),
             to: "/account/change-password",
             method: .POST,
-            body: changePasswordRequestDto
+            data: changePasswordRequestDto
         )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+        XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
+        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
+        XCTAssertEqual(errorResponse.error.reason, "'newPassword' is less than required minimum of 8 characters and 'newPassword' is not a valid password", "Error reason should be correct.")
     }
 
-    func testBadRequestStatusCodeShouldBeReturnedWhenPasswordIsTooLong() throws {
+    func testValidationErrorShouldBeReturnedWhenPasswordIsTooLong() throws {
 
         // Arrange.
         _ = try User.create(on: SharedApplication.application(),
@@ -120,23 +128,25 @@ final class ChangePasswordActionTests: XCTestCase {
         let changePasswordRequestDto = ChangePasswordRequestDto(currentPassword: "p@ssword", newPassword: "123456789012345678901234567890123")
 
         // Act.
-        let response = try SharedApplication.application().sendRequest(
+        let errorResponse = try SharedApplication.application().getErrorResponse(
             as: .user(userName: "robinwhite", password: "p@ssword"),
             to: "/account/change-password",
             method: .POST,
-            body: changePasswordRequestDto
+            data: changePasswordRequestDto
         )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+        XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
+        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'userAccountIsBlocked'.")
+        XCTAssertEqual(errorResponse.error.reason, "'newPassword' is greater than required maximum of 32 characters and 'newPassword' is not a valid password", "Error reason should be correct.")
     }
 
     static let allTests = [
         ("testPasswordShouldBeChangedWhenAuthorizedUserChangePassword", testPasswordShouldBeChangedWhenAuthorizedUserChangePassword),
-        ("testUnauthorizationStatusCodeShouldBeReturnedWhenNotAuthorizedUserTriesToChangePassword", testUnauthorizationStatusCodeShouldBeReturnedWhenNotAuthorizedUserTriesToChangePassword),
-        ("testBadRequestStatusCodeShouldBeReturnedWhenAuthorizedUserEntersWrongOldPassword", testBadRequestStatusCodeShouldBeReturnedWhenAuthorizedUserEntersWrongOldPassword),
-        ("testBadRequestStatusCodeShouldBeReturnedWhenUserAccountIsBlocked", testBadRequestStatusCodeShouldBeReturnedWhenUserAccountIsBlocked),
-        ("testBadRequestStatusCodeShouldBeReturnedWhenPasswordIsTooShort", testBadRequestStatusCodeShouldBeReturnedWhenPasswordIsTooShort),
-        ("testBadRequestStatusCodeShouldBeReturnedWhenPasswordIsTooLong", testBadRequestStatusCodeShouldBeReturnedWhenPasswordIsTooLong)
+        ("testPasswordShouldNotBeChangedWhenNotAuthorizedUserTriesToChangePassword", testPasswordShouldNotBeChangedWhenNotAuthorizedUserTriesToChangePassword),
+        ("testPasswordShouldNotBeChangedWhenAuthorizedUserEntersWrongOldPassword", testPasswordShouldNotBeChangedWhenAuthorizedUserEntersWrongOldPassword),
+        ("testPasswordShouldNotBeChangedWhenUserAccountIsBlocked", testPasswordShouldNotBeChangedWhenUserAccountIsBlocked),
+        ("testValidationErrorShouldBeReturnedWhenPasswordIsTooShort", testValidationErrorShouldBeReturnedWhenPasswordIsTooShort),
+        ("testValidationErrorShouldBeReturnedWhenPasswordIsTooLong", testValidationErrorShouldBeReturnedWhenPasswordIsTooLong)
     ]
 }

@@ -56,11 +56,15 @@ final class LoginActionTests: XCTestCase {
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "martafury", password: "incorrect")
 
         // Act.
-        let response = try SharedApplication.application()
-            .sendRequest(to: "/account/login", method: .POST, body: loginRequestDto)
+        let errorResponse = try SharedApplication.application().getErrorResponse(
+            to: "/account/login",
+            method: .POST,
+            data: loginRequestDto
+        )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+        XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
+        XCTAssertEqual(errorResponse.error.code, "invalidLoginCredentials", "Error code should be equal 'invalidLoginCredentials'.")
     }
 
     func testUserWithNotConfirmedAccountShouldNotBeSignedIn() throws {
@@ -75,11 +79,15 @@ final class LoginActionTests: XCTestCase {
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "josefury", password: "p@ssword")
 
         // Act.
-        let response = try SharedApplication.application()
-            .sendRequest(to: "/account/login", method: .POST, body: loginRequestDto)
+        let errorResponse = try SharedApplication.application().getErrorResponse(
+            to: "/account/login",
+            method: .POST,
+            data: loginRequestDto
+        )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+        XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
+        XCTAssertEqual(errorResponse.error.code, "emailNotConfirmed", "Error code should be equal 'emailNotConfirmed'.")
     }
 
     func testUserWithBlockedAccountShouldNotBeSignedIn() throws {
@@ -94,11 +102,15 @@ final class LoginActionTests: XCTestCase {
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "tomfury", password: "p@ssword")
 
         // Act.
-        let response = try SharedApplication.application()
-            .sendRequest(to: "/account/login", method: .POST, body: loginRequestDto)
+        let errorResponse = try SharedApplication.application().getErrorResponse(
+            to: "/account/login",
+            method: .POST,
+            data: loginRequestDto
+        )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+        XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
+        XCTAssertEqual(errorResponse.error.code, "userAccountIsBlocked", "Error code should be equal 'userAccountIsBlocked'.")
     }
 
     static let allTests = [

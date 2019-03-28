@@ -6,7 +6,7 @@ import FluentPostgreSQL
 
 final class DeleteActionTests: XCTestCase {
     
-    func testUserShouldBeDeletedForAuthorizedUser() throws {
+    func testAccountShouldBeDeletedForAuthorizedUser() throws {
 
         // Arrange.
         _ = try User.create(on: SharedApplication.application(),
@@ -27,7 +27,7 @@ final class DeleteActionTests: XCTestCase {
         XCTAssert(user == nil, "User should be deleted.")
     }
 
-    func testUnauthorizedStatusCodeShouldBeReturnedForUnauthorizedUser() throws {
+    func testAccountShouldNotBeDeletedIfUserIsNotAuthorized() throws {
 
         // Arrange.
         _ = try User.create(on: SharedApplication.application(),
@@ -43,7 +43,7 @@ final class DeleteActionTests: XCTestCase {
         XCTAssertEqual(response.http.status, HTTPResponseStatus.unauthorized, "Response http status code should be unauthorized (401).")
     }
 
-    func testForbiddenStatusCodeShouldBeReturnedForOtherUserData() throws {
+    func testAccountShouldNotDeletedWhenUserTriesToDeleteNotHisAccount() throws {
 
         // Arrange.
         _ = try User.create(on: SharedApplication.application(),
@@ -67,7 +67,7 @@ final class DeleteActionTests: XCTestCase {
         XCTAssertEqual(response.http.status, HTTPResponseStatus.forbidden, "Response http status code should be forbidden (403).")
     }
 
-    func testNotFoundStatusCodeShouldBeReturnedIfUserNotExists() throws {
+    func testNotFoundShouldBeReturnedIfAccountNotExists() throws {
 
         // Arrange.
         _ = try User.create(on: SharedApplication.application(),
@@ -87,9 +87,9 @@ final class DeleteActionTests: XCTestCase {
     }
 
     static let allTests = [
-        ("testUserShouldBeDeletedForAuthorizedUser", testUserShouldBeDeletedForAuthorizedUser),
-        ("testUnauthorizedStatusCodeShouldBeReturnedForUnauthorizedUser", testUnauthorizedStatusCodeShouldBeReturnedForUnauthorizedUser),
-        ("testForbiddenStatusCodeShouldBeReturnedForOtherUserData", testForbiddenStatusCodeShouldBeReturnedForOtherUserData),
-        ("testNotFoundStatusCodeShouldBeReturnedIfUserNotExists", testNotFoundStatusCodeShouldBeReturnedIfUserNotExists)
+        ("testAccountShouldBeDeletedForAuthorizedUser", testAccountShouldBeDeletedForAuthorizedUser),
+        ("testAccountShouldNotBeDeletedIfUserIsNotAuthorized", testAccountShouldNotBeDeletedIfUserIsNotAuthorized),
+        ("testAccountShouldNotDeletedWhenUserTriesToDeleteNotHisAccount", testAccountShouldNotDeletedWhenUserTriesToDeleteNotHisAccount),
+        ("testNotFoundShouldBeReturnedIfAccountNotExists", testNotFoundShouldBeReturnedIfAccountNotExists)
     ]
 }

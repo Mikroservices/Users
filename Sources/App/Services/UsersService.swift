@@ -79,7 +79,7 @@ final class UsersService: UsersServiceType {
                 throw ForgotPasswordError.tokenExpired
             }
 
-            let hoursDifference = Calendar.current.dateComponents([.minute], from: forgotPasswordDate, to: Date()).hour ?? 0
+            let hoursDifference = Calendar.current.dateComponents([.hour], from: forgotPasswordDate, to: Date()).hour ?? 0
             if hoursDifference > 6 {
                 throw ForgotPasswordError.tokenExpired
             }

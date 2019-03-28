@@ -62,11 +62,15 @@ final class RefreshActionTests: XCTestCase {
         let refreshTokenDto = RefreshTokenDto(refreshToken: accessTokenDto.refreshToken)
 
         // Act.
-        let response = try SharedApplication.application()
-            .sendRequest(to: "/account/refresh", method: .POST, body: refreshTokenDto)
+        let errorResponse = try SharedApplication.application().getErrorResponse(
+            to: "/account/refresh",
+            method: .POST,
+            data: refreshTokenDto
+        )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+        XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
+        XCTAssertEqual(errorResponse.error.code, "userAccountIsBlocked", "Error code should be equal 'userAccountIsBlocked'.")
     }
 
     func testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsExpired() throws {
@@ -87,11 +91,15 @@ final class RefreshActionTests: XCTestCase {
         let refreshTokenDto = RefreshTokenDto(refreshToken: accessTokenDto.refreshToken)
 
         // Act.
-        let response = try SharedApplication.application()
-            .sendRequest(to: "/account/refresh", method: .POST, body: refreshTokenDto)
+        let errorResponse = try SharedApplication.application().getErrorResponse(
+            to: "/account/refresh",
+            method: .POST,
+            data: refreshTokenDto
+        )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+        XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
+        XCTAssertEqual(errorResponse.error.code, "refreshTokenExpired", "Error code should be equal 'refreshTokenExpired'.")
     }
 
     func testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsRevoked() throws {
@@ -112,11 +120,15 @@ final class RefreshActionTests: XCTestCase {
         let refreshTokenDto = RefreshTokenDto(refreshToken: accessTokenDto.refreshToken)
 
         // Act.
-        let response = try SharedApplication.application()
-            .sendRequest(to: "/account/refresh", method: .POST, body: refreshTokenDto)
+        let errorResponse = try SharedApplication.application().getErrorResponse(
+            to: "/account/refresh",
+            method: .POST,
+            data: refreshTokenDto
+        )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+        XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
+        XCTAssertEqual(errorResponse.error.code, "refreshTokenRevoked", "Error code should be equal 'refreshTokenRevoked'.")
     }
 
     static let allTests = [

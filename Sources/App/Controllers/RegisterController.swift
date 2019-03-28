@@ -114,15 +114,11 @@ final class RegisterController: RouteCollection {
 
     private func createUser(on request: Request, registerUserDto: RegisterUserDto) throws -> Future<User> {
 
-        guard let password = registerUserDto.password else {
-            throw RegisterError.passwordIsRequired
-        }
-
         let salt = try Password.generateSalt()
-        let passwordHash = try Password.hash(password, withSalt: salt)
+        let passwordHash = try Password.hash(registerUserDto.password, withSalt: salt)
         let emailConfirmationGuid = UUID.init().uuidString
 
-        let gravatarEmail = (registerUserDto.email ?? "").lowercased().trimmingCharacters(in: [" "])
+        let gravatarEmail = registerUserDto.email.lowercased().trimmingCharacters(in: [" "])
         let gravatarHash = try MD5.hash(gravatarEmail).hexEncodedString()
 
         let user = User(from: registerUserDto,

@@ -6,7 +6,7 @@ import FluentPostgreSQL
 
 final class UpdateActionTests: XCTestCase {
     
-    func testUserDataShouldBeUpdatedForAuthorizedUser() throws {
+    func testAccountShouldBeUpdatedForAuthorizedUser() throws {
 
         // Arrange.
         let user = try User.create(on: SharedApplication.application(),
@@ -57,7 +57,7 @@ final class UpdateActionTests: XCTestCase {
         XCTAssertEqual(updatedUserDto.birthDate?.description, userDto.birthDate?.description, "Property 'birthDate' should be changed.")
     }
 
-    func testUnauthorizedStatusCodeShouldBeReturnedForUnauthorizedUser() throws {
+    func testAccountShouldNotBeUpdatedIfUserIsNotAuthorized() throws {
 
         // Arrange.
         _ = try User.create(on: SharedApplication.application(),
@@ -95,7 +95,7 @@ final class UpdateActionTests: XCTestCase {
         XCTAssertEqual(response.http.status, HTTPResponseStatus.unauthorized, "Response http status code should be unauthorized (401).")
     }
 
-    func testForbiddenStatusCodeShouldBeReturnedForOtherUserData() throws {
+    func testAccountShouldNotUpdatedWhenUserTriesToUpdateNotHisAccount() throws {
 
         // Arrange.
         _ = try User.create(on: SharedApplication.application(),
@@ -146,7 +146,7 @@ final class UpdateActionTests: XCTestCase {
         XCTAssertEqual(response.http.status, HTTPResponseStatus.forbidden, "Response http status code should be forbidden (403).")
     }
 
-    func testUserShouldNotBeUpdatedIfNameIsTooLong() throws {
+    func testAccountShouldNotBeUpdatedIfNameIsTooLong() throws {
 
         // Arrange.
         _ = try User.create(on: SharedApplication.application(),
@@ -159,18 +159,20 @@ final class UpdateActionTests: XCTestCase {
                               name: "123456789012345678901234567890123456789012345678901")
 
         // Act.
-        let response = try SharedApplication.application().sendRequest(
+        let errorResponse = try SharedApplication.application().getErrorResponse(
             as: .user(userName: "brianperry", password: "p@ssword"),
             to: "/users/@brianperry",
             method: .PUT,
-            body: userDto
+            data: userDto
         )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+        XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
+        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'userAccountIsBlocked'.")
+        XCTAssertEqual(errorResponse.error.reason, "'name' is greater than required maximum of 50 characters and 'name' is not nil", "Error reason should be correct.")
     }
 
-    func testUserShouldNotBeUpdatedIfLocationIsTooLong() throws {
+    func testAccountShouldNotBeUpdatedIfLocationIsTooLong() throws {
 
         // Arrange.
         _ = try User.create(on: SharedApplication.application(),
@@ -184,18 +186,20 @@ final class UpdateActionTests: XCTestCase {
                               location: "123456789012345678901234567890123456789012345678901")
 
         // Act.
-        let response = try SharedApplication.application().sendRequest(
+        let errorResponse = try SharedApplication.application().getErrorResponse(
             as: .user(userName: "chrisperry", password: "p@ssword"),
             to: "/users/@chrisperry",
             method: .PUT,
-            body: userDto
+            data: userDto
         )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+        XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
+        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'userAccountIsBlocked'.")
+        XCTAssertEqual(errorResponse.error.reason, "'location' is greater than required maximum of 50 characters and 'location' is not nil", "Error reason should be correct.")
     }
 
-    func testUserShouldNotBeUpdatedIfWebsiteIsTooLong() throws {
+    func testAccountShouldNotBeUpdatedIfWebsiteIsTooLong() throws {
 
         // Arrange.
         _ = try User.create(on: SharedApplication.application(),
@@ -209,18 +213,20 @@ final class UpdateActionTests: XCTestCase {
                               website: "123456789012345678901234567890123456789012345678901")
 
         // Act.
-        let response = try SharedApplication.application().sendRequest(
+        let errorResponse = try SharedApplication.application().getErrorResponse(
             as: .user(userName: "lukeperry", password: "p@ssword"),
             to: "/users/@lukeperry",
             method: .PUT,
-            body: userDto
+            data: userDto
         )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+        XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
+        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'userAccountIsBlocked'.")
+        XCTAssertEqual(errorResponse.error.reason, "'website' is greater than required maximum of 50 characters and 'website' is not nil", "Error reason should be correct.")
     }
 
-    func testUserShouldNotBeUpdatedIfBioIsTooLong() throws {
+    func testAccountShouldNotBeUpdatedIfBioIsTooLong() throws {
 
         // Arrange.
         _ = try User.create(on: SharedApplication.application(),
@@ -237,24 +243,26 @@ final class UpdateActionTests: XCTestCase {
                                 "123456789012345678901234567890123456789012345678901")
 
         // Act.
-        let response = try SharedApplication.application().sendRequest(
+        let errorResponse = try SharedApplication.application().getErrorResponse(
             as: .user(userName: "francisperry", password: "p@ssword"),
             to: "/users/@francisperry",
             method: .PUT,
-            body: userDto
+            data: userDto
         )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (403).")
+        XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
+        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'userAccountIsBlocked'.")
+        XCTAssertEqual(errorResponse.error.reason, "'bio' is greater than required maximum of 200 characters and 'bio' is not nil", "Error reason should be correct.")
     }
 
     static let allTests = [
-        ("testUserDataShouldBeUpdatedForAuthorizedUser", testUserDataShouldBeUpdatedForAuthorizedUser),
-        ("testUnauthorizedStatusCodeShouldBeReturnedForUnauthorizedUser", testUnauthorizedStatusCodeShouldBeReturnedForUnauthorizedUser),
-        ("testForbiddenStatusCodeShouldBeReturnedForOtherUserData", testForbiddenStatusCodeShouldBeReturnedForOtherUserData),
-        ("testUserShouldNotBeUpdatedIfNameIsTooLong", testUserShouldNotBeUpdatedIfNameIsTooLong),
-        ("testUserShouldNotBeUpdatedIfLocationIsTooLong", testUserShouldNotBeUpdatedIfLocationIsTooLong),
-        ("testUserShouldNotBeUpdatedIfWebsiteIsTooLong", testUserShouldNotBeUpdatedIfWebsiteIsTooLong),
-        ("testUserShouldNotBeUpdatedIfBioIsTooLong", testUserShouldNotBeUpdatedIfBioIsTooLong)
+        ("testAccountShouldBeUpdatedForAuthorizedUser", testAccountShouldBeUpdatedForAuthorizedUser),
+        ("testAccountShouldNotBeUpdatedIfUserIsNotAuthorized", testAccountShouldNotBeUpdatedIfUserIsNotAuthorized),
+        ("testAccountShouldNotUpdatedWhenUserTriesToUpdateNotHisAccount", testAccountShouldNotUpdatedWhenUserTriesToUpdateNotHisAccount),
+        ("testAccountShouldNotBeUpdatedIfNameIsTooLong", testAccountShouldNotBeUpdatedIfNameIsTooLong),
+        ("testAccountShouldNotBeUpdatedIfLocationIsTooLong", testAccountShouldNotBeUpdatedIfLocationIsTooLong),
+        ("testAccountShouldNotBeUpdatedIfWebsiteIsTooLong", testAccountShouldNotBeUpdatedIfWebsiteIsTooLong),
+        ("testAccountShouldNotBeUpdatedIfBioIsTooLong", testAccountShouldNotBeUpdatedIfBioIsTooLong)
     ]
 }

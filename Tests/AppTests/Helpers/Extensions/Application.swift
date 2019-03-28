@@ -100,4 +100,41 @@ extension Application {
                                     data: emptyContent, 
                                     decodeTo: type)
     }
+
+    func getErrorResponse<T>(as authorizationType: AuthorizationType = .anonymous,
+                          to path: String,
+                          method: HTTPMethod = .GET,
+                          headers: HTTPHeaders = .init(),
+                          data: T? = nil) throws -> ErrorResponse where T: Content {
+
+        let response = try self.sendRequest(as: authorizationType,
+                                            to: path,
+                                            method: method,
+                                            headers: headers,
+                                            body: data)
+
+        let errorBody = try response.content.decode(ErrorBody.self).wait()
+        let errorResponse = ErrorResponse(error: errorBody, status: response.http.status)
+
+        return errorResponse
+    }
+
+    func getErrorResponse(as authorizationType: AuthorizationType = .anonymous,
+                          to path: String,
+                          method: HTTPMethod = .GET,
+                          headers: HTTPHeaders = .init()) throws -> ErrorResponse {
+
+        let emptyContent: EmptyContent? = nil
+
+        let response = try self.sendRequest(as: authorizationType,
+                                            to: path,
+                                            method: method,
+                                            headers: headers,
+                                            body: emptyContent)
+
+        let errorBody = try response.content.decode(ErrorBody.self).wait()
+        let errorResponse = ErrorResponse(error: errorBody, status: response.http.status)
+
+        return errorResponse
+    }
 }

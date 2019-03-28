@@ -3,7 +3,6 @@ import ExtendedError
 
 enum RegisterError: String, Error {
     case securityTokenIsMandatory
-    case passwordIsRequired
     case securityTokenIsInvalid
     case userNameIsAlreadyTaken
     case userIdNotExists
@@ -19,7 +18,6 @@ extension RegisterError: TerminateError {
     var reason: String {
         switch self {
         case .securityTokenIsMandatory: return "Security token is mandatory (it should be provided from Google reCaptcha)."
-        case .passwordIsRequired: return "Password is required. User have to provide some."
         case .securityTokenIsInvalid: return "Security token is invalid (Google reCaptcha API returned that information)."
         case .userNameIsAlreadyTaken: return "User with provided user name already exists in the system."
         case .userIdNotExists: return "User Id not exists. Probably saving of the user entity failed."
