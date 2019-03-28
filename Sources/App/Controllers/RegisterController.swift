@@ -127,7 +127,20 @@ final class RegisterController: RouteCollection {
                         emailConfirmationGuid: emailConfirmationGuid,
                         gravatarHash: gravatarHash)
 
-        return user.save(on: request)
+        return user.save(on: request).flatMap { savedUser in
+            return Role.query(on: request).filter(\.isDefault == true).all().flatMap { roles in
+
+                var rolesSavedFuture: [Future<UserRole>] = [Future<UserRole>]()
+                roles.forEach { role in
+                    let roleSavedFuture = savedUser.roles.attach(role, on: request)
+                    rolesSavedFuture.append(roleSavedFuture)
+                }
+
+                return rolesSavedFuture.map(to: User.self, on: request) { userRoles in
+                    return savedUser
+                }
+            }
+        }
     }
 
     private func sendNewUserEmail(on request: Request, user: User) throws -> Future<User> {

@@ -6,6 +6,7 @@ public class DatabaseSeed {
     public static func `default`(_ app: Application) throws {
         let connection = try app.newConnection(to: .psql).wait()
         try settings(on: connection)
+        try roles(on: connection)
     }
 
     private static func settings(on connection: PostgreSQLConnection) throws {
@@ -46,6 +47,26 @@ xrhRAoGAJjk4/TcoOMzSjaiMF3yq82CRblUvpo0cWLN/nLWkwJkhCgzf/fm7Z3Fs
 """)
     }
 
+    private static func roles(on connection: PostgreSQLConnection) throws {
+        let roles = try Role.query(on: connection).all().wait()
+
+        try ensureRoleExists(on: connection,
+                             existing: roles,
+                             name: "Administrator",
+                             code: "administrator",
+                             description: "Users have access to whole system.",
+                             hasSuperPrivileges: true,
+                             isDefault: false)
+
+        try ensureRoleExists(on: connection,
+                             existing: roles,
+                             name: "Member",
+                             code: "member",
+                             description: "Users have access to public part of system.",
+                             hasSuperPrivileges: false,
+                             isDefault: true)
+    }
+
     private static func ensureSettingExists(on connection: PostgreSQLConnection,
                                             existing settings: [Setting],
                                             key: SettingKey,
@@ -54,6 +75,19 @@ xrhRAoGAJjk4/TcoOMzSjaiMF3yq82CRblUvpo0cWLN/nLWkwJkhCgzf/fm7Z3Fs
         if !settings.contains(where: { $0.key == key.rawValue }) {
             let setting = Setting(key: key.rawValue, value: value)
             _ = try setting.save(on: connection).wait()
+        }
+    }
+
+    private static func ensureRoleExists(on connection: PostgreSQLConnection,
+                                         existing roles: [Role],
+                                         name: String,
+                                         code: String,
+                                         description: String,
+                                         hasSuperPrivileges: Bool,
+                                         isDefault: Bool) throws {
+        if !roles.contains(where: { $0.name == name }) {
+            let role = Role(name: name, code: code, description: description, hasSuperPrivileges: hasSuperPrivileges, isDefault: isDefault)
+            _ = try role.save(on: connection).wait()
         }
     }
 }

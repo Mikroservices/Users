@@ -69,5 +69,7 @@ private func configureDatabase(services: inout Services) throws {
     migrations.add(model: User.self, database: .psql)
     migrations.add(model: RefreshToken.self, database: .psql)
     migrations.add(model: Setting.self, database: .psql)
+    migrations.add(model: Role.self, database: .psql)
+    migrations.add(model: UserRole.self, database: .psql)
     services.register(migrations)
 }

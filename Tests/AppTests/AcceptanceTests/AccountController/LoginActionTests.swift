@@ -1,6 +1,8 @@
 @testable import App
 import XCTest
 import Vapor
+import JWT
+import Crypto
 import XCTest
 import FluentPostgreSQL
 
@@ -44,6 +46,56 @@ final class LoginActionTests: XCTestCase {
         let accessTokenDto = try response.content.decode(AccessTokenDto.self).wait()
         XCTAssert(accessTokenDto.accessToken.count > 0, "Access token should be returned for correct credentials")
         XCTAssert(accessTokenDto.refreshToken.count > 0, "Refresh token should be returned for correct credentials")
+    }
+
+    func testAccessTokenShouldContainsBasicInformationAboutUser() throws {
+
+        // Arrange.
+        let user = try User.create(on: SharedApplication.application(),
+                                   userName: "stevenfury",
+                                   email: "stevenfury@testemail.com",
+                                   name: "Steven Fury")
+        let loginRequestDto = LoginRequestDto(userNameOrEmail: "stevenfury@testemail.com", password: "p@ssword")
+
+        // Act.
+        let response = try SharedApplication.application()
+            .sendRequest(to: "/account/login", method: .POST, body: loginRequestDto)
+
+        // Assert.
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
+        let accessTokenDto = try response.content.decode(AccessTokenDto.self).wait()
+        let jwtPrivateKey = try Setting.get(on: SharedApplication.application(), key: .jwtPrivateKey)
+        let rsaKey: RSAKey = try .private(pem: jwtPrivateKey.value)
+        let authorizationPayload = try JWT<AuthorizationPayload>(from: accessTokenDto.accessToken, verifiedUsing: JWTSigner.rs512(key: rsaKey))
+        XCTAssertEqual(authorizationPayload.payload.email, user.email, "Email should be included in JWT access token")
+        XCTAssertEqual(authorizationPayload.payload.id, user.id, "User id should be included in JWT access token")
+        XCTAssertEqual(authorizationPayload.payload.name, user.name, "Name should be included in JWT access token")
+        XCTAssertEqual(authorizationPayload.payload.userName, user.userName, "User name should be included in JWT access token")
+        XCTAssertEqual(authorizationPayload.payload.gravatarHash, user.gravatarHash, "Gravatar hash should be included in JWT access token")
+    }
+
+    func testAccessTokenShouldContainsInformationAboutUserRoles() throws {
+
+        // Arrange.
+        let user = try User.create(on: SharedApplication.application(),
+                                   userName: "yokofury",
+                                   email: "yokofury@testemail.com",
+                                   name: "Yoko Fury")
+        let role = try Role.get(on: SharedApplication.application(), name: "Administrator")
+        try user.attach(role: role, on: SharedApplication.application())
+        let loginRequestDto = LoginRequestDto(userNameOrEmail: "yokofury@testemail.com", password: "p@ssword")
+
+        // Act.
+        let response = try SharedApplication.application()
+            .sendRequest(to: "/account/login", method: .POST, body: loginRequestDto)
+
+        // Assert.
+        XCTAssertEqual(response.http.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
+        let accessTokenDto = try response.content.decode(AccessTokenDto.self).wait()
+        let jwtPrivateKey = try Setting.get(on: SharedApplication.application(), key: .jwtPrivateKey)
+        let rsaKey: RSAKey = try .private(pem: jwtPrivateKey.value)
+        let authorizationPayload = try JWT<AuthorizationPayload>(from: accessTokenDto.accessToken, verifiedUsing: JWTSigner.rs512(key: rsaKey))
+        XCTAssertEqual(authorizationPayload.payload.roles[0], "administrator", "User roles should be included in JWT access token")
     }
 
     func testUserWithIncorrectPasswordShouldNotBeSignedIn() throws {

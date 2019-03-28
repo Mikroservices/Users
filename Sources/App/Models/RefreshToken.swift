@@ -25,6 +25,13 @@ final class RefreshToken: PostgreSQLUUIDModel {
     }
 }
 
+/// User which generate refresh token.
+extension RefreshToken {
+    var user: Parent<RefreshToken, User> {
+        return parent(\.userId)
+    }
+}
+
 /// Allows `RefreshToken` to be used as a dynamic migration.
 extension RefreshToken: Migration { }
 

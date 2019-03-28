@@ -64,6 +64,20 @@ final class User: PostgreSQLUUIDModel {
     }
 }
 
+/// Refresh tokens generated for user.
+extension User {
+    var refreshTokens: Children<User, RefreshToken> {
+        return children(\.id)
+    }
+}
+
+/// Roles connected to user.
+extension User {
+    var roles: Siblings<User, Role, UserRole> {
+        return siblings()
+    }
+}
+
 /// Allows `Voice` to be used as a dynamic migration.
 extension User: Migration { }
 
@@ -81,7 +95,7 @@ extension User {
                      gravatarHash: String) {
         self.init(
             userName: registerUserDto.userName,
-            email: registerUserDto.email ?? "",
+            email: registerUserDto.email,
             name: registerUserDto.name,
             password: password,
             salt: salt,

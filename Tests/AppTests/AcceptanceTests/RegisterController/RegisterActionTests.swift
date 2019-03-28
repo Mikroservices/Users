@@ -1,6 +1,8 @@
 @testable import App
 import XCTest
 import Vapor
+import JWT
+import Crypto
 import XCTest
 import FluentPostgreSQL
 
@@ -82,6 +84,24 @@ final class RegisterActionTests: XCTestCase {
         XCTAssertEqual(createdUserDto.website, "http://dansmith.com/", "Website is not correct")
         XCTAssertEqual(createdUserDto.birthDate?.description, registerUserDto.birthDate?.description, "Birth date is not correct")
         XCTAssertEqual(createdUserDto.gravatarHash, "5a00c583025fbdb133a446223f627a12", "Gravatar is not correct")
+    }
+
+    func testNewUserShouldBeAssignedToDefaultRoles() throws {
+
+        // Arrange.
+        let registerUserDto = RegisterUserDto(userName: "briansmith",
+                                              email: "briansmith@testemail.com",
+                                              password: "p@ssword",
+                                              name: "Brian Smith",
+                                              securityToken: "123")
+
+        // Act.
+        _ = try SharedApplication.application().getResponse(to: "/register", method: .POST, data: registerUserDto, decodeTo: UserDto.self)
+
+        // Assert.
+        let user = try User.get(on: SharedApplication.application(), userName: "briansmith")
+        let roles = try user.getRoles(on: SharedApplication.application())
+        XCTAssertEqual(roles[0].code, "member", "Default user roles should be added to user")
     }
 
     func testUserShouldNotBeCreatedIfUserWithTheSameEmailExists() throws {

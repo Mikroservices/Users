@@ -8,6 +8,7 @@ struct AuthorizationPayload: JWTPayload {
     var email: String
     var exp: Date
     var gravatarHash: String
+    var roles: [String]
 
     func verify(using signer: JWTSigner) throws {
         // nothing to verify

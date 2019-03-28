@@ -50,18 +50,21 @@ final class AuthorizationService: AuthorizationServiceType {
 
     public func createAccessToken(request: Request, forUser user: User) throws -> Future<String> {
         let settingsService = try request.make(SettingsServiceType.self)
-        return try settingsService.get(on: request).map(to: String.self) { configuration in
+        return try settingsService.get(on: request).flatMap(to: String.self) { configuration in
 
             guard let jwtPrivateKey = configuration.getString(.jwtPrivateKey) else {
                 throw Abort(.internalServerError, reason: "Private key is not configured in database.")
             }
 
             let rsaKey: RSAKey = try .private(pem: jwtPrivateKey)
-            let authorizationPayload = self.createAuthorizationPayload(forUser: user)
-            let data = try JWT(payload: authorizationPayload).sign(using: JWTSigner.rs512(key: rsaKey))
-            let accessToken = String(data: data, encoding: .utf8) ?? ""
+            let authorizationPayloadFuture = try self.createAuthorizationPayload(request: request, forUser: user)
 
-            return accessToken
+            return authorizationPayloadFuture.map(to: String.self) { authorizationPayload in
+                let data = try JWT(payload: authorizationPayload).sign(using: JWTSigner.rs512(key: rsaKey))
+                let accessToken = String(data: data, encoding: .utf8) ?? ""
+
+                return accessToken
+            }
         }
     }
 
@@ -130,18 +133,23 @@ final class AuthorizationService: AuthorizationServiceType {
         return Future.map(on: request) { return nil }
     }
 
-    private func createAuthorizationPayload(forUser user: User) -> AuthorizationPayload {
-        let expirationDate = Date().addingTimeInterval(TimeInterval(self.accessTokenTime))
-        let authorizationPayload = AuthorizationPayload(
-            id: user.id,
-            userName: user.userName,
-            name: user.name,
-            email: user.email,
-            exp: expirationDate,
-            gravatarHash: user.gravatarHash
-        )
+    private func createAuthorizationPayload(request: Request, forUser user: User) throws -> Future<AuthorizationPayload> {
 
-        return authorizationPayload
+        return try user.roles.query(on: request).all().map { roles in
+
+            let expirationDate = Date().addingTimeInterval(TimeInterval(self.accessTokenTime))
+            let authorizationPayload = AuthorizationPayload(
+                id: user.id,
+                userName: user.userName,
+                name: user.name,
+                email: user.email,
+                exp: expirationDate,
+                gravatarHash: user.gravatarHash,
+                roles: roles.map { $0.code }
+            )
+
+            return authorizationPayload
+        }
     }
 
     private func createRefreshTokenString() -> String {
