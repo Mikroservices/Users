@@ -76,7 +76,7 @@ final class UsersService: UsersServiceType {
             }
 
             guard let forgotPasswordDate = user.forgotPasswordDate else {
-                throw ForgotPasswordError.tokenExpired
+                throw ForgotPasswordError.tokenNotGenerated
             }
 
             let hoursDifference = Calendar.current.dateComponents([.hour], from: forgotPasswordDate, to: Date()).hour ?? 0

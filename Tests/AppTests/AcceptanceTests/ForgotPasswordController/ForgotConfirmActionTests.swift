@@ -53,7 +53,30 @@ final class ForgotConfirmActionTests: XCTestCase {
                             isBlocked: true,
                             forgotPasswordGuid: "JOSEPHPINKGUID",
                             forgotPasswordDate: Date())
-        let confirmationRequestDto = ForgotPasswordConfirmationRequestDto(forgotPasswordGuid: "NOTEXISTS", password: "newP@ssword")
+        let confirmationRequestDto = ForgotPasswordConfirmationRequestDto(forgotPasswordGuid: "JOSEPHPINKGUID", password: "newP@ssword")
+
+        // Act.
+        let errorResponse = try SharedApplication.application().getErrorResponse(
+            to: "/forgot/confirm",
+            method: .POST,
+            data: confirmationRequestDto
+        )
+
+        // Assert.
+        XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
+        XCTAssertEqual(errorResponse.error.code, "userAccountIsBlocked", "Error code should be equal 'userAccountIsBlocked'.")
+    }
+
+    func testPasswordShouldNotBeChangeIfUserDidNotGenerateToken() throws {
+
+        // Arrange.
+        _ = try User.create(on: SharedApplication.application(),
+                            userName: "wladpink",
+                            email: "wladpink@testemail.com",
+                            name: "Wlad Pink",
+                            forgotPasswordGuid: nil,
+                            forgotPasswordDate: nil)
+        let confirmationRequestDto = ForgotPasswordConfirmationRequestDto(forgotPasswordGuid: "WLADPINKGUID", password: "newP@ssword")
 
         // Act.
         let errorResponse = try SharedApplication.application().getErrorResponse(
@@ -143,6 +166,7 @@ final class ForgotConfirmActionTests: XCTestCase {
         ("testPasswordShouldBeChangeForCorrectToken", testPasswordShouldBeChangeForCorrectToken),
         ("testPasswordShouldNotBeChangedForIncorrectToken", testPasswordShouldNotBeChangedForIncorrectToken),
         ("testPasswordShouldNotBeChangedForBlockedUser", testPasswordShouldNotBeChangedForBlockedUser),
+        ("testPasswordShouldNotBeChangeIfUserDidNotGenerateToken", testPasswordShouldNotBeChangeIfUserDidNotGenerateToken),
         ("testPasswordShouldNotBeChangedForOverdueToken", testPasswordShouldNotBeChangedForOverdueToken),
         ("testPasswordShouldNotBeChangedWhenNewPasswordIsTooShort", testPasswordShouldNotBeChangedWhenNewPasswordIsTooShort),
         ("testPasswordShouldNotBeChangedWhenPasswordIsTooLong", testPasswordShouldNotBeChangedWhenPasswordIsTooLong)
