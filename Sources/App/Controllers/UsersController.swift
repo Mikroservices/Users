@@ -34,7 +34,9 @@ final class UsersController: RouteCollection {
 
         try userDto.validate()
 
-        let userNameFuture = try self.getUserNameFromBearerTokenOrAbort(on: request)
+        let authorizationService = try request.make(AuthorizationServiceType.self)
+        let userNameFuture = try authorizationService.getUserNameFromBearerTokenOrAbort(on: request)
+
         return userNameFuture.flatMap(to: User.self) { userNameFromToken in
             let userNameNormalized = try request.parameters.next(String.self).uppercased().replacingOccurrences(of: "@", with: "")
 
@@ -53,7 +55,9 @@ final class UsersController: RouteCollection {
     /// Delete user.
     func delete(request: Request) throws -> Future<HTTPStatus> {
 
-        let userNameFuture = try self.getUserNameFromBearerTokenOrAbort(on: request)
+        let authorizationService = try request.make(AuthorizationServiceType.self)
+        let userNameFuture = try authorizationService.getUserNameFromBearerTokenOrAbort(on: request)
+
         return userNameFuture.flatMap(to: Void.self) { userNameFromToken in
             let userNameNormalized = try request.parameters.next(String.self).uppercased().replacingOccurrences(of: "@", with: "")
 
@@ -91,18 +95,6 @@ final class UsersController: RouteCollection {
         }
 
         return userDto
-    }
-
-    private func getUserNameFromBearerTokenOrAbort(on request: Request) throws -> Future<String> {
-        let authorizationService = try request.make(AuthorizationServiceType.self)
-
-        return try authorizationService.getUserNameFromBearerToken(request: request).map(to: String.self) { userNameFromToken in
-            guard let unwrapedUserNameFromToken = userNameFromToken else {
-                throw Abort(.unauthorized)
-            }
-
-            return unwrapedUserNameFromToken
-        }
     }
 
     private func updateUser(on request: Request, userDto: UserDto, userNameNormalized: String) throws -> Future<User> {

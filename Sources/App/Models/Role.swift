@@ -42,3 +42,14 @@ extension Role: Content { }
 
 /// Allows `Role` to be used as a dynamic parameter in route definitions.
 extension Role: Parameter { }
+
+extension Role {
+    convenience init(from roleDto: RoleDto) {
+        self.init(name: roleDto.name,
+                  code: roleDto.code,
+                  description: roleDto.description,
+                  hasSuperPrivileges: roleDto.hasSuperPrivileges,
+                  isDefault: roleDto.isDefault
+        )
+    }
+}

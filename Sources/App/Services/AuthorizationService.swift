@@ -10,6 +10,8 @@ protocol AuthorizationServiceType: Service {
     func updateRefreshToken(request: Request, forToken refreshToken: RefreshToken) throws -> Future<String>
     func getUserIdFromBearerToken(request: Request) throws -> Future<UUID?>
     func getUserNameFromBearerToken(request: Request) throws -> Future<String?>
+    func getUserNameFromBearerTokenOrAbort(on request: Request) throws -> Future<String>
+    func verifySuperUser(request: Request) throws -> Future<Void>
 }
 
 final class AuthorizationService: AuthorizationServiceType {
@@ -131,6 +133,43 @@ final class AuthorizationService: AuthorizationServiceType {
         }
 
         return Future.map(on: request) { return nil }
+    }
+
+    public func getUserNameFromBearerTokenOrAbort(on request: Request) throws -> Future<String> {
+
+        return try self.getUserNameFromBearerToken(request: request).map(to: String.self) { userNameFromToken in
+            guard let unwrapedUserNameFromToken = userNameFromToken else {
+                throw Abort(.unauthorized)
+            }
+
+            return unwrapedUserNameFromToken
+        }
+    }
+
+    public func verifySuperUser(request: Request) throws -> Future<Void> {
+        let authorizationService = try request.make(AuthorizationServiceType.self)
+
+        let userNameFuture = try authorizationService.getUserNameFromBearerTokenOrAbort(on: request)
+
+        let userFuture = userNameFuture.flatMap(to: User?.self) { userNameFromToken in
+            let userNameNormalized = try request.parameters.next(String.self).uppercased().replacingOccurrences(of: "@", with: "")
+            return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first()
+        }
+
+        let rolesFuture = userFuture.flatMap(to: Int.self) { userFromDb in
+
+            guard let user = userFromDb else {
+                throw Abort(.unauthorized)
+            }
+
+            return try user.roles.query(on: request).filter(\.hasSuperPrivileges == true).count()
+        }
+
+        return rolesFuture.map(to: Void.self) { rolesWithSuperPrivileges in
+            if rolesWithSuperPrivileges == 0 {
+                throw Abort(.forbidden)
+            }
+        }
     }
 
     private func createAuthorizationPayload(request: Request, forUser user: User) throws -> Future<AuthorizationPayload> {
