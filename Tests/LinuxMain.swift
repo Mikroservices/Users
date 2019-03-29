@@ -25,6 +25,10 @@ XCTMain([
     testCase(RolesReadActionTests.allTests),
     testCase(RolesUpdateActionTests.allTests),
 
+    // User roles controller.
+    testCase(UserRolesConnectActionTests.allTests),
+    testCase(UserRolesDisconnectActionTests.allTests),
+
     // Users controller.
     testCase(UsersDeleteActionTests.allTests),
     testCase(UsersReadActionTests.allTests),
