@@ -6,10 +6,14 @@ import FluentPostgreSQL
 
 final class RolesListActionTests: XCTestCase {
 
-    func dummyTest() throws {
+    func testListOfRolesShouldBeReturnedForSuperUser() throws {
+    }
+
+    func testListOfRolesShouldNotBeReturnedForNotSuperUser() throws {
     }
 
     static let allTests = [
-        ("dummyTest", dummyTest)
+        ("testListOfRolesShouldBeReturnedForSuperUser", testListOfRolesShouldBeReturnedForSuperUser),
+        ("testListOfRolesShouldNotBeReturnedForNotSuperUser", testListOfRolesShouldNotBeReturnedForNotSuperUser)
     ]
 }

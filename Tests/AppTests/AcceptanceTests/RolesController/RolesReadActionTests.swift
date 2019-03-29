@@ -6,10 +6,18 @@ import FluentPostgreSQL
 
 final class RolesReadActionTests: XCTestCase {
 
-    func dummyTest() throws {
+    func testRoleShouldBeReturnedForSuperUser() throws {
+    }
+
+    func testRoleShouldNotBeReturnedIfUserIsNotSuperUser() throws {
+    }
+
+    func testCorrectStatusCodeShouldBeReturnedIdRoleNotExists() throws {
     }
 
     static let allTests = [
-        ("dummyTest", dummyTest)
+        ("testRoleShouldBeReturnedForSuperUser", testRoleShouldBeReturnedForSuperUser),
+        ("testRoleShouldNotBeReturnedIfUserIsNotSuperUser", testRoleShouldNotBeReturnedIfUserIsNotSuperUser),
+        ("testCorrectStatusCodeShouldBeReturnedIdRoleNotExists", testCorrectStatusCodeShouldBeReturnedIdRoleNotExists)
     ]
 }

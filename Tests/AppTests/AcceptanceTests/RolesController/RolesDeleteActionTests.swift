@@ -6,10 +6,18 @@ import FluentPostgreSQL
 
 final class RolesDeleteActionTests: XCTestCase {
 
-    func dummyTest() throws {
+    func testRoleShouldBeDeletedIfRoleExistsAndUserIsSuperUser() throws {
+    }
+
+    func testRoleShouldNotBeDeletedIfRoleExistsButUserIsNotSuperUser() throws {
+    }
+
+    func testCorrectStatusCodeShouldBeReturnedIfRoleNotExists() throws {
     }
 
     static let allTests = [
-        ("dummyTest", dummyTest)
+        ("testRoleShouldBeDeletedIfRoleExistsAndUserIsSuperUser", testRoleShouldBeDeletedIfRoleExistsAndUserIsSuperUser),
+        ("testRoleShouldNotBeDeletedIfRoleExistsButUserIsNotSuperUser", testRoleShouldNotBeDeletedIfRoleExistsButUserIsNotSuperUser),
+        ("testCorrectStatusCodeShouldBeReturnedIfRoleNotExists", testCorrectStatusCodeShouldBeReturnedIfRoleNotExists)
     ]
 }

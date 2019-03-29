@@ -6,10 +6,22 @@ import FluentPostgreSQL
 
 final class UserRolesConnectActionTests: XCTestCase {
 
-    func dummyTest() throws {
+    func testUserShouldBeConnectedToRoleForSuperUser() throws {
+    }
+
+    func testUserShouldNotBeConnectedToRoleIfUserIsNotSuperUser() throws {
+    }
+
+    func testCorrectStatsCodeShouldBeReturnedIfUserNotExists() throws {
+    }
+
+    func testCorrectStatusCodeShouldBeReturnedIfRoleNotExists() throws {
     }
 
     static let allTests = [
-        ("dummyTest", dummyTest)
+        ("testUserShouldBeConnectedToRoleForSuperUser", testUserShouldBeConnectedToRoleForSuperUser),
+        ("testUserShouldNotBeConnectedToRoleIfUserIsNotSuperUser", testUserShouldNotBeConnectedToRoleIfUserIsNotSuperUser),
+        ("testCorrectStatsCodeShouldBeReturnedIfUserNotExists", testCorrectStatsCodeShouldBeReturnedIfUserNotExists),
+        ("testCorrectStatusCodeShouldBeReturnedIfRoleNotExists", testCorrectStatusCodeShouldBeReturnedIfRoleNotExists)
     ]
 }

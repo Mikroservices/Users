@@ -46,7 +46,7 @@ extension RoleDto: Validatable {
         var validations = Validations(RoleDto.self)
 
         try validations.add(\.name, .count(...50))
-        try validations.add(\.code, .count(...50))
+        try validations.add(\.code, .count(...20))
         try validations.add(\.description, .count(...200) || .nil)
 
         return validations

@@ -6,10 +6,30 @@ import FluentPostgreSQL
 
 final class RolesCreateActionTests: XCTestCase {
 
-    func dummyTest() throws {
+    func testCorrectRoleShouldBeCreatedBySuperUser() throws {
+    }
+
+    func testRoleShouldNotBeCreatedIfUserIsNotSuperUser() throws {
+    }
+
+    func testRoleShouldNotBeCreatedIfRoleWithSameCodeExists() throws {
+    }
+
+    func testRoleShouldNotBeCreatedIfCodeIsTooLong() throws {
+    }
+
+    func testRoleShouldNotBeCreatedIfNameIsTooLong() throws {
+    }
+
+    func testRoleShouldNotBeCreatedIfDescriptionIsTooLong() throws {
     }
 
     static let allTests = [
-        ("dummyTest", dummyTest)
+        ("testCorrectRoleShouldBeCreatedBySuperUser", testCorrectRoleShouldBeCreatedBySuperUser),
+        ("testRoleShouldNotBeCreatedIfUserIsNotSuperUser", testRoleShouldNotBeCreatedIfUserIsNotSuperUser),
+        ("testRoleShouldNotBeCreatedIfRoleWithSameCodeExists", testRoleShouldNotBeCreatedIfRoleWithSameCodeExists),
+        ("testRoleShouldNotBeCreatedIfCodeIsTooLong", testRoleShouldNotBeCreatedIfCodeIsTooLong),
+        ("testRoleShouldNotBeCreatedIfNameIsTooLong", testRoleShouldNotBeCreatedIfNameIsTooLong),
+        ("testRoleShouldNotBeCreatedIfDescriptionIsTooLong", testRoleShouldNotBeCreatedIfDescriptionIsTooLong)
     ]
 }

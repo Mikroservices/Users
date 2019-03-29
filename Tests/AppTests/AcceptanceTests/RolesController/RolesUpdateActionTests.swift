@@ -6,10 +6,30 @@ import FluentPostgreSQL
 
 final class RolesUpdateActionTests: XCTestCase {
 
-    func dummyTest() throws {
+    func testCorrectRoleShouldBeUpdatedBySuperUser() throws {
+    }
+
+    func testRoleShouldNotBeUpdatedIfUserIsNotSuperUser() throws {
+    }
+
+    func testRoleShouldNotBeUpdatedIfRoleWithSameCodeExists() throws {
+    }
+
+    func testRoleShouldNotBeUpdatedIfCodeIsTooLong() throws {
+    }
+
+    func testRoleShouldNotBeUpdatedIfNameIsTooLong() throws {
+    }
+
+    func testRoleShouldNotBeUpdatedIfDescriptionIsTooLong() throws {
     }
 
     static let allTests = [
-        ("dummyTest", dummyTest)
+        ("testCorrectRoleShouldBeUpdatedBySuperUser", testCorrectRoleShouldBeUpdatedBySuperUser),
+        ("testRoleShouldNotBeUpdatedIfUserIsNotSuperUser", testRoleShouldNotBeUpdatedIfUserIsNotSuperUser),
+        ("testRoleShouldNotBeUpdatedIfRoleWithSameCodeExists", testRoleShouldNotBeUpdatedIfRoleWithSameCodeExists),
+        ("testRoleShouldNotBeUpdatedIfCodeIsTooLong", testRoleShouldNotBeUpdatedIfCodeIsTooLong),
+        ("testRoleShouldNotBeUpdatedIfNameIsTooLong", testRoleShouldNotBeUpdatedIfNameIsTooLong),
+        ("testRoleShouldNotBeUpdatedIfDescriptionIsTooLong", testRoleShouldNotBeUpdatedIfDescriptionIsTooLong)
     ]
 }
