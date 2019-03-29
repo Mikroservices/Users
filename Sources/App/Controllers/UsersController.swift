@@ -7,13 +7,13 @@ final class UsersController: RouteCollection {
     public static let uri = "/users"
 
     func boot(router: Router) throws {
-        router.get(UsersController.uri, String.parameter, use: profile)
+        router.get(UsersController.uri, String.parameter, use: read)
         router.put(UserDto.self, at: UsersController.uri, String.parameter, use: update)
         router.delete(UsersController.uri, String.parameter, use: delete)
     }
 
     /// User profile.
-    func profile(request: Request) throws -> Future<UserDto> {
+    func read(request: Request) throws -> Future<UserDto> {
 
         let authorizationService = try request.make(AuthorizationServiceType.self)
         let userNameNormalized = try request.parameters.next(String.self).replacingOccurrences(of: "@", with: "").uppercased()

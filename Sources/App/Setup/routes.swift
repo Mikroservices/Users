@@ -13,4 +13,5 @@ public func routes(_ router: Router) throws {
     try router.register(collection: AccountController())
     try router.register(collection: RegisterController())
     try router.register(collection: ForgotPasswordController())
+    try router.register(collection: RolesController())
 }

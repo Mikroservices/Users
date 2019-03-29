@@ -4,7 +4,7 @@ import Vapor
 import XCTest
 import FluentPostgreSQL
 
-final class DeleteActionTests: XCTestCase {
+final class UsersDeleteActionTests: XCTestCase {
     
     func testAccountShouldBeDeletedForAuthorizedUser() throws {
 

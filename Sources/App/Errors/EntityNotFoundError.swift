@@ -4,6 +4,7 @@ import ExtendedError
 enum EntityNotFoundError: String, Error {
     case userNotFound
     case refreshTokenNotFound
+    case roleNotFound
 }
 
 extension EntityNotFoundError: TerminateError {
@@ -15,6 +16,7 @@ extension EntityNotFoundError: TerminateError {
         switch self {
         case .userNotFound: return "User not exists."
         case .refreshTokenNotFound: return "Refresh token not exists."
+        case .roleNotFound: return "Rolenot exists."
         }
     }
 

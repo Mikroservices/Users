@@ -4,7 +4,7 @@ import Vapor
 import XCTest
 import FluentPostgreSQL
 
-final class UpdateActionTests: XCTestCase {
+final class UsersUpdateActionTests: XCTestCase {
     
     func testAccountShouldBeUpdatedForAuthorizedUser() throws {
 

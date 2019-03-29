@@ -56,7 +56,7 @@ final class RegisterActionTests: XCTestCase {
         // Assert.
         let location = response.http.headers[.location][0]
         let user = try response.content.decode(UserDto.self).wait()
-        XCTAssertEqual(location, "/users/\(user.id?.uuidString ?? "")", "Location header should contains created user id.")
+        XCTAssertEqual(location, "/users/@\(user.userName)", "Location header should contains created username.")
     }
 
     func testCorrectUserDataShouldBeReturnedAfterCreatingNewUser() throws {

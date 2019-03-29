@@ -152,7 +152,7 @@ final class RegisterController: RouteCollection {
     private func createNewUserResponse(on request: Request, user: User) throws -> Future<Response> {
         let createdUserDto = UserDto(from: user)
         return try createdUserDto.encode(for: request).map { response in
-            response.http.headers.replaceOrAdd(name: .location, value: "\(UsersController.uri)/\(user.id?.uuidString ?? "")")
+            response.http.headers.replaceOrAdd(name: .location, value: "\(UsersController.uri)/@\(user.userName)")
             response.http.status = .created
 
             return response
