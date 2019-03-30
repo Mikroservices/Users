@@ -147,12 +147,11 @@ final class AuthorizationService: AuthorizationServiceType {
     }
 
     public func verifySuperUser(request: Request) throws -> Future<Void> {
-        let authorizationService = try request.make(AuthorizationServiceType.self)
 
-        let userNameFuture = try authorizationService.getUserNameFromBearerTokenOrAbort(on: request)
+        let userNameFuture = try self.getUserNameFromBearerTokenOrAbort(on: request)
 
         let userFuture = userNameFuture.flatMap(to: User?.self) { userNameFromToken in
-            let userNameNormalized = try request.parameters.next(String.self).uppercased().replacingOccurrences(of: "@", with: "")
+            let userNameNormalized = userNameFromToken.uppercased()
             return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first()
         }
 

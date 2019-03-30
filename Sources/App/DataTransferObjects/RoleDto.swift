@@ -9,12 +9,12 @@ final class RoleDto: Reflectable {
     var hasSuperPrivileges: Bool
     var isDefault: Bool
 
-    init(id: UUID?,
+    init(id: UUID? = nil,
          name: String,
          code: String,
          description: String?,
-         hasSuperPrivileges: Bool,
-         isDefault: Bool) {
+         hasSuperPrivileges: Bool = false,
+         isDefault: Bool = false) {
         self.id = id
         self.name = name
         self.code = code

@@ -61,6 +61,11 @@ extension User {
         _ = try self.roles.attach(role, on: connection).wait()
     }
 
+    func attach(roleName: String, on application: Application) throws {
+        let role = try Role.get(on: application, name: roleName)
+        try self.attach(role: role, on: application)
+    }
+
     func getRoles(on application: Application) throws -> [Role] {
         let connection = try application.newConnection(to: .psql).wait()
         return try self.roles.query(on: connection).all().wait()

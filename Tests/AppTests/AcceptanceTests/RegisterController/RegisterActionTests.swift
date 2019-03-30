@@ -25,7 +25,7 @@ final class RegisterActionTests: XCTestCase {
         XCTAssert(createdUserDto.id != nil, "User wasn't created.")
     }
 
-    func testStatusCodeShouldBeReturnedAfterCreatingNewUser() throws {
+    func testCreatedStatusCodeShouldBeReturnedAfterCreatingNewUser() throws {
 
         // Arrange.
         let registerUserDto = RegisterUserDto(userName: "martinsmith",
@@ -174,7 +174,7 @@ final class RegisterActionTests: XCTestCase {
 
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
-        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'userAccountIsBlocked'.")
+        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
         XCTAssertEqual(errorResponse.error.reason, "'userName' is less than required minimum of 1 character", "Error reason should be correct.")
     }
 
@@ -196,7 +196,7 @@ final class RegisterActionTests: XCTestCase {
 
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
-        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'userAccountIsBlocked'.")
+        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
         XCTAssertEqual(errorResponse.error.reason, "'userName' is greater than required maximum of 50 characters", "Error reason should be correct.")
     }
 
@@ -218,7 +218,7 @@ final class RegisterActionTests: XCTestCase {
 
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
-        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'userAccountIsBlocked'.")
+        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
         XCTAssertEqual(errorResponse.error.reason, "'email' is not a valid email address", "Error reason should be correct.")
     }
 
@@ -240,7 +240,7 @@ final class RegisterActionTests: XCTestCase {
 
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
-        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'userAccountIsBlocked'.")
+        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
         XCTAssertEqual(errorResponse.error.reason, "'email' is not a valid email address", "Error reason should be correct.")
     }
 
@@ -262,7 +262,7 @@ final class RegisterActionTests: XCTestCase {
 
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
-        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'userAccountIsBlocked'.")
+        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
         XCTAssertEqual(errorResponse.error.reason, "'password' is less than required minimum of 8 characters and 'password' is not a valid password", "Error reason should be correct.")
     }
 
@@ -284,7 +284,7 @@ final class RegisterActionTests: XCTestCase {
 
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
-        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'userAccountIsBlocked'.")
+        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
         XCTAssertEqual(errorResponse.error.reason, "'password' is less than required minimum of 8 characters and 'password' is not a valid password", "Error reason should be correct.")
     }
 
@@ -306,7 +306,7 @@ final class RegisterActionTests: XCTestCase {
 
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
-        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'userAccountIsBlocked'.")
+        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
         XCTAssertEqual(errorResponse.error.reason, "'password' is greater than required maximum of 32 characters and 'password' is not a valid password", "Error reason should be correct.")
     }
 
@@ -328,7 +328,7 @@ final class RegisterActionTests: XCTestCase {
 
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
-        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'userAccountIsBlocked'.")
+        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
         XCTAssertEqual(errorResponse.error.reason, "'name' is greater than required maximum of 50 characters and 'name' is not nil", "Error reason should be correct.")
     }
 
@@ -351,7 +351,7 @@ final class RegisterActionTests: XCTestCase {
 
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
-        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'userAccountIsBlocked'.")
+        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
         XCTAssertEqual(errorResponse.error.reason, "'location' is greater than required maximum of 50 characters and 'location' is not nil", "Error reason should be correct.")
     }
 
@@ -374,7 +374,7 @@ final class RegisterActionTests: XCTestCase {
 
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
-        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'userAccountIsBlocked'.")
+        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
         XCTAssertEqual(errorResponse.error.reason, "'website' is greater than required maximum of 50 characters and 'website' is not nil", "Error reason should be correct.")
     }
 
@@ -400,7 +400,7 @@ final class RegisterActionTests: XCTestCase {
 
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
-        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'userAccountIsBlocked'.")
+        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
         XCTAssertEqual(errorResponse.error.reason, "'bio' is greater than required maximum of 200 characters and 'bio' is not nil", "Error reason should be correct.")
     }
 
@@ -422,13 +422,13 @@ final class RegisterActionTests: XCTestCase {
 
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
-        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'userAccountIsBlocked'.")
+        XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
         XCTAssertEqual(errorResponse.error.reason, "'securityToken' is nil", "Error reason should be correct.")
     }
 
     static let allTests = [
         ("testUserAccountShouldBeCreatedForValidUserData", testUserAccountShouldBeCreatedForValidUserData),
-        ("testStatusCodeShouldBeReturnedAfterCreatingNewUser", testStatusCodeShouldBeReturnedAfterCreatingNewUser),
+        ("testCreatedStatusCodeShouldBeReturnedAfterCreatingNewUser", testCreatedStatusCodeShouldBeReturnedAfterCreatingNewUser),
         ("testHeaderLocationShouldBeReturnedAfterCreatingNewUser", testHeaderLocationShouldBeReturnedAfterCreatingNewUser),
         ("testCorrectUserDataShouldBeReturnedAfterCreatingNewUser", testCorrectUserDataShouldBeReturnedAfterCreatingNewUser),
         ("testUserShouldNotBeCreatedIfUserWithTheSameEmailExists", testUserShouldNotBeCreatedIfUserWithTheSameEmailExists),

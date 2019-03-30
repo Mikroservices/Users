@@ -76,7 +76,13 @@ final class RolesController: RouteCollection {
             try self.getRoleById(on: request)
         }
 
-        let updateFuture = roleFuture.flatMap { role in 
+        let validateCodeFuture = roleFuture.flatMap(to: Role.self) { role in
+            return try self.validateCode(on: request, code: roleDto.code, roleId: role.id).map {
+                return role
+            }
+        }
+
+        let updateFuture = validateCodeFuture.flatMap { role in
             try self.updateRole(on: request, from: roleDto, to: role)
         }
 
@@ -101,10 +107,21 @@ final class RolesController: RouteCollection {
         return deleteFuture.transform(to: HTTPStatus.ok)
     }
 
-    private func validateCode(on request: Request, code: String) throws -> Future<Void> {
-        return Role.query(on: request).filter(\.code == code).first().map { role in
-            if role != nil {
-                throw RoleError.roleWithCodeExists
+    private func validateCode(on request: Request, code: String, roleId: UUID? = nil) throws -> Future<Void> {
+        if let unwrapedRoleId = roleId {
+            return Role.query(on: request).group(.and) { verifyCodeGroup in
+                verifyCodeGroup.filter(\.code == code)
+                verifyCodeGroup.filter(\.id != unwrapedRoleId)
+            }.first().map { role in
+                if role != nil {
+                    throw RoleError.roleWithCodeExists
+                }
+            }
+        } else {
+            return Role.query(on: request).filter(\.code == code).first().map { role in
+                if role != nil {
+                    throw RoleError.roleWithCodeExists
+                }
             }
         }
     }

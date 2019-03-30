@@ -8,8 +8,8 @@ final class UserRolesController: RouteCollection {
     public static let uri = "/user-roles"
 
     func boot(router: Router) throws {
-        router.post(UserRoleDto.self, use: connect)
-        router.post(UserRoleDto.self, use: disconnect)
+        router.post(UserRoleDto.self, at: "\(UserRolesController.uri)/connect", use: connect)
+        router.post(UserRoleDto.self, at: "\(UserRolesController.uri)/disconnect", use: disconnect)
     }
 
     func connect(request: Request, userRoleDto: UserRoleDto) throws -> Future<HTTPResponseStatus> {
