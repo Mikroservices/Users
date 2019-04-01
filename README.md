@@ -1,159 +1,672 @@
-# :couple: Letterer - Users
+# :couple: Mikroservices - Users
 
-Microservice for management users in Letterer system.
+Microservice which provides common features for managing users. Application is written in Swift and Vapor.
 
-## Developer environement
+## Main features
 
-You can work on the microservice on macOS and Linux platforms. Below there are instructions for both.
+Main features which are implemented:
 
-### XCode (macos)
+- registering new user
+- sign-in user (JWT access token & refresh token)
+- forgot password
+- change password
+- update user data
+- user roles
 
-For developing application in XCode you need to do following steps:
+*Class diagram*
 
-1. Clone repository
+![model](Images/model.png)
 
-Download source code by executing command:
+## Getting started
 
-```bash
-$ git clone https://github.com/Letterer/Users.git
-```
-
-2. Open XCode
-
-XCode is recommended IDE for developing service on macOS.
-
-```
-$ cd Users\
-$ open Users.xcodeproj
-```
-
-3. Build & Run
-
-Select the run scheme from the scheme menu and `My Mac` as the deployment target, then click the play button.
-
-4. Verify
-
-Open the url: `http://localhost:10001`.
-
-### Command line (macos/Linux)
-
-For developing application in XCode you need to do following steps:
-
-1. Clone repository
-
-Download source code by executing command:
+First you need to have Swift installed on your computer. Run following commands:
 
 ```bash
-$ git clone https://github.com/Letterer/Users.git
-```
-
-2. Add environment variables
-
-You have to add new variables to you environment settings (e.g. to `.bashrc` or `.bash_profile` file). 
-
-**RSA private key**
-
-This is a variable which is mandatory for generating JWT tokens. Only this service is responsible for generating this token and only he should use that key. Below key is only for developer purposes. On production/test environment we should use other (private) key.
-
-Name: `LETTERER_PRIVATE_KEY`
-
-Value:
-
-```
------BEGIN RSA PRIVATE KEY-----
-MIIEogIBAAKCAQEAh4WjL2kJmM2GwSp1h/SMyrx7hD99Hl5vdNqlEhJ7mpg7UHzn
-K0A3nroOqo4Z8idkfM0kjTLFqlHdo1HU5jBmibfuTo8CpAwqKi6Ff+sR9mJd8QkQ
-nPRmHgRg5hvbt8h1zHZokiKFUG0P5bCoZ/bgzHEXIVYZ3Y+htcvZwSIpZBqjZ/Qm
-HjIk9Q7gKlcVUOgBuagerpvxELD4viOu7OETV3bpVa5boL55jJoxHmpUKiPaytOi
-x8eRvi8YjUNf3uQ5y9ye+891BEsVxcjLDyHMUKcpj5e1EysLDLJJQsbRUElO0CCs
-quATzcGbPz3pmF/5Wn1mRr+GoLD72Hr4wR9/MwIDAQABAoIBAHAY4Sc5KeADuQAU
-n80KQl770utMHLE/CdBNfpbZRPZWD1H/TrOe1aLsYW9ARUPgw6Tbhu1oXsoIF12d
-NY4F4PrvciX28wdArKvheTma9munZ+8VQXGiUslnc8NCrdZx8MZj9xFRjpY88BZc
-rp/4PG++55QChTiYMvmOGZtAJ56NltJ8mDH/HPmHqrRqHTRy1Vvrm/zAxfZo8C9u
-IFuGa6v2/apMhq5joRNcCrlLPUr6hJbaFIBzfKUUyF/7p8tx1YgSCxanjWTEh0gw
-9dwx4Qr8aKIhleTB9fEHF0dtEJMfQDnnPZCCPKyZqPBAsprodglXFsTJFVrp6whh
-V+24iHkCgYEA11sJ0OZTLTu2SAFL2PhmruQC8p0FPNkFJSsV6PMU+7cGAtgpVNN5
-LeudTIpvBjSXtSpz6VugRxhiLWlXH1+9a//KT1DqIsJKtZjh/gscFQ7orLtseX2v
-0EYB+80gL9aQtufZgKCz6TjHO1+SS7m4zInVijpqoGhQuNjuv1QQTtUCgYEAoRlr
-IU+UvEPhl4gnt/yRbZalz2N/CBeezJG8GW7K5ru1yeYuxCKeSIfuDynkRmgsBfXp
-2GFkG2WQQZ6CJ0YGk/KK77L32h8fKUOQQu9UaOvV7BoEjj++6JwsFOQ3X88JtGu8
-KgPV/qPj1hxFT1ZIOu5y+haeLCB5bsTzHHVHaecCgYBV1zD7dsOS1SlcXD/qdWEg
-tzxBjrtGvM6jOSBboYEssJCR063t5Pl5h2BE4S1OEOqjyQ845k/l5t9DcKjMlbIA
-eY4fvYYGYuG6rvzt8Wm5Lx8psu+TIblR0IX745C/4MwATDxTXDs6bGplzTuYOahi
-x1I57f0QgWQjujy4QP7bHQKBgDqpPtFKYSaMsUC0W4Irfekhyg7SdBdGQpTLHGtG
-ZKvP/koefzj8Qha3KIBtCKp6lE03VodsLz+qo/TA+zPB0/NbhivyRz4txvMHnyhA
-bcQm3Ca08qO5opKhC4wv7dn9UdNYx5OlAe9PTk9QzAwvpu2Oll9qjP4UdSNYpA3g
-xrhRAoGAJjk4/TcoOMzSjaiMF3yq82CRblUvpo0cWLN/nLWkwJkhCgzf/fm7Z3Fs
-2GosCdIK/krdgKYUThj02OmSB58oYCNn6W56G07yzDVeTIp0BrlsPuCMqGILabKP
-4SlNoO/RqfjpSZRMnEpYPbrxgYkjC9nPB+Zy6mRCN7cYqJoqjng=
------END RSA PRIVATE KEY-----
-```
-
-**Path to the database**
-
-Variable stores path to the sqlite database file. You should put here proper path on you drive.
-
-Name: `LETTERER_SQLITE_PATH`
-
-Value: `/home/[USER]/Projects/Letterer/Databases/Users.db`
-
-**Private key to Google reCaptcha**
-
-Variable for secret key generated for the domain in Google: [https://www.google.com/recaptcha/admin](https://www.google.com/recaptcha/admin).
-
-Name: `LETTERER_RECAPTCHA_KEY`
-
-Value: ``
-
-3. Build & Run
-
-If you have Vapor installed on your Linux distribution you can run following commands:
-
-```bash
-$ cd Users/
-$ vapor build
-$ vapor run
-```
-
-Also you can build and run application by executing common swift commands.
-
-```bash
-$ cd Users/
+$ git clone https://github.com/Mikroservices/Users.git
+$ cd Users
 $ swift package update
 $ swift build
-$ swift run
 ```
 
-4. Verify
+If application successfully builds you need to set up connection string to the database. 
+Service supports only PostgreSQL database. 
 
-Open the url: `http://localhost:10001`.
+```
+Variable name:              LETTERER_USERS_CONNECTION_STRING
+Value (connection string):  postgresql://user:password@host:5432/database?sslmode=require
+```
+
+You can set upt this variable as:
+
+1. environment variable in your system
+2. environment variable in XCode
+
+Now you can run the application:
+
+```bash
+$ .build/debug/Run --port 8001
+```
+
+If application starts open in your browser link: [http://localhost:8001](http://localhost:8001).
+You should see blank page with text: *Service is up and running!*.
+
+## Configuration
+
+Application is using default settings. All settings are stored in database in `Setting` table.
+You should set up settings:
+
+- `isRecaptchaEnabled` - information about enable/disable Google Recaptcha, it's highly recommended to enable this feature. Recaptcha is validated during user registration process.
+- `recaptchaKey` - secret key for Google Recaptcha.
+- `jwtPrivateKey` - RSA512 key for generating JWT tokens (signing in). Private key should be entered only in that service. Other services should use only public key.
+- `emailServiceAddress` - address to service responsible for sending emails (confirmation email, forgot your password features).
 
 ## API
 
-That microservice is mainly responsible for register and login user to the system. API which provides is described below.
+Service provides simple REST API. Below there is a description of each endpoint.
 
-### New user
+### Register controller
 
-Creates new user in the system. After creating an account user still cannot login. First he/she need to confirm email.
+#### Create new user
 
-Url: `\users`
+Endpoint for creating new user in the system.
 
-Method: `POST`
+**Request**
 
+```
+METHOD: POST
+URL: /register
+BODY:
+{
+    "email": "johndoe@email.com",
+    "userName": "johndoe",
+    "password": "P@ssw0rd",
+    "bio": "This is some bio...",
+    "location": "London",
+    "website": "http://johndoe.io",
+    "securityToken": "a712udda8df822d8sa8w8dsac8sa7das8a990c"
+}
+```
 
-### Login
+**Response**
 
-Login user to the system.
+```
+STATUS: 201 (Created)
+BODY:
+{
+    "id": "19349a02-81c1-4506-b70a-c1b442e2fc1b"
+    "email": "johndoe@email.com",
+    "userName": "johndoe",
+    "bio": "This is some bio...",
+    "location": "London",
+    "website": "http://johndoe.io",
+}
+```
 
-Url: `\users\login`
+**Errors**
 
-Method: `POST`
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "securityTokenIsMandatory",
+    "reason": "Security token is mandatory (it should be provided from Google reCaptcha)."
+}
+```
 
-### Confirm email
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "securityTokenIsInvalid",
+    "reason": "Security token is invalid (Google reCaptcha API returned that information)."
+}
+```
 
-Email confirmation.
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "userNameIsAlreadyTaken",
+    "reason": "User with provided user name already exists in the system."
+}
+```
 
-Url: `\users\confirm`
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "emailIsAlreadyConnected",
+    "reason": "Email is already connected with other account."
+}
+```
 
-Method: `POST`
+#### Confirm user email
+
+Endpoint should be used for email verification. During creating account special email is sending. In that email there is a link to your website (with `id` and `confirmationGuid` as query parameters). You have to create page which will read that parameters and it should send request to following endpoint. Only after that procedure user can sign-in to the system.
+
+**Request**
+
+```
+METHOD: POST
+URL: /register/confirm
+BODY:
+{
+    "id": "19349a02-81c1-4506-b70a-c1b442e2fc1b",
+    "confirmationGuid": "1bb5118c-6814-4991-8410-de6656b19a2c"
+}
+```
+**Response**
+
+```
+STATUS: 200 (Ok)
+```
+
+**Errors**
+
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "invalidIdOrToken",
+    "reason": "Invalid user Id or token. User have to activate account by reseting his password."
+}
+```
+
+#### Verify user name
+
+Endpoint can be used to verification if user can use specified user name for his new account. It returns `true` if user name is valid and user can create user with that user name.
+
+**Request**
+
+```
+METHOD: POST
+URL: /register/username/@{username}
+```
+**Response**
+
+```
+STATUS: 200 (Ok)
+BODY:
+{
+    "result": true
+}
+```
+
+#### Verify email
+
+Endpoint can be used to verification if user can use specified email for his new account. It returns `true` if email is valid and user can create user with that email.
+
+**Request**
+
+```
+METHOD: POST
+URL: /register/email/{email}
+```
+
+**Response**
+
+```
+STATUS: 200 (Ok)
+BODY:
+{
+    "result": true
+}
+```
+
+### Account controller
+
+#### Sign in to the system
+
+**Request**
+
+```
+METHOD: POST
+URL: /account/login
+BODY:
+{
+    "userNameOrEmail": "johndoe@email.com",
+    "password": "P@ssw0rd"
+}
+```
+
+**Response**
+
+```
+STATUS: 200 (Ok)
+BODY:
+{
+    "accessToken": "4Zo6SK6VFSxrRVN......3ZKcW35jRo43BQShJfBcpleQPY",
+    "refreshToken": "himl3VsU0Uq3oFSIF2ihPwwX5NGdQ1TLOs99Ox3p6"
+}
+```
+
+**Errors**
+
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "invalidLoginCredentials",
+    "reason": "Given user name or password are invalid."
+}
+```
+
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "emailNotConfirmed",
+    "reason": "User email is not confirmed. User have to confirm his email first."
+}
+```
+
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "userAccountIsBlocked",
+    "reason": "User account is blocked. User cannot login to the system right now."
+}
+```
+
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "internalServerError",
+    "reason": "Private key is not configured in database."
+}
+```
+
+#### Refresh access token
+
+**Request**
+
+```
+METHOD: POST
+URL: /account/refresh
+BODY:
+{
+    "refreshToken": "himl3VsU0Uq3oFSIF2ihPwwX5NGdQ1TLOs99Ox3p6"
+}
+```
+
+**Response**
+
+```
+STATUS: 200 (Ok)
+BODY:
+{
+    "accessToken": "GUoSGcqNqsKP7cQd......tE8O5FQN1btqSjhbw5hxH9EBh",
+    "refreshToken": "LPB4euZSHaODXJA1W650rvReKwnrBngjEAx2MxCvz"
+}
+```
+
+**Errors**
+
+```
+STATUS: 404 (NotFound)
+BODY: 
+{
+    "error": true,
+    "code": "refreshTokenNotFound",
+    "reason": "Refresh token not exists."
+}
+```
+
+```
+STATUS: 404 (NotFound)
+BODY: 
+{
+    "error": true,
+    "code": "userNotFound",
+    "reason": "User not exists."
+}
+```
+
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "refreshTokenRevoked",
+    "reason": "Refresh token was revoked."
+}
+```
+
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "refreshTokenExpired",
+    "reason": "Refresh token was expired."
+}
+```
+
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "userAccountIsBlocked",
+    "reason": "User account is blocked. User cannot login to the system right now."
+}
+```
+
+#### Change password
+
+**Request**
+
+```
+METHOD: POST
+URL: /account/change-password
+BODY:
+{
+    "currentPassword": "P@ssw0rd",
+    "newPassword": "NewP@ssw0rd"
+}
+```
+
+**Response**
+
+```
+STATUS: 200 (Ok)
+```
+
+**Errors**
+
+```
+STATUS: 401 (Unauthorized)
+```
+
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "invalidLoginCredentials",
+    "reason": "Given user name or password are invalid."
+}
+```
+
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "emailNotConfirmed",
+    "reason": "User email is not confirmed. User have to confirm his email first."
+}
+```
+
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "userAccountIsBlocked",
+    "reason": "User account is blocked. User cannot login to the system right now."
+}
+```
+
+### Forgot password controller
+
+#### Forgot password
+
+Endpoint is sending email with link to your website. Link in query parameter contains special GUID which have to used in next endpoint.
+
+**Request**
+
+```
+METHOD: POST
+URL: /forgot/token
+BODY:
+{
+    "email": "johndoe@email.com"
+}
+```
+
+**Response**
+
+```
+STATUS: 200 (Ok)
+```
+
+**Errors**
+
+```
+STATUS: 404 (NotFound)
+BODY: 
+{
+    "error": true,
+    "code": "userNotFound",
+    "reason": "User not exists."
+}
+```
+
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "userAccountIsBlocked",
+    "reason": "User account is blocked. You cannot change password right now."
+}
+```
+
+#### Forgot password
+
+Endpoint is sending email with link to your website. Link in query parameter contains special GUID which have to used in next endpoint.
+
+**Request**
+
+```
+METHOD: POST
+URL: /forgot/confirm
+BODY:
+{
+    "forgotPasswordGuid": "9957D516-761A-4D86-B281-E31F2D707F3B",
+    "password": "P@ssw0rd"
+}
+```
+
+**Response**
+
+```
+STATUS: 200 (Ok)
+```
+
+**Errors**
+
+```
+STATUS: 404 (NotFound)
+BODY: 
+{
+    "error": true,
+    "code": "userNotFound",
+    "reason": "User not exists."
+}
+```
+
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "userAccountIsBlocked",
+    "reason": "User account is blocked. You cannot change password right now."
+}
+```
+
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "tokenExpired",
+    "reason": "Token which allows to change password expired. User have to repeat forgot password process."
+}
+```
+
+### Users controller
+
+#### Get user (profile)
+
+Endpoint is sending email with link to your website. Link in query parameter contains special GUID which have to used in next endpoint.
+
+**Request**
+
+```
+METHOD: GET
+URL: /users/@{username}
+```
+
+**Response**
+
+```
+STATUS: 200 (Ok)
+BODY:
+{
+    "id": "19349a02-81c1-4506-b70a-c1b442e2fc1b"
+    "email": "johndoe@email.com",
+    "userName": "johndoe",
+    "password": "P@ssw0rd",
+    "bio": "This is some bio...",
+    "location": "London",
+    "website": "http://johndoe.io",
+}
+```
+
+**Errors**
+
+```
+STATUS: 404 (NotFound)
+BODY: 
+{
+    "error": true,
+    "code": "userNotFound",
+    "reason": "User not exists."
+}
+```
+
+#### Update user data
+
+```
+METHOD: PUT
+URL: /users/@{username}
+BODY:
+{
+    "id": "19349a02-81c1-4506-b70a-c1b442e2fc1b",
+    "email": "johndoe@email.com",
+    "userName": "johndoe",
+    "bio": "This is some bio...",
+    "location": "London",
+    "website": "http://johndoe.io"
+}
+```
+
+**Response**
+
+```
+STATUS: 200 (Ok)
+BODY:
+{
+    "id": "19349a02-81c1-4506-b70a-c1b442e2fc1b"
+    "email": "johndoe@email.com",
+    "userName": "johndoe",
+    "bio": "This is some bio...",
+    "location": "London",
+    "website": "http://johndoe.io",
+}
+```
+
+**Errors**
+
+```
+STATUS: 403 (Forbidden)
+BODY: 
+{
+    "error": true,
+    "code": "userForbidden",
+    "reason": "Access to specified user is forbidden."
+}
+```
+
+```
+STATUS: 404 (NotFound)
+BODY: 
+{
+    "error": true,
+    "code": "userNotFound",
+    "reason": "User not exists."
+}
+```
+
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "securityTokenIsMandatory",
+    "reason": "Security token is mandatory (it should be provided from Google reCaptcha)."
+}
+```
+
+#### Delete user account
+
+```
+METHOD: DELETE
+URL: /users/@{username}
+```
+
+**Response**
+
+```
+STATUS: 200 (Ok)
+```
+
+**Errors**
+
+```
+STATUS: 403 (Forbidden)
+BODY: 
+{
+    "error": true,
+    "code": "userForbidden",
+    "reason": "Access to specified user is forbidden."
+}
+```
+
+```
+STATUS: 404 (NotFound)
+BODY: 
+{
+    "error": true,
+    "code": "userNotFound",
+    "reason": "User not exists."
+}
+```
+
+### Roles controller
+
+`GET /roles`
+`GET /roles/{id}`
+`POST /roles`
+`PUT /roles/{id}`
+`DELETE /roles/{id}`
+
+### User roles controller
+
+`POST /user-roles/connect`
+`POST /user-roles/disconnect`
 
