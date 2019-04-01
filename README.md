@@ -659,10 +659,204 @@ BODY:
 
 ### Roles controller
 
-`GET /roles`
-`GET /roles/{id}`
-`POST /roles`
-`PUT /roles/{id}`
+#### Get roles
+
+```
+METHOD: GET
+URL: /roles
+```
+
+**Response**
+
+```
+STATUS: 200 (Ok)
+BODY:
+[
+    {
+        "id": "jt7390gt-63kt-09fw-b70a-c1b442e2fc1b",
+        "name": "Administrator",
+        "code": "administrator",
+        "description": "This is role for people with high privileges.",
+        "hasSuperPrivileges": true,
+        "isDefault": false
+    },
+    {
+        "id": "ut85jdnw-93jf-02js-jg92-c1b442e2fc1b",
+        "name": "Member",
+        "code": "member",
+        "description": "Normal user",
+        "hasSuperPrivileges": false,
+        "isDefault": true
+    }
+]
+```
+
+**Errors**
+
+```
+STATUS: 401 (Unauthorize)
+```
+
+```
+STATUS: 403 (Forbidden)
+```
+
+#### Get specific role
+
+```
+METHOD: GET
+URL: /roles/{id}
+```
+
+**Response**
+
+```
+STATUS: 200 (Ok)
+BODY:
+{
+    "id": "jt7390gt-63kt-09fw-b70a-c1b442e2fc1b",
+    "name": "Administrator",
+    "code": "administrator",
+    "description": "This is role for people with high privileges.",
+    "hasSuperPrivileges": true,
+    "isDefault": false
+}
+```
+
+**Errors**
+
+```
+STATUS: 401 (Unauthorize)
+```
+
+```
+STATUS: 403 (Forbidden)
+```
+
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "incorrectRoleId",
+    "reason": "Role id is incorrect."
+}
+```
+
+```
+STATUS: 404 (NotFound)
+BODY: 
+{
+    "error": true,
+    "code": "roleNotFound",
+    "reason": "Role not exists."
+}
+```
+
+#### Create new role
+
+```
+METHOD: POST
+URL: /roles
+BODY:
+{
+    "name": "Developer",
+    "code": "developer",
+    "description": "Some guy who creates code.",
+    "hasSuperPrivileges": true,
+    "isDefault": false
+}
+```
+
+**Response**
+
+```
+STATUS: 200 (Ok)
+BODY:
+{
+    "id": "85kfh37i-kf82-dd92-032d-c1b442e2fc1b",
+    "name": "Developer",
+    "code": "developer",
+    "description": "Some guy who creates code.",
+    "hasSuperPrivileges": true,
+    "isDefault": false
+}
+```
+
+**Errors**
+
+```
+STATUS: 401 (Unauthorize)
+```
+
+```
+STATUS: 403 (Forbidden)
+```
+
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "roleWithCodeExists",
+    "reason": "Role with specified code already exists."
+}
+```
+
+#### Update existing role
+
+```
+METHOD: PUT
+URL: /roles/{id}
+BODY:
+{
+    "id": "85kfh37i-kf82-dd92-032d-c1b442e2fc1b",
+    "name": "Senior Developer",
+    "code": "senior-developer",
+    "description": "Some guy who creates code.",
+    "hasSuperPrivileges": true,
+    "isDefault": false
+}
+```
+
+**Response**
+
+```
+STATUS: 200 (Ok)
+BODY:
+{
+    "id": "85kfh37i-kf82-dd92-032d-c1b442e2fc1b",
+    "name": "Developer",
+    "code": "developer",
+    "description": "Some guy who creates code.",
+    "hasSuperPrivileges": true,
+    "isDefault": false
+}
+```
+
+**Errors**
+
+```
+STATUS: 401 (Unauthorize)
+```
+
+```
+STATUS: 403 (Forbidden)
+```
+
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "roleWithCodeExists",
+    "reason": "Role with specified code already exists."
+}
+```
+
+
+
+
 `DELETE /roles/{id}`
 
 ### User roles controller

@@ -16,7 +16,7 @@ extension EntityNotFoundError: TerminateError {
         switch self {
         case .userNotFound: return "User not exists."
         case .refreshTokenNotFound: return "Refresh token not exists."
-        case .roleNotFound: return "Rolenot exists."
+        case .roleNotFound: return "Role not exists."
         }
     }
 
