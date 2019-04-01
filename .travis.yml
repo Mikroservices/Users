@@ -1,0 +1,8 @@
+language: swift
+os: osx
+osx_image: xcode10.2
+before_script:
+- gem install xcpretty
+script: 
+- swift package generate-xcodeproj
+- set -o pipefail && xcodebuild -scheme Run clean build | xcpretty
