@@ -1,10 +1,11 @@
 # :couple: Mikroservices - Users
 
-Microservice which provides common features for managing users. Application is written in Swift and Vapor.
+Microservice which provides common features for managing users (only RESTful API).
+Application is written in [Swift](https://swift.org) and [Vapor](https://vapor.codes).
 
 ## Main features
 
-Main features which are implemented:
+Main features which has been implemented:
 
 - registering new user
 - sign-in user (JWT access token & refresh token)
@@ -19,7 +20,8 @@ Main features which are implemented:
 
 ## Getting started
 
-First you need to have Swift installed on your computer. Run following commands:
+First you need to have [Swift](https://swift.org) installed on your computer. 
+Next you should run following commands:
 
 ```bash
 $ git clone https://github.com/Mikroservices/Users.git
@@ -47,24 +49,28 @@ Now you can run the application:
 $ .build/debug/Run --port 8001
 ```
 
-If application starts open in your browser link: [http://localhost:8001](http://localhost:8001).
-You should see blank page with text: *Service is up and running!*.
+If application starts open following link in your browser: [http://localhost:8001](http://localhost:8001).
+You should see blank page with text: *Service is up and running!*. Now you can use API which is described below.
 
 ## Configuration
 
-Application is using default settings. All settings are stored in database in `Setting` table.
-You should set up settings:
+The application uses the default settings. All settings are stored in the database in the `Setting` table.
+There are the following settings:
 
 - `isRecaptchaEnabled` - information about enable/disable Google Recaptcha, it's highly recommended to enable this feature. Recaptcha is validated during user registration process.
 - `recaptchaKey` - secret key for Google Recaptcha.
 - `jwtPrivateKey` - RSA512 key for generating JWT tokens (signing in). Private key should be entered only in that service. Other services should use only public key.
 - `emailServiceAddress` - address to service responsible for sending emails (confirmation email, forgot your password features).
 
+In production environment you *MUST* change especially `jwtPrivateKey`.
+
 ## API
 
-Service provides simple REST API. Below there is a description of each endpoint.
+Service provides simple RESTful API. Below there is a description of each endpoint.
 
 ### Register controller
+
+Controller responsible for registering new user.
 
 #### Create new user
 
@@ -144,6 +150,16 @@ BODY:
 }
 ```
 
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "validationError",
+    "reason": "[different validation messages for each field]"
+}
+```
+
 #### Confirm user email
 
 Endpoint should be used for email verification. During creating account special email is sending. In that email there is a link to your website (with `id` and `confirmationGuid` as query parameters). You have to create page which will read that parameters and it should send request to following endpoint. Only after that procedure user can sign-in to the system.
@@ -220,7 +236,16 @@ BODY:
 
 ### Account controller
 
+Controller responsible for managing user account.
+
 #### Sign in to the system
+
+Endpoint for signing in user into the system. It requires user name or email and password. Returns two things:
+
+- `accessToken` - JWT token with basic information about user, signed in by private key from settings.
+- `refreshToken` - token which should be used for refreshing access token.
+
+`Refresh token` has a much longer life time (~30 days) then `access token` (~1 hour). You should use `refresh token` for downloading new `access token`.
 
 **Request**
 
@@ -288,6 +313,8 @@ BODY:
 ```
 
 #### Refresh access token
+
+Endpoint for refreshing access token.
 
 **Request**
 
@@ -365,6 +392,8 @@ BODY:
 
 #### Change password
 
+Endpoint for change user password.
+
 **Request**
 
 ```
@@ -419,7 +448,19 @@ BODY:
 }
 ```
 
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "validationError",
+    "reason": "'newPassword' is less than required minimum of 8 characters and 'newPassword' is not a valid password"
+}
+```
+
 ### Forgot password controller
+
+Controller responsible for forgot password feature.
 
 #### Forgot password
 
@@ -466,7 +507,7 @@ BODY:
 
 #### Forgot password
 
-Endpoint is sending email with link to your website. Link in query parameter contains special GUID which have to used in next endpoint.
+Endpoint is responsible for setting up new password. It requires GUID generated in previous endpoint and new password.
 
 **Request**
 
@@ -518,11 +559,23 @@ BODY:
 }
 ```
 
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "validationError",
+    "reason": "'password' is less than required minimum of 8 characters and 'password' is not a valid password"
+}
+```
+
 ### Users controller
+
+Controller responsible for managing user.
 
 #### Get user (profile)
 
-Endpoint is sending email with link to your website. Link in query parameter contains special GUID which have to used in next endpoint.
+Endpoint returns user data. It's public endpoint. Some data (like email and birth date) are visible only for the owner.
 
 **Request**
 
@@ -560,6 +613,8 @@ BODY:
 ```
 
 #### Update user data
+
+Endpoint for updating user data.
 
 ```
 METHOD: PUT
@@ -622,7 +677,19 @@ BODY:
 }
 ```
 
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "validationError",
+    "reason": "[different validation messages for each field]"
+}
+```
+
 #### Delete user account
+
+Endpoint for deleting user account.
 
 ```
 METHOD: DELETE
@@ -659,7 +726,11 @@ BODY:
 
 ### Roles controller
 
+Controller responsible for managing roles. All endpoints are accessible only for user assigned to role with super privileges.
+
 #### Get roles
+
+Endpoint for downloading user roles.
 
 ```
 METHOD: GET
@@ -702,6 +773,8 @@ STATUS: 403 (Forbidden)
 ```
 
 #### Get specific role
+
+Endpoint for downloading specific role data.
 
 ```
 METHOD: GET
@@ -755,6 +828,8 @@ BODY:
 
 #### Create new role
 
+Endpoint for creating new role.
+
 ```
 METHOD: POST
 URL: /roles
@@ -803,7 +878,19 @@ BODY:
 }
 ```
 
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "validationError",
+    "reason": "[different validation messages for each field]"
+}
+```
+
 #### Update existing role
+
+Endpoint for updating role.
 
 ```
 METHOD: PUT
@@ -854,13 +941,141 @@ BODY:
 }
 ```
 
+```
+STATUS: 400 (BadRequest)
+BODY: 
+{
+    "error": true,
+    "code": "validationError",
+    "reason": "[different validation messages for each field]"
+}
+```
 
+#### Delete role
 
+Endpoint for deleting role.
 
-`DELETE /roles/{id}`
+```
+METHOD: DELETE
+URL: /roles/{id}
+```
+
+**Response**
+
+```
+STATUS: 200 (Ok)
+```
+
+**Errors**
+
+```
+STATUS: 401 (Unauthorize)
+```
+
+```
+STATUS: 403 (Forbidden)
+```
+
+```
+STATUS: 404 (NotFound)
+BODY: 
+{
+    "error": true,
+    "code": "roleNotFound",
+    "reason": "Role not exists."
+}
+```
 
 ### User roles controller
 
-`POST /user-roles/connect`
-`POST /user-roles/disconnect`
+Controller responsible for setting up users with appropriate roles.
 
+#### Connect role to user
+
+Endpoint for connecting user to role.
+
+```
+METHOD: POST
+URL: /user-roles/connect
+```
+
+**Response**
+
+```
+STATUS: 200 (Ok)
+```
+
+**Errors**
+
+```
+STATUS: 401 (Unauthorize)
+```
+
+```
+STATUS: 403 (Forbidden)
+```
+
+```
+STATUS: 404 (NotFound)
+BODY: 
+{
+    "error": true,
+    "code": "roleNotFound",
+    "reason": "Role not exists."
+}
+```
+
+```
+STATUS: 404 (NotFound)
+BODY: 
+{
+    "error": true,
+    "code": "userNotFound",
+    "reason": "User not exists."
+}
+```
+
+#### Disconnect role from user
+
+Endpoint for disconnecting user from role.
+
+```
+METHOD: POST
+URL: /user-roles/disconnect
+```
+
+**Response**
+
+```
+STATUS: 200 (Ok)
+```
+
+**Errors**
+
+```
+STATUS: 401 (Unauthorize)
+```
+
+```
+STATUS: 403 (Forbidden)
+```
+
+```
+STATUS: 404 (NotFound)
+BODY: 
+{
+    "error": true,
+    "code": "roleNotFound",
+    "reason": "Role not exists."
+}
+```
+
+```
+STATUS: 404 (NotFound)
+BODY: 
+{
+    "error": true,
+    "code": "userNotFound",
+    "reason": "User not exists."
+}
+```
