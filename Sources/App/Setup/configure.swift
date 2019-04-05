@@ -50,7 +50,7 @@ private func configureDatabaseProvider(services: inout Services) throws {
 
 private func configureDatabase(services: inout Services) throws {
 
-    let connectionString = try Environment.require("LETTERER_USERS_CONNECTION_STRING")
+    let connectionString = try Environment.require("MIKROSERVICE_USERS_CONNECTION_STRING")
 
     // Configure a PostgreSQL database
     guard let databaseConfig = PostgreSQLDatabaseConfig(url: connectionString, transport: .unverifiedTLS) else {

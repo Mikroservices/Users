@@ -36,7 +36,7 @@ If application successfully builds you need to set up connection string to the d
 Service supports only PostgreSQL database. 
 
 ```
-Variable name:              LETTERER_USERS_CONNECTION_STRING
+Variable name:              MIKROSERVICE_USERS_CONNECTION_STRING
 Value (connection string):  postgresql://user:password@host:5432/database?sslmode=require
 ```
 
