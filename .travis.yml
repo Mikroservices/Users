@@ -2,7 +2,7 @@ language: swift
 os: osx
 osx_image: xcode10.2
 before_script:
-- gem install xcpretty
+- brew install libressl
 script: 
 - swift package generate-xcodeproj
 - swift build
