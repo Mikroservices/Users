@@ -40,7 +40,7 @@ Variable name:              LETTERER_USERS_CONNECTION_STRING
 Value (connection string):  postgresql://user:password@host:5432/database?sslmode=require
 ```
 
-You can set upt this variable as:
+You can set up this variable as:
 
 1. environment variable in your system
 2. environment variable in XCode
@@ -57,7 +57,7 @@ You should see blank page with text: *Service is up and running!*. Now you can u
 ## Configuration
 
 The application uses the default settings. All settings are stored in the database in the `Setting` table.
-There are the following settings:
+We can find there following settings:
 
 - `isRecaptchaEnabled` - information about enable/disable Google Recaptcha, it's highly recommended to enable this feature. Recaptcha is validated during user registration process.
 - `recaptchaKey` - secret key for Google Recaptcha.
