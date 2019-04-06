@@ -1,5 +1,5 @@
 FROM swift:4.2
-LABEL Description="Letterer Users" Vendor="Marcin Czachurski" Version="1.0"
+LABEL Description="Mikroservice Users" Vendor="Marcin Czachurski" Version="1.0"
 
 ADD . /users
 WORKDIR /users

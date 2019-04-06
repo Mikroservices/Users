@@ -401,6 +401,8 @@ Endpoint for change user password.
 ```
 METHOD: POST
 URL: /account/change-password
+HEADERS:
+    "Authorization": "Bearer eyJhbGciOiJSUzUxMi.....Y1f05c9yvA;boundary="boundary"
 BODY:
 {
     "currentPassword": "P@ssw0rd",
@@ -621,6 +623,8 @@ Endpoint for updating user data.
 ```
 METHOD: PUT
 URL: /users/@{username}
+HEADERS:
+    "Authorization": "Bearer eyJhbGciOiJSUzUxMi.....Y1f05c9yvA;boundary="boundary"
 BODY:
 {
     "id": "19349a02-81c1-4506-b70a-c1b442e2fc1b",
@@ -648,6 +652,10 @@ BODY:
 ```
 
 **Errors**
+
+```
+STATUS: 401 (Unauthorized)
+```
 
 ```
 STATUS: 403 (Forbidden)
@@ -695,6 +703,8 @@ Endpoint for deleting user account.
 
 ```
 METHOD: DELETE
+HEADERS:
+    "Authorization": "Bearer eyJhbGciOiJSUzUxMi.....Y1f05c9yvA;boundary="boundary"
 URL: /users/@{username}
 ```
 
@@ -705,6 +715,10 @@ STATUS: 200 (Ok)
 ```
 
 **Errors**
+
+```
+STATUS: 401 (Unauthorized)
+```
 
 ```
 STATUS: 403 (Forbidden)
@@ -737,6 +751,8 @@ Endpoint for downloading user roles.
 ```
 METHOD: GET
 URL: /roles
+HEADERS:
+    "Authorization": "Bearer eyJhbGciOiJSUzUxMi.....Y1f05c9yvA;boundary="boundary"
 ```
 
 **Response**
@@ -767,7 +783,7 @@ BODY:
 **Errors**
 
 ```
-STATUS: 401 (Unauthorize)
+STATUS: 401 (Unauthorized)
 ```
 
 ```
@@ -781,6 +797,8 @@ Endpoint for downloading specific role data.
 ```
 METHOD: GET
 URL: /roles/{id}
+HEADERS:
+    "Authorization": "Bearer eyJhbGciOiJSUzUxMi.....Y1f05c9yvA;boundary="boundary"
 ```
 
 **Response**
@@ -801,7 +819,7 @@ BODY:
 **Errors**
 
 ```
-STATUS: 401 (Unauthorize)
+STATUS: 401 (Unauthorized)
 ```
 
 ```
@@ -835,6 +853,8 @@ Endpoint for creating new role.
 ```
 METHOD: POST
 URL: /roles
+HEADERS:
+    "Authorization": "Bearer eyJhbGciOiJSUzUxMi.....Y1f05c9yvA;boundary="boundary"
 BODY:
 {
     "name": "Developer",
@@ -863,7 +883,7 @@ BODY:
 **Errors**
 
 ```
-STATUS: 401 (Unauthorize)
+STATUS: 401 (Unauthorized)
 ```
 
 ```
@@ -897,6 +917,8 @@ Endpoint for updating role.
 ```
 METHOD: PUT
 URL: /roles/{id}
+HEADERS:
+    "Authorization": "Bearer eyJhbGciOiJSUzUxMi.....Y1f05c9yvA;boundary="boundary"
 BODY:
 {
     "id": "85kfh37i-kf82-dd92-032d-c1b442e2fc1b",
@@ -926,7 +948,7 @@ BODY:
 **Errors**
 
 ```
-STATUS: 401 (Unauthorize)
+STATUS: 401 (Unauthorized)
 ```
 
 ```
@@ -960,6 +982,8 @@ Endpoint for deleting role.
 ```
 METHOD: DELETE
 URL: /roles/{id}
+HEADERS:
+    "Authorization": "Bearer eyJhbGciOiJSUzUxMi.....Y1f05c9yvA;boundary="boundary"
 ```
 
 **Response**
@@ -971,7 +995,7 @@ STATUS: 200 (Ok)
 **Errors**
 
 ```
-STATUS: 401 (Unauthorize)
+STATUS: 401 (Unauthorized)
 ```
 
 ```
@@ -999,6 +1023,8 @@ Endpoint for connecting user to role.
 ```
 METHOD: POST
 URL: /user-roles/connect
+HEADERS:
+    "Authorization": "Bearer eyJhbGciOiJSUzUxMi.....Y1f05c9yvA;boundary="boundary"
 ```
 
 **Response**
@@ -1010,7 +1036,7 @@ STATUS: 200 (Ok)
 **Errors**
 
 ```
-STATUS: 401 (Unauthorize)
+STATUS: 401 (Unauthorized)
 ```
 
 ```
@@ -1044,6 +1070,8 @@ Endpoint for disconnecting user from role.
 ```
 METHOD: POST
 URL: /user-roles/disconnect
+HEADERS:
+    "Authorization": "Bearer eyJhbGciOiJSUzUxMi.....Y1f05c9yvA;boundary="boundary"
 ```
 
 **Response**
@@ -1055,7 +1083,7 @@ STATUS: 200 (Ok)
 **Errors**
 
 ```
-STATUS: 401 (Unauthorize)
+STATUS: 401 (Unauthorized)
 ```
 
 ```
