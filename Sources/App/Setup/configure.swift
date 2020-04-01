@@ -3,6 +3,7 @@ import Recaptcha
 import Fluent
 import FluentPostgresDriver
 import ExtendedError
+import JWT
 
 /// Called before your application initializes.
 public func configure(_ app: Application) throws {
@@ -93,7 +94,16 @@ private func loadConfiguration(_ app: Application) throws {
         application: app,
         emailServiceAddress: configuration.getString(.emailServiceAddress),
         isRecaptchaEnabled: configuration.getBool(.isRecaptchaEnabled) ?? false,
-        recaptchaKey: configuration.getString(.jwtPrivateKey) ?? "",
-        jwtPrivateKey: configuration.getString(.recaptchaKey) ?? ""
+        recaptchaKey: configuration.getString(.recaptchaKey) ?? "",
+        jwtPrivateKey: configuration.getString(.jwtPrivateKey) ?? ""
     )
+    
+    if app.settings.configuration.jwtPrivateKey != "" {
+        guard let privateKey = app.settings.configuration.jwtPrivateKey.data(using: .ascii) else {
+            throw Abort(.internalServerError, reason: "Private key is not configured in database.")
+        }
+        
+        let rsaKey: RSAKey = try .private(pem: privateKey)
+        app.jwt.signers.use(.rs512(key: rsaKey))
+    }
 }

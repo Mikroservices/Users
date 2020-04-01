@@ -9,8 +9,6 @@ import ExtendedError
 
 final class RegisterController: RouteCollection {
 
-    public static let uri = "/register"
-
     func boot(routes: RoutesBuilder) throws {
         let registerGroup = routes.grouped("register")
         
@@ -36,11 +34,11 @@ final class RegisterController: RouteCollection {
             self.validateUserName(on: request, userName: registerUserDto.userName)
         }
 
-        let validateEmailFuture = validateUserNameFuture.flatMap { _ in
+        let validateEmailFuture = validateUserNameFuture.flatMap {
             self.validateEmail(on: request, email: registerUserDto.email)
         }
 
-        let createUserFuture = validateEmailFuture.flatMapThrowing { _ in
+        let createUserFuture = validateEmailFuture.flatMapThrowing {
             try self.createUser(on: request, registerUserDto: registerUserDto)
         }.flatMap { user in user }
 
@@ -117,7 +115,7 @@ final class RegisterController: RouteCollection {
 
     private func validateEmail(on request: Request, email: String?) -> EventLoopFuture<Void> {
         let emailNormalized = (email ?? "").uppercased()
-        return User.query(on: request.db).filter(\.$emailNormalized == emailNormalized).first().flatMap { user  in
+        return User.query(on: request.db).filter(\.$emailNormalized == emailNormalized).first().flatMap { user in
             if user != nil {
                 return request.eventLoop.makeFailedFuture(RegisterError.emailIsAlreadyConnected)
             }

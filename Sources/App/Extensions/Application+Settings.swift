@@ -1,6 +1,5 @@
 import Vapor
 import Foundation
-import JWT
 
 public struct ApplicationSettings {
     public let emailServiceAddress: String?
@@ -18,19 +17,6 @@ public struct ApplicationSettings {
         self.isRecaptchaEnabled = isRecaptchaEnabled
         self.recaptchaKey = recaptchaKey
         self.jwtPrivateKey = jwtPrivateKey
-        
-        if jwtPrivateKey != "" {
-            do {
-                guard let privateKey = application.settings.configuration.jwtPrivateKey.data(using: .utf8) else {
-                    throw Abort(.internalServerError, reason: "Private key is not configured in database.")
-                }
-                
-                let rsaKey: RSAKey = try .private(pem: privateKey)
-                application.jwt.signers.use(.rs512(key: rsaKey))
-            } catch {
-                fatalError("JWT token is invalid")
-            }
-        }
     }
 }
 
