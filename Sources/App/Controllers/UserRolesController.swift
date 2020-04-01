@@ -1,5 +1,6 @@
 import Vapor
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 import ExtendedError
 
 /// Connect/disconnect user with role.
@@ -7,11 +8,11 @@ final class UserRolesController: RouteCollection {
 
     public static let uri = "/user-roles"
 
-    func boot(router: Router) throws {
-        router.post(UserRoleDto.self, at: "\(UserRolesController.uri)/connect", use: connect)
-        router.post(UserRoleDto.self, at: "\(UserRolesController.uri)/disconnect", use: disconnect)
+    func boot(routes: RoutesBuilder) throws {
+        // routes.post(UserRoleDto.self, at: "\(UserRolesController.uri)/connect", use: connect)
+        // routes.post(UserRoleDto.self, at: "\(UserRolesController.uri)/disconnect", use: disconnect)
     }
-
+/*
     func connect(request: Request, userRoleDto: UserRoleDto) throws -> Future<HTTPResponseStatus> {
 
         let authorizationService = try request.make(AuthorizationServiceType.self)
@@ -47,4 +48,5 @@ final class UserRolesController: RouteCollection {
 
         return detachFuture.transform(to: HTTPStatus.ok)
     }
+*/
 }

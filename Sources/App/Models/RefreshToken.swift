@@ -1,16 +1,29 @@
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 import Vapor
 import Crypto
 
-/// A single entry of a Voice list.
-final class RefreshToken: PostgreSQLUUIDModel {
+final class RefreshToken: Model {
 
+    static let schema = "RefreshTokens"
+    
+    @ID(key: .id)
     var id: UUID?
-    var userId: UUID
+    
+    @Field(key: "token")
     var token: String
+    
+    @Field(key: "expiryDate")
     var expiryDate: Date
-    var revoked: Bool = false
+    
+    @Field(key: "revoked")
+    var revoked: Bool
 
+    @Parent(key: "userId")
+    var user: User
+    
+    init() { }
+    
     init(id: UUID? = nil,
          userId: UUID,
          token: String,
@@ -18,25 +31,31 @@ final class RefreshToken: PostgreSQLUUIDModel {
          revoked: Bool = false
     ) {
         self.id = id
-        self.userId = userId
         self.token = token
         self.expiryDate = expiryDate
         self.revoked = revoked
-    }
-}
-
-/// User which generate refresh token.
-extension RefreshToken {
-    var user: Parent<RefreshToken, User> {
-        return parent(\.userId)
+        
+        self.$user.id = userId
     }
 }
 
 /// Allows `RefreshToken` to be used as a dynamic migration.
-extension RefreshToken: Migration { }
+extension RefreshToken: Migration {
+    func prepare(on database: Database) -> EventLoopFuture<Void> {
+        database
+            .schema("RefreshTokens")
+            .id()
+            .field("token", .string, .required)
+            .field("expiryDate", .datetime, .required)
+            .field("revoked", .bool, .required)
+            .field("userId", .uuid, .references("Users", "id"))
+            .create()
+    }
+
+    func revert(on database: Database) -> EventLoopFuture<Void> {
+        database.schema("RefreshTokens").delete()
+    }
+}
 
 /// Allows `RefreshToken` to be encoded to and decoded from HTTP messages.
 extension RefreshToken: Content { }
-
-/// Allows `RefreshToken` to be used as a dynamic parameter in route definitions.
-extension RefreshToken: Parameter { }

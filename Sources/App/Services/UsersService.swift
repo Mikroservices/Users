@@ -1,27 +1,43 @@
 import Foundation
 import Vapor
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 
-protocol UsersServiceType: Service {
-    func login(on request: Request, userNameOrEmail: String, password: String) throws -> Future<User>
-    func forgotPassword(on request: Request, email: String) throws -> Future<User>
-    func confirmForgotPassword(on request: Request, forgotPasswordGuid: String, password: String) throws -> Future<User>
-    func changePassword(on request: Request, userName: String, currentPassword: String, newPassword: String) throws -> Future<User>
-    func confirmEmail(on request: Request, userId: UUID, confirmationGuid: String) throws -> Future<User>
-    func isUserNameTaken(on request: Request, userName: String) -> Future<Bool>
-    func isEmailConnected(on request: Request, email: String) -> Future<Bool>
+extension Application.Services {
+    struct UsersServiceKey: StorageKey {
+        typealias Value = UsersServiceType
+    }
+
+    var usersService: UsersServiceType {
+        get {
+            self.application.storage[UsersServiceKey.self] ?? UsersService()
+        }
+        nonmutating set {
+            self.application.storage[UsersServiceKey.self] = newValue
+        }
+    }
+}
+
+protocol UsersServiceType {
+    func login(on request: Request, userNameOrEmail: String, password: String) throws -> EventLoopFuture<User>
+    func forgotPassword(on request: Request, email: String) throws -> EventLoopFuture<User>
+    func confirmForgotPassword(on request: Request, forgotPasswordGuid: String, password: String) throws -> EventLoopFuture<User>
+    func changePassword(on request: Request, userName: String, currentPassword: String, newPassword: String) throws -> EventLoopFuture<User>
+    func confirmEmail(on request: Request, userId: UUID, confirmationGuid: String) throws -> EventLoopFuture<User>
+    func isUserNameTaken(on request: Request, userName: String) -> EventLoopFuture<Bool>
+    func isEmailConnected(on request: Request, email: String) -> EventLoopFuture<Bool>
 }
 
 final class UsersService: UsersServiceType {
 
-    func login(on request: Request, userNameOrEmail: String, password: String) throws -> Future<User> {
+    func login(on request: Request, userNameOrEmail: String, password: String) throws -> EventLoopFuture<User> {
 
         let userNameOrEmailNormalized = userNameOrEmail.uppercased()
 
-        return User.query(on: request).group(.or) { userNameGroup in
-            userNameGroup.filter(\.userNameNormalized == userNameOrEmailNormalized)
-            userNameGroup.filter(\.emailNormalized == userNameOrEmailNormalized)
-        }.first().map(to: User.self) { userFromDb in
+        return User.query(on: request.db).group(.or) { userNameGroup in
+            userNameGroup.filter(\.$userNameNormalized == userNameOrEmailNormalized)
+            userNameGroup.filter(\.$emailNormalized == userNameOrEmailNormalized)
+        }.first().flatMapThrowing { userFromDb in
 
             guard let user = userFromDb else {
                 throw LoginError.invalidLoginCredentials
@@ -44,10 +60,11 @@ final class UsersService: UsersServiceType {
         }
     }
 
-    func forgotPassword(on request: Request, email: String) throws -> Future<User> {
+    func forgotPassword(on request: Request, email: String) throws -> EventLoopFuture<User> {
         let emailNormalized = email.uppercased()
 
-        return User.query(on: request).filter(\.emailNormalized == emailNormalized).first().flatMap(to: User.self) { userFromDb in
+        let userFuture = User.query(on: request.db).filter(\.$emailNormalized == emailNormalized).first()
+        return userFuture.flatMapThrowing { userFromDb in
 
             guard let user = userFromDb else {
                 throw EntityNotFoundError.userNotFound
@@ -60,12 +77,14 @@ final class UsersService: UsersServiceType {
             user.forgotPasswordGuid = UUID.init().uuidString
             user.forgotPasswordDate = Date()
 
-            return user.save(on: request)
+            _ = user.save(on: request.db)
+            return user
         }
     }
 
-    func confirmForgotPassword(on request: Request, forgotPasswordGuid: String, password: String) throws -> Future<User> {
-        return User.query(on: request).filter(\.forgotPasswordGuid == forgotPasswordGuid).first().flatMap(to: User.self) { userFromDb in
+    func confirmForgotPassword(on request: Request, forgotPasswordGuid: String, password: String) throws -> EventLoopFuture<User> {
+        let userFuture = User.query(on: request.db).filter(\.$forgotPasswordGuid == forgotPasswordGuid).first()
+        return userFuture.flatMapThrowing { userFromDb in
 
             guard let user = userFromDb else {
                 throw EntityNotFoundError.userNotFound
@@ -84,7 +103,7 @@ final class UsersService: UsersServiceType {
                 throw ForgotPasswordError.tokenExpired
             }
 
-            let salt = try Password.generateSalt()
+            let salt = Password.generateSalt()
             let passwordHash = try Password.hash(password, withSalt: salt)
 
             user.forgotPasswordGuid = nil
@@ -93,15 +112,17 @@ final class UsersService: UsersServiceType {
             user.salt = salt
             user.emailWasConfirmed = true
 
-            return user.save(on: request)
+            _ = user.save(on: request.db)
+            return user
         }
     }
 
-    func changePassword(on request: Request, userName: String, currentPassword: String, newPassword: String) throws -> Future<User> {
+    func changePassword(on request: Request, userName: String, currentPassword: String, newPassword: String) throws -> EventLoopFuture<User> {
 
         let userNameNormalized = userName.uppercased()
 
-        return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().flatMap(to: User.self) { userFromDb in
+        let userFuture = User.query(on: request.db).filter(\.$userNameNormalized == userNameNormalized).first()
+        return userFuture.flatMapThrowing { userFromDb in
 
             guard let user = userFromDb else {
                 throw LoginError.invalidLoginCredentials
@@ -126,12 +147,13 @@ final class UsersService: UsersServiceType {
             user.password = newPasswordHash
             user.salt = salt
 
-            return user.update(on: request)
+            _ = user.update(on: request.db)
+            return user
         }
     }
 
-    func confirmEmail(on request: Request, userId: UUID, confirmationGuid: String) throws -> Future<User> {
-        return User.find(userId, on: request).flatMap(to: User.self) { userFromDb in
+    func confirmEmail(on request: Request, userId: UUID, confirmationGuid: String) throws -> EventLoopFuture<User> {
+        return User.find(userId, on: request.db).flatMapThrowing { userFromDb in
 
             guard let user = userFromDb else {
                 throw RegisterError.invalidIdOrToken
@@ -142,15 +164,18 @@ final class UsersService: UsersServiceType {
             }
 
             user.emailWasConfirmed = true
-            return user.save(on: request)
+
+            _ = user.save(on: request.db)
+            return user
         }
     }
 
-    func isUserNameTaken(on request: Request, userName: String) -> Future<Bool> {
+    func isUserNameTaken(on request: Request, userName: String) -> EventLoopFuture<Bool> {
 
         let userNameNormalized = userName.uppercased()
 
-        return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().map(to: Bool.self) { userFromDb in
+        let userFuture = User.query(on: request.db).filter(\.$userNameNormalized == userNameNormalized).first()
+        return userFuture.map { userFromDb in
 
             if userFromDb != nil {
                 return true
@@ -160,11 +185,12 @@ final class UsersService: UsersServiceType {
         }
     }
 
-    func isEmailConnected(on request: Request, email: String) -> Future<Bool> {
+    func isEmailConnected(on request: Request, email: String) -> EventLoopFuture<Bool> {
 
         let emailNormalized = email.uppercased()
 
-        return User.query(on: request).filter(\.emailNormalized == emailNormalized).first().map(to: Bool.self) { userFromDb in
+        let userFuture = User.query(on: request.db).filter(\.$emailNormalized == emailNormalized).first()
+        return userFuture.map { userFromDb in
 
             if userFromDb != nil {
                 return true

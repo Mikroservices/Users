@@ -2,6 +2,7 @@
 import Foundation
 import Vapor
 
+/*
 final class MockEmailsService: EmailsServiceType {
     func sendForgotPasswordEmail(on request: Request, user: User) throws -> Future<Bool> {
         return request.future().map { return true }
@@ -11,3 +12,4 @@ final class MockEmailsService: EmailsServiceType {
         return request.future().map { return true }
     }
 }
+*/

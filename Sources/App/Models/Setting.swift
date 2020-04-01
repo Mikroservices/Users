@@ -1,13 +1,21 @@
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 import Vapor
 
-/// A single entry of a Setting list.
-final class Setting: PostgreSQLUUIDModel {
-
+final class Setting: Model {
+    static let schema = "Settings"
+    
+    @ID(key: .id)
     var id: UUID?
+    
+    @Field(key: "key")
     var key: String
+    
+    @Field(key: "value")
     var value: String
 
+    init() { }
+    
     init(id: UUID? = nil,
          key: String,
          value: String
@@ -18,11 +26,20 @@ final class Setting: PostgreSQLUUIDModel {
     }
 }
 
-/// Allows `Setting` to be used as a dynamic migration.
-extension Setting: Migration { }
+extension Setting: Migration {
+    func prepare(on database: Database) -> EventLoopFuture<Void> {
+        database
+            .schema("Settings")
+            .id()
+            .field("key", .string, .required)
+            .field("value", .string, .required)
+            .create()
+    }
+
+    func revert(on database: Database) -> EventLoopFuture<Void> {
+        database.schema("Settings").delete()
+    }
+}
 
 /// Allows `Setting` to be encoded to and decoded from HTTP messages.
 extension Setting: Content { }
-
-/// Allows `Setting` to be used as a dynamic parameter in route definitions.
-extension Setting: Parameter { }

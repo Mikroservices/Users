@@ -1,7 +1,7 @@
 @testable import App
 import Foundation
 import Vapor
-
+/*
 extension Services {
     public static func commonWithMocks() -> Services {
         var services = Services.default()
@@ -16,3 +16,4 @@ extension Services {
         return services
     }
 }
+*/

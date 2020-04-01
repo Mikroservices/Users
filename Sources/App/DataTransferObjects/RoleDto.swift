@@ -1,6 +1,6 @@
 import Vapor
 
-final class RoleDto: Reflectable {
+final class RoleDto {
 
     var id: UUID?
     var name: String
@@ -40,15 +40,9 @@ extension RoleDto {
 extension RoleDto: Content { }
 
 extension RoleDto: Validatable {
-
-    /// See `Validatable`.
-    static func validations() throws -> Validations<RoleDto> {
-        var validations = Validations(RoleDto.self)
-
-        try validations.add(\.name, .count(...50))
-        try validations.add(\.code, .count(...20))
-        try validations.add(\.description, .count(...200) || .nil)
-
-        return validations
+    static func validations(_ validations: inout Validations) {
+        validations.add("name", as: String.self, is: .count(...50))
+        validations.add("code", as: String.self, is: .count(...20))
+        validations.add("description", as: String?.self, is: .count(...200) || .nil)
     }
 }

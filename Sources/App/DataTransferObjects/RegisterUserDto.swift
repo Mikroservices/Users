@@ -1,6 +1,6 @@
 import Vapor
 
-final class RegisterUserDto: Reflectable {
+final class RegisterUserDto {
 
     var userName: String
     var email: String
@@ -40,22 +40,16 @@ final class RegisterUserDto: Reflectable {
 extension RegisterUserDto: Content { }
 
 extension RegisterUserDto: Validatable {
+    static func validations(_ validations: inout Validations) {
+        validations.add("userName", as: String.self, is: .count(1...50) && .alphanumeric)
+        validations.add("email", as: String.self, is: .email)
+        validations.add("password", as: String.self, is: .count(8...32) && .password)
 
-    /// See `Validatable`.
-    static func validations() throws -> Validations<RegisterUserDto> {
-        var validations = Validations(RegisterUserDto.self)
+        validations.add("name", as: String?.self, is: .count(...50) || .nil)
+        validations.add("location", as: String?.self, is: .count(...50) || .nil)
+        validations.add("website", as: String?.self, is: .count(...50) || .nil)
+        validations.add("bio", as: String?.self, is: .count(...200) || .nil)
 
-        try validations.add(\.userName, .count(1...50) && .alphanumeric)
-        try validations.add(\.email, .email)
-        try validations.add(\.password, .count(8...32) && .password)
-
-        try validations.add(\.name, .count(...50) || .nil)
-        try validations.add(\.location, .count(...50) || .nil)
-        try validations.add(\.website, .count(...50) || .nil)
-        try validations.add(\.bio, .count(...200) || .nil)
-
-        try validations.add(\.securityToken, !.nil)
-
-        return validations
+        validations.add("securityToken", as: String?.self, is: !.nil)
     }
 }

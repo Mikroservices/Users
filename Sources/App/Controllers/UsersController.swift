@@ -1,17 +1,18 @@
 import Vapor
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 
 /// Controls basic operations for User object.
 final class UsersController: RouteCollection {
 
     public static let uri = "/users"
 
-    func boot(router: Router) throws {
-        router.get(UsersController.uri, String.parameter, use: read)
-        router.put(UserDto.self, at: UsersController.uri, String.parameter, use: update)
-        router.delete(UsersController.uri, String.parameter, use: delete)
+    func boot(routes: RoutesBuilder) throws {
+        // routes.get(UsersController.uri, String.parameter, use: read)
+        // routes.put(UserDto.self, at: UsersController.uri, String.parameter, use: update)
+        // routes.delete(UsersController.uri, String.parameter, use: delete)
     }
-
+/*
     /// User profile.
     func read(request: Request) throws -> Future<UserDto> {
 
@@ -113,4 +114,5 @@ final class UsersController: RouteCollection {
             return user.update(on: request)
         }
     }
+*/
 }

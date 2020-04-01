@@ -3,8 +3,8 @@ import Foundation
 import XCTest
 import Vapor
 import XCTest
-import FluentPostgreSQL
 
+/*
 final class ForgotConfirmActionTests: XCTestCase {
 
     func testPasswordShouldBeChangeForCorrectToken() throws {
@@ -172,3 +172,4 @@ final class ForgotConfirmActionTests: XCTestCase {
         ("testPasswordShouldNotBeChangedWhenPasswordIsTooLong", testPasswordShouldNotBeChangedWhenPasswordIsTooLong)
     ]
 }
+*/

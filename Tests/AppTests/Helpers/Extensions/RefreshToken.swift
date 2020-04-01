@@ -1,7 +1,7 @@
 @testable import App
 import Vapor
-import FluentPostgreSQL
 
+/*
 extension RefreshToken {
 
     static func get(on application: Application, token: String) throws -> RefreshToken {
@@ -18,3 +18,4 @@ extension RefreshToken {
         _ = try self.save(on: connection).wait()
     }
 }
+*/

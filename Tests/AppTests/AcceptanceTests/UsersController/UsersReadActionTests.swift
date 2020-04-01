@@ -2,8 +2,8 @@
 import XCTest
 import Vapor
 import XCTest
-import FluentPostgreSQL
 
+/*
 final class UsersReadActionTests: XCTestCase {
 
     func testUserProfileShouldBeReturnedForExistingUser() throws {
@@ -96,3 +96,4 @@ final class UsersReadActionTests: XCTestCase {
         ("testPublicProfileShouldNotContainsSensitiveInformation", testPublicProfileShouldNotContainsSensitiveInformation)
     ]
 }
+*/

@@ -7,27 +7,33 @@ public enum SettingKey: String {
     case recaptchaKey
 }
 
-protocol SettingsServiceType: Service {
-    func get(on request: Request) throws -> Future<Configuration>
+extension Application.Services {
+    struct SettingsServiceKey: StorageKey {
+        typealias Value = SettingsServiceType
+    }
+
+    var settingsService: SettingsServiceType {
+        get {
+            self.application.storage[SettingsServiceKey.self] ?? SettingsService()
+        }
+        nonmutating set {
+            self.application.storage[SettingsServiceKey.self] = newValue
+        }
+    }
+}
+
+protocol SettingsServiceType {
+    func get(on application: Application) -> EventLoopFuture<Configuration>
 }
 
 final class SettingsService: SettingsServiceType {
 
-    private var configuration: Configuration?
+    func get(on application: Application) -> EventLoopFuture<Configuration> {
 
-    func get(on request: Request) throws -> Future<Configuration> {
+        application.logger.info("Downloading application settings from database")
 
-        if let unwrapedConfiguration = self.configuration {
-            return Future.map(on: request) { return unwrapedConfiguration }
-        }
-
-        let logger = try request.make(Logger.self)
-        logger.info("Downloading application settings from database")
-
-        return Setting.query(on: request).all().map(to: Configuration.self) { settings in
+        return Setting.query(on: application.db).all().map { settings in
             let configuration = Configuration(settings: settings)
-            self.configuration = configuration
-
             return configuration
         }
     }

@@ -1,7 +1,7 @@
 @testable import App
 import Vapor
-import FluentPostgreSQL
 
+/*
 extension Role {
 
     static func create(on application: Application,
@@ -32,3 +32,4 @@ extension Role {
         return role
     }
 }
+*/

@@ -1,17 +1,34 @@
 import Vapor
 import JWT
 import Crypto
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 
-protocol AuthorizationServiceType: Service {
-    func validateRefreshToken(on request: Request, refreshToken: String) throws -> Future<(user: User, refreshToken: RefreshToken)>
-    func createAccessToken(request: Request, forUser user: User) throws -> Future<String>
-    func createRefreshToken(request: Request, forUser user: User) throws -> Future<String>
-    func updateRefreshToken(request: Request, forToken refreshToken: RefreshToken) throws -> Future<String>
-    func getUserIdFromBearerToken(request: Request) throws -> Future<UUID?>
-    func getUserNameFromBearerToken(request: Request) throws -> Future<String?>
-    func getUserNameFromBearerTokenOrAbort(on request: Request) throws -> Future<String>
-    func verifySuperUser(request: Request) throws -> Future<Void>
+extension Application.Services {
+    struct AuthorizationServiceKey: StorageKey {
+        typealias Value = AuthorizationServiceType
+    }
+
+    var authorizationService: AuthorizationServiceType {
+        get {
+            self.application.storage[AuthorizationServiceKey.self] ?? AuthorizationService()
+        }
+        nonmutating set {
+            self.application.storage[AuthorizationServiceKey.self] = newValue
+        }
+    }
+}
+
+protocol AuthorizationServiceType {
+    func validateRefreshToken(on request: Request, refreshToken: String) throws -> EventLoopFuture<Void>
+    func getUserByRefreshToken(on request: Request, refreshToken: String) throws -> EventLoopFuture<User>
+    func createAccessToken(request: Request, forUser user: User) throws -> EventLoopFuture<String>
+    func createRefreshToken(request: Request, forUser user: User) throws -> EventLoopFuture<String>
+    func updateRefreshToken(request: Request, forToken refreshToken: RefreshToken) throws -> EventLoopFuture<String>
+    func getUserIdFromBearerToken(request: Request) throws -> UUID?
+    func getUserNameFromBearerToken(request: Request) throws -> String?
+    func getUserNameFromBearerTokenOrAbort(on request: Request) throws -> String
+    func verifySuperUser(request: Request) throws -> EventLoopFuture<Void>
 }
 
 final class AuthorizationService: AuthorizationServiceType {
@@ -19,58 +36,52 @@ final class AuthorizationService: AuthorizationServiceType {
     private let refreshTokenTime: TimeInterval = 30 * 24 * 60 * 60  // 30 days
     private let accessTokenTime: TimeInterval = 60 * 60             // 1 hour
 
-    public func validateRefreshToken(on request: Request, refreshToken: String) throws -> Future<(user: User, refreshToken: RefreshToken)> {
-        return RefreshToken.query(on: request).filter(\.token == refreshToken)
-            .first().flatMap(to: (user: User, refreshToken: RefreshToken).self) { refreshTokenFromDb in
+    public func validateRefreshToken(on request: Request, refreshToken: String) throws -> EventLoopFuture<Void> {
+        return RefreshToken.query(on: request.db).filter(\.$token == refreshToken).first().flatMapThrowing { refreshTokenFromDb in
 
-                guard let refreshToken = refreshTokenFromDb else {
-                    throw EntityNotFoundError.refreshTokenNotFound
-                }
-
-                if refreshToken.revoked {
-                    throw RefreshTokenError.refreshTokenRevoked
-                }
-
-                if refreshToken.expiryDate < Date()  {
-                    throw RefreshTokenError.refreshTokenExpired
-                }
-
-                return User.query(on: request).filter(\.id == refreshToken.userId).first().map { userFromDb in
-
-                    guard let user = userFromDb else {
-                        throw EntityNotFoundError.userNotFound
-                    }
-
-                    if user.isBlocked {
-                        throw LoginError.userAccountIsBlocked
-                    }
-
-                    return (user, refreshToken)
-                }
-        }
-    }
-
-    public func createAccessToken(request: Request, forUser user: User) throws -> Future<String> {
-        let settingsService = try request.make(SettingsServiceType.self)
-        return try settingsService.get(on: request).flatMap(to: String.self) { configuration in
-
-            guard let jwtPrivateKey = configuration.getString(.jwtPrivateKey) else {
-                throw Abort(.internalServerError, reason: "Private key is not configured in database.")
+            guard let refreshToken = refreshTokenFromDb else {
+                throw EntityNotFoundError.refreshTokenNotFound
             }
 
-            let rsaKey: RSAKey = try .private(pem: jwtPrivateKey)
-            let authorizationPayloadFuture = try self.createAuthorizationPayload(request: request, forUser: user)
+            if refreshToken.revoked {
+                throw RefreshTokenError.refreshTokenRevoked
+            }
 
-            return authorizationPayloadFuture.map(to: String.self) { authorizationPayload in
-                let data = try JWT(payload: authorizationPayload).sign(using: JWTSigner.rs512(key: rsaKey))
-                let accessToken = String(data: data, encoding: .utf8) ?? ""
-
-                return accessToken
+            if refreshToken.expiryDate < Date()  {
+                throw RefreshTokenError.refreshTokenExpired
             }
         }
     }
+    
+    public func getUserByRefreshToken(on request: Request, refreshToken: String) throws -> EventLoopFuture<User> {
+        let refreshTokenFuture = RefreshToken.query(on: request.db).with(\.$user).filter(\.$token == refreshToken).first()
+        
+        let userFuture = refreshTokenFuture.flatMapThrowing { refreshTokenFromDb -> User in
+            
+            guard let refreshToken = refreshTokenFromDb else {
+                throw EntityNotFoundError.refreshTokenNotFound
+            }
+            
+            if refreshToken.user.isBlocked {
+                throw LoginError.userAccountIsBlocked
+            }
 
-    public func createRefreshToken(request: Request, forUser user: User) throws -> Future<String> {
+            return refreshToken.user
+        }
+        
+        return userFuture
+    }
+
+    public func createAccessToken(request: Request, forUser user: User) throws -> EventLoopFuture<String> {
+        let authorizationPayloadFlatFuture = try self.createAuthorizationPayload(request: request, forUser: user)
+
+        return authorizationPayloadFlatFuture.flatMapThrowing { authorizationPayload in
+            let accessToken = try request.jwt.sign(authorizationPayload)
+            return accessToken
+        }
+    }
+
+    public func createRefreshToken(request: Request, forUser user: User) throws -> EventLoopFuture<String> {
 
         guard let userId = user.id else {
             throw RefreshTokenError.userIdNotSpecified
@@ -80,100 +91,81 @@ final class AuthorizationService: AuthorizationServiceType {
         let expiryDate = Date().addingTimeInterval(self.refreshTokenTime)
         let refreshToken = RefreshToken(userId: userId, token: token, expiryDate: expiryDate)
 
-        return refreshToken.save(on: request).transform(to: refreshToken.token)
+        return refreshToken.save(on: request.db).map {
+            refreshToken.token
+        }
     }
 
-    public func updateRefreshToken(request: Request, forToken refreshToken: RefreshToken) throws -> Future<String> {
+    public func updateRefreshToken(request: Request, forToken refreshToken: RefreshToken) throws -> EventLoopFuture<String> {
         refreshToken.token = self.createRefreshTokenString()
         refreshToken.expiryDate = Date().addingTimeInterval(self.refreshTokenTime)
 
-        return refreshToken.save(on: request).transform(to: refreshToken.token)
+        return refreshToken.save(on: request.db).map {
+            refreshToken.token
+        }
     }
 
-    public func getUserIdFromBearerToken(request: Request) throws -> Future<UUID?> {
-        return try self.geAuthorizationPayloadFromBearerToken(request: request).map(to: UUID?.self) { authorizationPayload in
-            guard let unwrapedAuthorizationPayload = authorizationPayload else {
-                return nil
+    public func getUserIdFromBearerToken(request: Request) throws -> UUID? {
+        let authorizationPayload = try self.geAuthorizationPayloadFromBearerToken(request: request)
+        guard let unwrapedAuthorizationPayload = authorizationPayload else {
+            return nil
+        }
+
+        return unwrapedAuthorizationPayload.id
+    }
+
+    public func getUserNameFromBearerToken(request: Request) throws -> String? {
+        let authorizationPayload = try self.geAuthorizationPayloadFromBearerToken(request: request)
+        guard let unwrapedAuthorizationPayload = authorizationPayload else {
+            return nil
+        }
+
+        return unwrapedAuthorizationPayload.userName
+    }
+
+    private func geAuthorizationPayloadFromBearerToken(request: Request) throws -> AuthorizationPayload? {
+        if let bearer = request.headers.bearerAuthorization {
+            let authorizationPayload = try request.jwt.verify(bearer.token, as: AuthorizationPayload.self)
+
+            if authorizationPayload.exp > Date() {
+                return authorizationPayload
             }
 
-            return unwrapedAuthorizationPayload.id
+            return nil
         }
+
+        return nil
     }
 
-    public func getUserNameFromBearerToken(request: Request) throws -> Future<String?> {
-        return try self.geAuthorizationPayloadFromBearerToken(request: request).map(to: String?.self) { authorizationPayload in
-            guard let unwrapedAuthorizationPayload = authorizationPayload else {
-                return nil
-            }
-
-            return unwrapedAuthorizationPayload.userName
+    public func getUserNameFromBearerTokenOrAbort(on request: Request) throws -> String {
+        let userNameFromToken = try self.getUserNameFromBearerToken(request: request)
+        guard let unwrapedUserNameFromToken = userNameFromToken else {
+            throw Abort(.unauthorized)
         }
+
+        return unwrapedUserNameFromToken
     }
 
-    private func geAuthorizationPayloadFromBearerToken(request: Request) throws -> Future<AuthorizationPayload?> {
+    public func verifySuperUser(request: Request) throws -> EventLoopFuture<Void> {
 
-        if let bearer = request.http.headers.bearerAuthorization {
-
-            let settingsService = try request.make(SettingsServiceType.self)
-            return try settingsService.get(on: request).map(to: AuthorizationPayload?.self) { configuration in
-
-                guard let jwtPrivateKey = configuration.getString(.jwtPrivateKey) else {
-                    throw Abort(.internalServerError, reason: "Private key is not configured in database.")
-                }
-
-                let rsaKey: RSAKey = try .private(pem: jwtPrivateKey)
-                let authorizationPayload = try JWT<AuthorizationPayload>(from: bearer.token, verifiedUsing: JWTSigner.rs512(key: rsaKey))
-
-                if authorizationPayload.payload.exp > Date() {
-                    return authorizationPayload.payload
-                }
-
-                return nil
-            }
-        }
-
-        return Future.map(on: request) { return nil }
-    }
-
-    public func getUserNameFromBearerTokenOrAbort(on request: Request) throws -> Future<String> {
-
-        return try self.getUserNameFromBearerToken(request: request).map(to: String.self) { userNameFromToken in
-            guard let unwrapedUserNameFromToken = userNameFromToken else {
-                throw Abort(.unauthorized)
-            }
-
-            return unwrapedUserNameFromToken
-        }
-    }
-
-    public func verifySuperUser(request: Request) throws -> Future<Void> {
-
-        let userNameFuture = try self.getUserNameFromBearerTokenOrAbort(on: request)
-
-        let userFuture = userNameFuture.flatMap(to: User?.self) { userNameFromToken in
-            let userNameNormalized = userNameFromToken.uppercased()
-            return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first()
-        }
-
-        let rolesFuture = userFuture.flatMap(to: Int.self) { userFromDb in
-
+        let userNameFromToken = try self.getUserNameFromBearerTokenOrAbort(on: request)
+        let userNameNormalized = userNameFromToken.uppercased()
+        
+        let userFuture = User.query(on: request.db).with(\.$roles).filter(\.$userNameNormalized == userNameNormalized).first()
+        return userFuture.flatMapThrowing { userFromDb in
             guard let user = userFromDb else {
                 throw Abort(.unauthorized)
             }
 
-            return try user.roles.query(on: request).filter(\.hasSuperPrivileges == true).count()
-        }
-
-        return rolesFuture.map(to: Void.self) { rolesWithSuperPrivileges in
-            if rolesWithSuperPrivileges == 0 {
+            if user.roles.filter({ $0.hasSuperPrivileges == true }).count == 0 {
                 throw Abort(.forbidden)
             }
         }
     }
 
-    private func createAuthorizationPayload(request: Request, forUser user: User) throws -> Future<AuthorizationPayload> {
+    private func createAuthorizationPayload(request: Request, forUser user: User) throws -> EventLoopFuture<AuthorizationPayload> {
 
-        return try user.roles.query(on: request).all().map { roles in
+        return User.query(on: request.db).with(\.$roles).filter(\.$id == user.id!).first().map { userFromDb in
 
             let expirationDate = Date().addingTimeInterval(TimeInterval(self.accessTokenTime))
             let authorizationPayload = AuthorizationPayload(
@@ -183,7 +175,7 @@ final class AuthorizationService: AuthorizationServiceType {
                 email: user.email,
                 exp: expirationDate,
                 gravatarHash: user.gravatarHash,
-                roles: roles.map { $0.code }
+                roles: userFromDb?.roles.map { $0.code } ?? []
             )
 
             return authorizationPayload

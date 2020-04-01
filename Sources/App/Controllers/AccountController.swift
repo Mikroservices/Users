@@ -3,26 +3,27 @@ import Vapor
 import JWT
 import Crypto
 import Recaptcha
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 
 final class AccountController: RouteCollection {
 
     public static let uri = "/account"
 
-    func boot(router: Router) throws {
-        router.post(LoginRequestDto.self, at: "\(AccountController.uri)/login", use: login)
-        router.post(RefreshTokenDto.self, at: "\(AccountController.uri)/refresh", use: refresh)
-        router.post(ChangePasswordRequestDto.self, at: "\(AccountController.uri)/change-password", use: changePassword)
+    func boot(routes: RoutesBuilder) throws {
+        // routes.post(LoginRequestDto.self, at: "\(AccountController.uri)/login", use: login)
+        // routes.post(RefreshTokenDto.self, at: "\(AccountController.uri)/refresh", use: refresh)
+        // routes.post(ChangePasswordRequestDto.self, at: "\(AccountController.uri)/change-password", use: changePassword)
     }
-
+/*
     /// Sign-in user.
-    func login(request: Request, loginRequestDto: LoginRequestDto) throws -> Future<AccessTokenDto> {
-        let usersService = try request.make(UsersServiceType.self)
+    func login(request: Request, loginRequestDto: LoginRequestDto) throws -> EventLoopFuture<AccessTokenDto> {
+        let usersService = request.application.services.usersService
 
         let loginFuture = try usersService.login(on: request, userNameOrEmail: loginRequestDto.userNameOrEmail, password: loginRequestDto.password)
-        return loginFuture.flatMap { user in
+        return loginFuture.flatMapThrowing { user in
 
-            let authorizationService = try request.make(AuthorizationServiceType.self)
+            let authorizationService = request.application.services.authorizationService
 
             let accessTokenFuture = try authorizationService.createAccessToken(request: request, forUser: user)
             let refreshTokenFuture = try authorizationService.createRefreshToken(request: request, forUser: user)
@@ -34,11 +35,11 @@ final class AccountController: RouteCollection {
     }
 
     /// Refresh token.
-    func refresh(request: Request, refreshTokenDto: RefreshTokenDto) throws -> Future<AccessTokenDto> {
-        let authorizationService = try request.make(AuthorizationServiceType.self)
+    func refresh(request: Request, refreshTokenDto: RefreshTokenDto) throws -> EventLoopFuture<AccessTokenDto> {
+        let authorizationService = request.application.services.authorizationService
 
         let validateRefreshTokenFuture = try authorizationService.validateRefreshToken(on: request, refreshToken: refreshTokenDto.refreshToken)
-        return validateRefreshTokenFuture.flatMap { (user, refreshToken) in
+        return validateRefreshTokenFuture.flatMapThrowing { (user, refreshToken) in
 
             let accessTokenFuture = try authorizationService.createAccessToken(request: request, forUser: user)
             let refreshTokenFuture = try authorizationService.updateRefreshToken(request: request, forToken: refreshToken)
@@ -50,19 +51,19 @@ final class AccountController: RouteCollection {
     }
 
     /// Change password.
-    func changePassword(request: Request, changePasswordRequestDto: ChangePasswordRequestDto) throws -> Future<HTTPStatus> {
+    func changePassword(request: Request, changePasswordRequestDto: ChangePasswordRequestDto) throws -> EventLoopFuture<HTTPStatus> {
 
-        try changePasswordRequestDto.validate()
+        try ChangePasswordRequestDto.validate(request)
 
-        let authorizationService = try request.make(AuthorizationServiceType.self)
+        let authorizationService = request.application.services.authorizationService
         let userNameFuture = try authorizationService.getUserNameFromBearerToken(request: request)
-        return userNameFuture.flatMap { userNameFromToken in
+        return userNameFuture.flatMapThrowing { userNameFromToken in
 
             guard let unwrapedUserNameFromToken = userNameFromToken else {
                 throw Abort(.unauthorized)
             }
 
-            let usersService = try request.make(UsersServiceType.self)
+            let usersService = request.application.services.usersService
             return try usersService.changePassword(
                 on: request,
                 userName: unwrapedUserNameFromToken,
@@ -71,4 +72,5 @@ final class AccountController: RouteCollection {
             ).transform(to: HTTPStatus.ok)
         }
     }
+*/
 }

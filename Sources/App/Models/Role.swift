@@ -1,16 +1,34 @@
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 import Vapor
 
-/// A single entry of a Role list.
-final class Role: PostgreSQLUUIDModel {
+final class Role: Model {
 
+    static let schema = "Roles"
+    
+    @ID(key: .id)
     var id: UUID?
-    var name: String
+    
+//    @Field(key: "name")
+//    var name: String
+//
+    @Field(key: "code")
     var code: String
+    
+    @Field(key: "description")
     var description: String?
+    
+    @Field(key: "hasSuperPrivileges")
     var hasSuperPrivileges: Bool
+    
+    @Field(key: "isDefault")
     var isDefault: Bool
+    
+    @Siblings(through: UserRole.self, from: \.$role, to: \.$user)
+    var users: [User]
 
+    init() { }
+    
     init(id: UUID? = nil,
          name: String,
          code: String,
@@ -19,7 +37,7 @@ final class Role: PostgreSQLUUIDModel {
          isDefault: Bool
     ) {
         self.id = id
-        self.name = name
+        // self.name = name
         self.code = code
         self.description = description
         self.hasSuperPrivileges = hasSuperPrivileges
@@ -27,21 +45,27 @@ final class Role: PostgreSQLUUIDModel {
     }
 }
 
-/// Users connected to role.
-extension Role {
-    var users: Siblings<Role, User, UserRole> {
-        return siblings()
+/// Allows `Role` to be used as a dynamic migration.
+extension Role: Migration {
+    func prepare(on database: Database) -> EventLoopFuture<Void> {
+        database
+            .schema("Roles")
+            .id()
+            //.field("name", .string, .required)
+            .field("code", .string, .required)
+            .field("description", .string)
+            .field("hasSuperPrivileges", .bool, .required)
+            .field("isDefault", .bool, .required)
+            .create()
+    }
+
+    func revert(on database: Database) -> EventLoopFuture<Void> {
+        database.schema("Roles").delete()
     }
 }
 
-/// Allows `Role` to be used as a dynamic migration.
-extension Role: Migration { }
-
 /// Allows `Role` to be encoded to and decoded from HTTP messages.
 extension Role: Content { }
-
-/// Allows `Role` to be used as a dynamic parameter in route definitions.
-extension Role: Parameter { }
 
 extension Role {
     convenience init(from roleDto: RoleDto) {

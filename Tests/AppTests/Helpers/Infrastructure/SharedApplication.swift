@@ -3,8 +3,8 @@ import Foundation
 import XCTest
 import Vapor
 import XCTest
-import FluentPostgreSQL
 
+/*
 final class SharedApplication {
 
     private static var sharedApplication: Application? = {
@@ -55,3 +55,4 @@ final class SharedApplication {
         try app.asyncRun().wait()
     }
 }
+*/

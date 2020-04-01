@@ -1,6 +1,6 @@
 import Vapor
 
-final class ForgotPasswordConfirmationRequestDto: Reflectable {
+final class ForgotPasswordConfirmationRequestDto {
 
     var forgotPasswordGuid: String
     var password: String
@@ -14,13 +14,7 @@ final class ForgotPasswordConfirmationRequestDto: Reflectable {
 extension ForgotPasswordConfirmationRequestDto: Content { }
 
 extension ForgotPasswordConfirmationRequestDto: Validatable {
-
-    /// See `Validatable`.
-    static func validations() throws -> Validations<ForgotPasswordConfirmationRequestDto> {
-        var validations = Validations(ForgotPasswordConfirmationRequestDto.self)
-
-        try validations.add(\.password, .count(8...32) && .password)
-
-        return validations
+    static func validations(_ validations: inout Validations) {
+        validations.add("password", as: String.self, is: .count(8...32) && .password)
     }
 }

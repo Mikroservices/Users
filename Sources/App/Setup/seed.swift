@@ -1,21 +1,22 @@
 import Vapor
-import FluentPostgreSQL
+import Fluent
+import FluentPostgresDriver
 
 public class DatabaseSeed {
 
-    public static func `default`(_ app: Application) throws {
-        let connection = try app.newConnection(to: .psql).wait()
-        try settings(on: connection)
-        try roles(on: connection)
+    public static func execute(_ app: Application) throws {
+        let database = app.db(.psql)
+        try settings(on: database)
+        try roles(on: database)
     }
 
-    private static func settings(on connection: PostgreSQLConnection) throws {
-        let settings = try Setting.query(on: connection).all().wait()
+    private static func settings(on database: Database) throws {
+        let settings = try Setting.query(on: database).all().wait()
 
-        try ensureSettingExists(on: connection, existing: settings, key: .emailServiceAddress, value: "http://localhost:8002")
-        try ensureSettingExists(on: connection, existing: settings, key: .isRecaptchaEnabled, value: "0")
-        try ensureSettingExists(on: connection, existing: settings, key: .recaptchaKey, value: "")
-        try ensureSettingExists(on: connection, existing: settings, key: .jwtPrivateKey, value:
+        try ensureSettingExists(on: database, existing: settings, key: .emailServiceAddress, value: "http://localhost:8002")
+        try ensureSettingExists(on: database, existing: settings, key: .isRecaptchaEnabled, value: "0")
+        try ensureSettingExists(on: database, existing: settings, key: .recaptchaKey, value: "")
+        try ensureSettingExists(on: database, existing: settings, key: .jwtPrivateKey, value:
 """
 -----BEGIN RSA PRIVATE KEY-----
 MIIEogIBAAKCAQEAh4WjL2kJmM2GwSp1h/SMyrx7hD99Hl5vdNqlEhJ7mpg7UHzn
@@ -47,10 +48,10 @@ xrhRAoGAJjk4/TcoOMzSjaiMF3yq82CRblUvpo0cWLN/nLWkwJkhCgzf/fm7Z3Fs
 """)
     }
 
-    private static func roles(on connection: PostgreSQLConnection) throws {
-        let roles = try Role.query(on: connection).all().wait()
+    private static func roles(on database: Database) throws {
+        let roles = try Role.query(on: database).all().wait()
 
-        try ensureRoleExists(on: connection,
+        try ensureRoleExists(on: database,
                              existing: roles,
                              name: "Administrator",
                              code: "administrator",
@@ -58,7 +59,7 @@ xrhRAoGAJjk4/TcoOMzSjaiMF3yq82CRblUvpo0cWLN/nLWkwJkhCgzf/fm7Z3Fs
                              hasSuperPrivileges: true,
                              isDefault: false)
 
-        try ensureRoleExists(on: connection,
+        try ensureRoleExists(on: database,
                              existing: roles,
                              name: "Member",
                              code: "member",
@@ -67,18 +68,18 @@ xrhRAoGAJjk4/TcoOMzSjaiMF3yq82CRblUvpo0cWLN/nLWkwJkhCgzf/fm7Z3Fs
                              isDefault: true)
     }
 
-    private static func ensureSettingExists(on connection: PostgreSQLConnection,
+    private static func ensureSettingExists(on database: Database,
                                             existing settings: [Setting],
                                             key: SettingKey,
                                             value: String) throws {
 
         if !settings.contains(where: { $0.key == key.rawValue }) {
             let setting = Setting(key: key.rawValue, value: value)
-            _ = try setting.save(on: connection).wait()
+            _ = try setting.save(on: database).wait()
         }
     }
 
-    private static func ensureRoleExists(on connection: PostgreSQLConnection,
+    private static func ensureRoleExists(on database: Database,
                                          existing roles: [Role],
                                          name: String,
                                          code: String,
@@ -87,7 +88,7 @@ xrhRAoGAJjk4/TcoOMzSjaiMF3yq82CRblUvpo0cWLN/nLWkwJkhCgzf/fm7Z3Fs
                                          isDefault: Bool) throws {
         if !roles.contains(where: { $0.name == name }) {
             let role = Role(name: name, code: code, description: description, hasSuperPrivileges: hasSuperPrivileges, isDefault: isDefault)
-            _ = try role.save(on: connection).wait()
+            _ = try role.save(on: database).wait()
         }
     }
 }

@@ -1,7 +1,7 @@
 @testable import App
 import Vapor
-import FluentPostgreSQL
 
+/*
 extension User {
     static func create(on application: Application,
                      userName: String,
@@ -71,3 +71,4 @@ extension User {
         return try self.roles.query(on: connection).all().wait()
     }
 }
+*/

@@ -2,8 +2,8 @@
 import XCTest
 import Vapor
 import XCTest
-import FluentPostgreSQL
 
+/*
 final class UserNameActionTests: XCTestCase {
 
     func testUserNameValidationShouldReturnTrueIfUserNameExists() throws {
@@ -40,3 +40,4 @@ final class UserNameActionTests: XCTestCase {
         ("testUserNameValidationShouldReturnFalseIfUserNameNotExists", testUserNameValidationShouldReturnFalseIfUserNameNotExists)
     ]
 }
+*/
