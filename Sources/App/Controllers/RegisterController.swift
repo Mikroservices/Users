@@ -139,23 +139,26 @@ final class RegisterController: RouteCollection {
                         emailConfirmationGuid: emailConfirmationGuid,
                         gravatarHash: gravatarHash)
 
-        _ = user.save(on: request.db)
-        return request.eventLoop.makeSucceededFuture(user)
+        let saveUserFuture = user.save(on: request.db)
+        let rolesWrappedFuture = saveUserFuture.map { _ in
+            Role.query(on: request.db).filter(\.$isDefault == true).all()
+        }
+        
+        let rolesFuture = rolesWrappedFuture.flatMap { roles in
+            roles
+        }
+        
+        return rolesFuture.flatMap { roles -> EventLoopFuture<User> in
+            var rolesSavedFuture: [EventLoopFuture<Void>] = [EventLoopFuture<Void>]()
+            roles.forEach { role in
+                let roleSavedFuture = user.$roles.attach(role, on: request.db)
+                rolesSavedFuture.append(roleSavedFuture)
+            }
             
-//            .flatMap { savedUser in
-//            return Role.query(on: request.db).filter(\.$isDefault == true).all().flatMap { roles in
-//
-//                var rolesSavedFuture: [Future<UserRole>] = [Future<UserRole>]()
-//                roles.forEach { role in
-//                    let roleSavedFuture = savedUser.roles.attach(role, on: request)
-//                    rolesSavedFuture.append(roleSavedFuture)
-//                }
-//
-//                return rolesSavedFuture.map(to: User.self, on: request) { userRoles in
-//                    return savedUser
-//                }
-//            }
-//        }
+            return EventLoopFuture.andAllSucceed(rolesSavedFuture, on: request.eventLoop).map { _ -> User in
+                user
+            }
+        }
     }
 
     private func sendNewUserEmail(on request: Request, user: User) throws -> EventLoopFuture<User> {

@@ -53,7 +53,7 @@ xrhRAoGAJjk4/TcoOMzSjaiMF3yq82CRblUvpo0cWLN/nLWkwJkhCgzf/fm7Z3Fs
 
         try ensureRoleExists(on: database,
                              existing: roles,
-                             name: "Administrator",
+                             role: "Administrator",
                              code: "administrator",
                              description: "Users have access to whole system.",
                              hasSuperPrivileges: true,
@@ -61,7 +61,7 @@ xrhRAoGAJjk4/TcoOMzSjaiMF3yq82CRblUvpo0cWLN/nLWkwJkhCgzf/fm7Z3Fs
 
         try ensureRoleExists(on: database,
                              existing: roles,
-                             name: "Member",
+                             role: "Member",
                              code: "member",
                              description: "Users have access to public part of system.",
                              hasSuperPrivileges: false,
@@ -81,13 +81,13 @@ xrhRAoGAJjk4/TcoOMzSjaiMF3yq82CRblUvpo0cWLN/nLWkwJkhCgzf/fm7Z3Fs
 
     private static func ensureRoleExists(on database: Database,
                                          existing roles: [Role],
-                                         name: String,
+                                         role: String,
                                          code: String,
                                          description: String,
                                          hasSuperPrivileges: Bool,
                                          isDefault: Bool) throws {
-        if !roles.contains(where: { $0.name == name }) {
-            let role = Role(name: name, code: code, description: description, hasSuperPrivileges: hasSuperPrivileges, isDefault: isDefault)
+        if !roles.contains(where: { $0.role == role }) {
+            let role = Role(role: role, code: code, description: description, hasSuperPrivileges: hasSuperPrivileges, isDefault: isDefault)
             _ = try role.save(on: database).wait()
         }
     }

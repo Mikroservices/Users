@@ -9,9 +9,9 @@ final class Role: Model {
     @ID(key: .id)
     var id: UUID?
     
-//    @Field(key: "name")
-//    var name: String
-//
+    @Field(key: "role")
+    var role: String
+
     @Field(key: "code")
     var code: String
     
@@ -30,14 +30,14 @@ final class Role: Model {
     init() { }
     
     init(id: UUID? = nil,
-         name: String,
+         role: String,
          code: String,
          description: String?,
          hasSuperPrivileges: Bool,
          isDefault: Bool
     ) {
         self.id = id
-        // self.name = name
+        self.role = role
         self.code = code
         self.description = description
         self.hasSuperPrivileges = hasSuperPrivileges
@@ -51,7 +51,7 @@ extension Role: Migration {
         database
             .schema("Roles")
             .id()
-            //.field("name", .string, .required)
+            .field("role", .string, .required)
             .field("code", .string, .required)
             .field("description", .string)
             .field("hasSuperPrivileges", .bool, .required)
@@ -69,7 +69,7 @@ extension Role: Content { }
 
 extension Role {
     convenience init(from roleDto: RoleDto) {
-        self.init(name: roleDto.name,
+        self.init(role: roleDto.role,
                   code: roleDto.code,
                   description: roleDto.description,
                   hasSuperPrivileges: roleDto.hasSuperPrivileges,
