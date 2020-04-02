@@ -14,7 +14,7 @@ final class AccountController: RouteCollection {
         let accountGroup = routes.grouped("account")
         
         accountGroup.post("login", use: login)
-        // routes.post(RefreshTokenDto.self, at: "\(AccountController.uri)/refresh", use: refresh)
+        accountGroup.post("refresh", use: refresh)
         // routes.post(ChangePasswordRequestDto.self, at: "\(AccountController.uri)/change-password", use: changePassword)
     }
 
@@ -43,23 +43,38 @@ final class AccountController: RouteCollection {
             }
         }
     }
-/*
+
     /// Refresh token.
-    func refresh(request: Request, refreshTokenDto: RefreshTokenDto) throws -> EventLoopFuture<AccessTokenDto> {
+    func refresh(request: Request) throws -> EventLoopFuture<AccessTokenDto> {
+        let refreshTokenDto = try request.content.decode(RefreshTokenDto.self)
         let authorizationService = request.application.services.authorizationService
 
-        let validateRefreshTokenFuture = try authorizationService.validateRefreshToken(on: request, refreshToken: refreshTokenDto.refreshToken)
-        return validateRefreshTokenFuture.flatMapThrowing { (user, refreshToken) in
-
-            let accessTokenFuture = try authorizationService.createAccessToken(request: request, forUser: user)
-            let refreshTokenFuture = try authorizationService.updateRefreshToken(request: request, forToken: refreshToken)
-
-            return map(to: AccessTokenDto.self, accessTokenFuture, refreshTokenFuture) { accessToken, refreshToken in
-                return AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
+        let validateRefreshTokenFuture = authorizationService.validateRefreshToken(on: request, refreshToken: refreshTokenDto.refreshToken)
+        
+        
+        let userAndTokenFuture = validateRefreshTokenFuture.map { refreshToken -> EventLoopFuture<(user: User, refreshToken: RefreshToken)> in
+            return authorizationService.getUserByRefreshToken(on: request, refreshToken: refreshToken.token).map { user in
+                return (user, refreshToken)
             }
+        }.flatMap { wrappedFuture in wrappedFuture }
+        
+        return userAndTokenFuture.flatMap { (user: User, refreshToken: RefreshToken) -> EventLoopFuture<AccessTokenDto> in
+            do {
+                 let accessTokenFuture = try authorizationService.createAccessToken(request: request, forUser: user)
+                 let refreshTokenFuture = try authorizationService.updateRefreshToken(request: request, forToken: refreshToken)
+             
+                 let combinedFuture = accessTokenFuture.and(refreshTokenFuture)
+                 let resultAll = combinedFuture.map { (accessToken, refreshToken) in
+                     AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
+                 }
+                 
+                 return resultAll
+             } catch {
+                 return request.eventLoop.makeFailedFuture(LoginError.invalidLoginCredentials)
+             }
         }
     }
-
+/*
     /// Change password.
     func changePassword(request: Request, changePasswordRequestDto: ChangePasswordRequestDto) throws -> EventLoopFuture<HTTPStatus> {
 

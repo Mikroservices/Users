@@ -20,8 +20,8 @@ extension Application.Services {
 }
 
 protocol AuthorizationServiceType {
-    func validateRefreshToken(on request: Request, refreshToken: String) throws -> EventLoopFuture<Void>
-    func getUserByRefreshToken(on request: Request, refreshToken: String) throws -> EventLoopFuture<User>
+    func validateRefreshToken(on request: Request, refreshToken: String) -> EventLoopFuture<RefreshToken>
+    func getUserByRefreshToken(on request: Request, refreshToken: String) -> EventLoopFuture<User>
     func createAccessToken(request: Request, forUser user: User) throws -> EventLoopFuture<String>
     func createRefreshToken(request: Request, forUser user: User) throws -> EventLoopFuture<String>
     func updateRefreshToken(request: Request, forToken refreshToken: RefreshToken) throws -> EventLoopFuture<String>
@@ -36,37 +36,39 @@ final class AuthorizationService: AuthorizationServiceType {
     private let refreshTokenTime: TimeInterval = 30 * 24 * 60 * 60  // 30 days
     private let accessTokenTime: TimeInterval = 60 * 60             // 1 hour
 
-    public func validateRefreshToken(on request: Request, refreshToken: String) throws -> EventLoopFuture<Void> {
-        return RefreshToken.query(on: request.db).filter(\.$token == refreshToken).first().flatMapThrowing { refreshTokenFromDb in
+    public func validateRefreshToken(on request: Request, refreshToken: String) -> EventLoopFuture<RefreshToken> {
+        return RefreshToken.query(on: request.db).filter(\.$token == refreshToken).first().flatMap { refreshTokenFromDb in
 
             guard let refreshToken = refreshTokenFromDb else {
-                throw EntityNotFoundError.refreshTokenNotFound
+                return request.eventLoop.makeFailedFuture(EntityNotFoundError.refreshTokenNotFound)
             }
 
             if refreshToken.revoked {
-                throw RefreshTokenError.refreshTokenRevoked
+                return request.eventLoop.makeFailedFuture(RefreshTokenError.refreshTokenRevoked)
             }
 
             if refreshToken.expiryDate < Date()  {
-                throw RefreshTokenError.refreshTokenExpired
+                return request.eventLoop.makeFailedFuture(RefreshTokenError.refreshTokenExpired)
             }
+            
+            return request.eventLoop.makeSucceededFuture(refreshToken)
         }
     }
     
-    public func getUserByRefreshToken(on request: Request, refreshToken: String) throws -> EventLoopFuture<User> {
+    public func getUserByRefreshToken(on request: Request, refreshToken: String) -> EventLoopFuture<User> {
         let refreshTokenFuture = RefreshToken.query(on: request.db).with(\.$user).filter(\.$token == refreshToken).first()
         
-        let userFuture = refreshTokenFuture.flatMapThrowing { refreshTokenFromDb -> User in
+        let userFuture = refreshTokenFuture.flatMap { refreshTokenFromDb -> EventLoopFuture<User> in
             
             guard let refreshToken = refreshTokenFromDb else {
-                throw EntityNotFoundError.refreshTokenNotFound
+                return request.eventLoop.makeFailedFuture(EntityNotFoundError.refreshTokenNotFound)
             }
             
             if refreshToken.user.isBlocked {
-                throw LoginError.userAccountIsBlocked
+                return request.eventLoop.makeFailedFuture(LoginError.userAccountIsBlocked)
             }
 
-            return refreshToken.user
+            return request.eventLoop.makeSucceededFuture(refreshToken.user)
         }
         
         return userFuture
