@@ -15,7 +15,7 @@ final class AccountController: RouteCollection {
         
         accountGroup.post("login", use: login)
         accountGroup.post("refresh", use: refresh)
-        // routes.post(ChangePasswordRequestDto.self, at: "\(AccountController.uri)/change-password", use: changePassword)
+        accountGroup.post("change-password", use: changePassword)
     }
 
     /// Sign-in user.
@@ -74,28 +74,28 @@ final class AccountController: RouteCollection {
              }
         }
     }
-/*
-    /// Change password.
-    func changePassword(request: Request, changePasswordRequestDto: ChangePasswordRequestDto) throws -> EventLoopFuture<HTTPStatus> {
 
+    /// Change password.
+    func changePassword(request: Request) throws -> EventLoopFuture<HTTPStatus> {
+        let changePasswordRequestDto = try request.content.decode(ChangePasswordRequestDto.self)
         try ChangePasswordRequestDto.validate(request)
 
         let authorizationService = request.application.services.authorizationService
-        let userNameFuture = try authorizationService.getUserNameFromBearerToken(request: request)
-        return userNameFuture.flatMapThrowing { userNameFromToken in
+        let userNameFromToken = try authorizationService.getUserNameFromBearerToken(request: request)
+        
+        guard let unwrapedUserNameFromToken = userNameFromToken else {
+            throw Abort(.unauthorized)
+        }
 
-            guard let unwrapedUserNameFromToken = userNameFromToken else {
-                throw Abort(.unauthorized)
-            }
+        let usersService = request.application.services.usersService
 
-            let usersService = request.application.services.usersService
-            return try usersService.changePassword(
-                on: request,
-                userName: unwrapedUserNameFromToken,
-                currentPassword: changePasswordRequestDto.currentPassword,
-                newPassword: changePasswordRequestDto.newPassword
-            ).transform(to: HTTPStatus.ok)
+        return try usersService.changePassword(
+            on: request,
+            userName: unwrapedUserNameFromToken,
+            currentPassword: changePasswordRequestDto.currentPassword,
+            newPassword: changePasswordRequestDto.newPassword
+        ).map { _ in
+            HTTPStatus.ok
         }
     }
-*/
 }
