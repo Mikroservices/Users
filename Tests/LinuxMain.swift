@@ -2,7 +2,7 @@ import XCTest
 @testable import AppTests
 
 XCTMain([
-
+/*
     // Account controller.
     testCase(ChangePasswordActionTests.allTests),
     testCase(LoginActionTests.allTests),
@@ -32,5 +32,6 @@ XCTMain([
     // Users controller.
     testCase(UsersDeleteActionTests.allTests),
     testCase(UsersReadActionTests.allTests),
-    testCase(UsersUpdateActionTests.allTests)    
+    testCase(UsersUpdateActionTests.allTests)
+*/
 ])

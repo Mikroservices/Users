@@ -8,8 +8,10 @@ import FluentPostgresDriver
 
 final class RegisterController: RouteCollection {
 
+    public static let uri: PathComponent = .constant("register")
+    
     func boot(routes: RoutesBuilder) throws {
-        let registerGroup = routes.grouped("register")
+        let registerGroup = routes.grouped(RegisterController.uri)
         
         registerGroup.post(use: register)
         registerGroup.post("confirm", use: confirm)
@@ -170,7 +172,7 @@ final class RegisterController: RouteCollection {
         let body = try Response.Body(data: JSONEncoder().encode(createdUserDto))
         let response = Response(status: .created, headers: HTTPHeaders(), body: body)
         response.headers.replaceOrAdd(name: .contentType, value: "application/json; charset=utf-8")
-        response.headers.replaceOrAdd(name: .location, value: "\(UsersController.uri)/@\(user.userName)")
+        response.headers.replaceOrAdd(name: .location, value: "/\(UsersController.uri)/@\(user.userName)")
         
         return response
     }

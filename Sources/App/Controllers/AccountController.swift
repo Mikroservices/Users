@@ -8,10 +8,10 @@ import FluentPostgresDriver
 
 final class AccountController: RouteCollection {
 
-    public static let uri = "/account"
+    public static let uri: PathComponent = .constant("account")
 
     func boot(routes: RoutesBuilder) throws {
-        let accountGroup = routes.grouped("account")
+        let accountGroup = routes.grouped(AccountController.uri)
         
         accountGroup.post("login", use: login)
         accountGroup.post("refresh", use: refresh)

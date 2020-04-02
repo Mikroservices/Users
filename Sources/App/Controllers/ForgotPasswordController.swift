@@ -8,8 +8,10 @@ import FluentPostgresDriver
 
 final class ForgotPasswordController: RouteCollection {
 
+    public static let uri: PathComponent = .constant("forgot")
+    
     func boot(routes: RoutesBuilder) throws {
-        let forgotGroup = routes.grouped("forgot")
+        let forgotGroup = routes.grouped(ForgotPasswordController.uri)
 
         forgotGroup.post("token", use: forgotPasswordToken)
         forgotGroup.post("confirm", use: forgotPasswordConfirm)

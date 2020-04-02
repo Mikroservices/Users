@@ -5,7 +5,7 @@ import FluentPostgresDriver
 /// Controls basic operations for User object.
 final class UsersController: RouteCollection {
 
-    public static let uri = "/users"
+    public static let uri = "users"
 
     func boot(routes: RoutesBuilder) throws {
         // routes.get(UsersController.uri, String.parameter, use: read)
