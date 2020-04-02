@@ -5,7 +5,6 @@ import Crypto
 import Recaptcha
 import Fluent
 import FluentPostgresDriver
-import ExtendedError
 
 final class RegisterController: RouteCollection {
 

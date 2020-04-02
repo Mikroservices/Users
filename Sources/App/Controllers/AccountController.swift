@@ -51,7 +51,6 @@ final class AccountController: RouteCollection {
 
         let validateRefreshTokenFuture = authorizationService.validateRefreshToken(on: request, refreshToken: refreshTokenDto.refreshToken)
         
-        
         let userAndTokenFuture = validateRefreshTokenFuture.map { refreshToken -> EventLoopFuture<(user: User, refreshToken: RefreshToken)> in
             return authorizationService.getUserByRefreshToken(on: request, refreshToken: refreshToken.token).map { user in
                 return (user, refreshToken)
@@ -94,8 +93,6 @@ final class AccountController: RouteCollection {
             userName: unwrapedUserNameFromToken,
             currentPassword: changePasswordRequestDto.currentPassword,
             newPassword: changePasswordRequestDto.newPassword
-        ).map { _ in
-            HTTPStatus.ok
-        }
+        ).transform(to: HTTPStatus.ok)
     }
 }

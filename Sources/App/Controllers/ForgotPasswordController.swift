@@ -6,20 +6,19 @@ import Recaptcha
 import Fluent
 import FluentPostgresDriver
 
-
 final class ForgotPasswordController: RouteCollection {
 
-    public static let uri = "/forgot"
-
     func boot(routes: RoutesBuilder) throws {
-        // routes.post(ForgotPasswordRequestDto.self, at: "\(ForgotPasswordController.uri)/token", use: forgotPasswordToken)
-        // routes.post(ForgotPasswordConfirmationRequestDto.self, at: "\(ForgotPasswordController.uri)/confirm", use: forgotPasswordConfirm)
+        let forgotGroup = routes.grouped("forgot")
+
+        forgotGroup.post("token", use: forgotPasswordToken)
+        forgotGroup.post("confirm", use: forgotPasswordConfirm)
     }
 
-    /*
     /// Forgot password.
-    func forgotPasswordToken(request: Request, forgotPasswordRequestDto: ForgotPasswordRequestDto) throws -> EventLoopFuture<HTTPResponseStatus> {
-
+    func forgotPasswordToken(request: Request) throws -> EventLoopFuture<HTTPResponseStatus> {
+        let forgotPasswordRequestDto = try request.content.decode(ForgotPasswordRequestDto.self)
+        
         let usersService = request.application.services.usersService
         let emailsService = request.application.services.emailsService
 
@@ -33,8 +32,8 @@ final class ForgotPasswordController: RouteCollection {
     }
 
     /// Changing password.
-    func forgotPasswordConfirm(request: Request, confirmationDto: ForgotPasswordConfirmationRequestDto) throws -> EventLoopFuture<HTTPResponseStatus> {
-
+    func forgotPasswordConfirm(request: Request) throws -> EventLoopFuture<HTTPResponseStatus> {
+        let confirmationDto = try request.content.decode(ForgotPasswordConfirmationRequestDto.self)
         try ForgotPasswordConfirmationRequestDto.validate(request)
 
         let usersService = request.application.services.usersService
@@ -46,5 +45,4 @@ final class ForgotPasswordController: RouteCollection {
 
         return confirmForgotPasswordFuture.transform(to: HTTPStatus.ok)
     }
- */
 }
