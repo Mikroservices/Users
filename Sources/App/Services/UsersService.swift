@@ -20,10 +20,10 @@ extension Application.Services {
 
 protocol UsersServiceType {
     func login(on request: Request, userNameOrEmail: String, password: String) throws -> EventLoopFuture<User>
-    func forgotPassword(on request: Request, email: String) throws -> EventLoopFuture<User>
-    func confirmForgotPassword(on request: Request, forgotPasswordGuid: String, password: String) throws -> EventLoopFuture<User>
-    func changePassword(on request: Request, userName: String, currentPassword: String, newPassword: String) throws -> EventLoopFuture<User>
-    func confirmEmail(on request: Request, userId: UUID, confirmationGuid: String) throws -> EventLoopFuture<User>
+    func forgotPassword(on request: Request, email: String) -> EventLoopFuture<User>
+    func confirmForgotPassword(on request: Request, forgotPasswordGuid: String, password: String) -> EventLoopFuture<User>
+    func changePassword(on request: Request, userId: UUID, currentPassword: String, newPassword: String) throws -> EventLoopFuture<User>
+    func confirmEmail(on request: Request, userId: UUID, confirmationGuid: String) -> EventLoopFuture<User>
     func isUserNameTaken(on request: Request, userName: String) -> EventLoopFuture<Bool>
     func isEmailConnected(on request: Request, email: String) -> EventLoopFuture<Bool>
 }
@@ -60,68 +60,65 @@ final class UsersService: UsersServiceType {
         }
     }
 
-    func forgotPassword(on request: Request, email: String) throws -> EventLoopFuture<User> {
+    func forgotPassword(on request: Request, email: String) -> EventLoopFuture<User> {
         let emailNormalized = email.uppercased()
 
         let userFuture = User.query(on: request.db).filter(\.$emailNormalized == emailNormalized).first()
-        return userFuture.flatMapThrowing { userFromDb in
+        return userFuture.flatMap { userFromDb in
 
             guard let user = userFromDb else {
-                throw EntityNotFoundError.userNotFound
+                return request.eventLoop.makeFailedFuture(EntityNotFoundError.userNotFound)
             }
 
             if user.isBlocked {
-                throw ForgotPasswordError.userAccountIsBlocked
+                return request.eventLoop.makeFailedFuture(ForgotPasswordError.userAccountIsBlocked)
             }
 
             user.forgotPasswordGuid = UUID.init().uuidString
             user.forgotPasswordDate = Date()
 
-            _ = user.save(on: request.db)
-            return user
+            return user.save(on: request.db).transform(to: user)
         }
     }
 
-    func confirmForgotPassword(on request: Request, forgotPasswordGuid: String, password: String) throws -> EventLoopFuture<User> {
+    func confirmForgotPassword(on request: Request, forgotPasswordGuid: String, password: String) -> EventLoopFuture<User> {
         let userFuture = User.query(on: request.db).filter(\.$forgotPasswordGuid == forgotPasswordGuid).first()
-        return userFuture.flatMapThrowing { userFromDb in
+        return userFuture.flatMap { userFromDb in
 
             guard let user = userFromDb else {
-                throw EntityNotFoundError.userNotFound
+                return request.eventLoop.makeFailedFuture(EntityNotFoundError.userNotFound)
             }
 
             if user.isBlocked {
-                throw ForgotPasswordError.userAccountIsBlocked
+                return request.eventLoop.makeFailedFuture(ForgotPasswordError.userAccountIsBlocked)
             }
 
             guard let forgotPasswordDate = user.forgotPasswordDate else {
-                throw ForgotPasswordError.tokenNotGenerated
+                return request.eventLoop.makeFailedFuture(ForgotPasswordError.tokenNotGenerated)
             }
 
             let hoursDifference = Calendar.current.dateComponents([.hour], from: forgotPasswordDate, to: Date()).hour ?? 0
             if hoursDifference > 6 {
-                throw ForgotPasswordError.tokenExpired
+                return request.eventLoop.makeFailedFuture(ForgotPasswordError.tokenExpired)
             }
-
-            let salt = Password.generateSalt()
-            let passwordHash = try Password.hash(password, withSalt: salt)
-
+            
             user.forgotPasswordGuid = nil
             user.forgotPasswordDate = nil
-            user.password = passwordHash
-            user.salt = salt
             user.emailWasConfirmed = true
+            
+            do {
+                user.salt = Password.generateSalt()
+                user.password = try Password.hash(password, withSalt: user.salt)
+            } catch {
+                return request.eventLoop.makeFailedFuture(ForgotPasswordError.passwordNotHashed)
+            }
 
-            _ = user.save(on: request.db)
-            return user
+            return user.save(on: request.db).transform(to: user)
         }
     }
 
-    func changePassword(on request: Request, userName: String, currentPassword: String, newPassword: String) throws -> EventLoopFuture<User> {
-
-        let userNameNormalized = userName.uppercased()
-
-        let userFuture = User.query(on: request.db).filter(\.$userNameNormalized == userNameNormalized).first()
+    func changePassword(on request: Request, userId: UUID, currentPassword: String, newPassword: String) throws -> EventLoopFuture<User> {
+        let userFuture = User.query(on: request.db).filter(\.$id == userId).first()
         return userFuture.flatMapThrowing { userFromDb in
 
             guard let user = userFromDb else {
@@ -141,7 +138,7 @@ final class UsersService: UsersServiceType {
                 throw LoginError.userAccountIsBlocked
             }
 
-            let salt = try Password.generateSalt()
+            let salt = Password.generateSalt()
             let newPasswordHash = try Password.hash(newPassword, withSalt: salt)
 
             user.password = newPasswordHash
@@ -152,21 +149,20 @@ final class UsersService: UsersServiceType {
         }
     }
 
-    func confirmEmail(on request: Request, userId: UUID, confirmationGuid: String) throws -> EventLoopFuture<User> {
-        return User.find(userId, on: request.db).flatMapThrowing { userFromDb in
+    func confirmEmail(on request: Request, userId: UUID, confirmationGuid: String) -> EventLoopFuture<User> {
+        return User.find(userId, on: request.db).flatMap { userFromDb in
 
             guard let user = userFromDb else {
-                throw RegisterError.invalidIdOrToken
+                return request.eventLoop.makeFailedFuture(RegisterError.invalidIdOrToken)
             }
 
             guard user.emailConfirmationGuid == confirmationGuid else {
-                throw RegisterError.invalidIdOrToken
+                return request.eventLoop.makeFailedFuture(RegisterError.invalidIdOrToken)
             }
 
             user.emailWasConfirmed = true
 
-            _ = user.save(on: request.db)
-            return user
+            return user.save(on: request.db).transform(to: user)
         }
     }
 

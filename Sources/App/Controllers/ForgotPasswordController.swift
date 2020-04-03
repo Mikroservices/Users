@@ -24,7 +24,7 @@ final class ForgotPasswordController: RouteCollection {
         let usersService = request.application.services.usersService
         let emailsService = request.application.services.emailsService
 
-        let updateUserFuture = try usersService.forgotPassword(on: request, email: forgotPasswordRequestDto.email)
+        let updateUserFuture = usersService.forgotPassword(on: request, email: forgotPasswordRequestDto.email)
 
         let sendEmailFuture = updateUserFuture.flatMapThrowing { user in
             try emailsService.sendForgotPasswordEmail(on: request, user: user)
@@ -39,7 +39,7 @@ final class ForgotPasswordController: RouteCollection {
         try ForgotPasswordConfirmationRequestDto.validate(request)
 
         let usersService = request.application.services.usersService
-        let confirmForgotPasswordFuture = try usersService.confirmForgotPassword(
+        let confirmForgotPasswordFuture = usersService.confirmForgotPassword(
             on: request,
             forgotPasswordGuid: confirmationDto.forgotPasswordGuid,
             password: confirmationDto.password

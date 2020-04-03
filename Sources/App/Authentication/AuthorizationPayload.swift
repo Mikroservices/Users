@@ -1,8 +1,9 @@
 import Foundation
+import Vapor
 import JWT
 
-struct AuthorizationPayload: JWTPayload {
-    var id: UUID?
+struct AuthorizationPayload: JWTPayload, Authenticatable {
+    var id: UUID
     var userName: String
     var name: String?
     var email: String

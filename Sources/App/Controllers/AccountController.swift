@@ -15,7 +15,10 @@ final class AccountController: RouteCollection {
         
         accountGroup.post("login", use: login)
         accountGroup.post("refresh", use: refresh)
-        accountGroup.post("change-password", use: changePassword)
+        accountGroup
+            .grouped(UserAuthenticator().middleware())
+            .grouped(AuthorizationPayload.guardMiddleware())
+            .post("change-password", use: changePassword)
     }
 
     /// Sign-in user.
@@ -76,21 +79,15 @@ final class AccountController: RouteCollection {
 
     /// Change password.
     func changePassword(request: Request) throws -> EventLoopFuture<HTTPStatus> {
+        let authorizationPayload = try request.auth.require(AuthorizationPayload.self)
+
         let changePasswordRequestDto = try request.content.decode(ChangePasswordRequestDto.self)
         try ChangePasswordRequestDto.validate(request)
 
-        let authorizationService = request.application.services.authorizationService
-        let userNameFromToken = try authorizationService.getUserNameFromBearerToken(request: request)
-        
-        guard let unwrapedUserNameFromToken = userNameFromToken else {
-            throw Abort(.unauthorized)
-        }
-
         let usersService = request.application.services.usersService
-
         return try usersService.changePassword(
             on: request,
-            userName: unwrapedUserNameFromToken,
+            userId: authorizationPayload.id,
             currentPassword: changePasswordRequestDto.currentPassword,
             newPassword: changePasswordRequestDto.newPassword
         ).transform(to: HTTPStatus.ok)

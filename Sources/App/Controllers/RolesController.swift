@@ -8,7 +8,10 @@ final class RolesController: RouteCollection {
     public static let uri: PathComponent = .constant("roles")
     
     func boot(routes: RoutesBuilder) throws {
-        let rolesGroup = routes.grouped(RolesController.uri)
+        let rolesGroup = routes
+            .grouped(RolesController.uri)
+            .grouped(UserAuthenticator().middleware())
+            .grouped(AuthorizationPayload.guardMiddleware())
         
         rolesGroup.post(use: create)
         // routes.get(RolesController.uri, use: list)
@@ -18,7 +21,7 @@ final class RolesController: RouteCollection {
     }
 
     /// Create new role.
-    func create(request: Request) throws -> EventLoopFuture<Response> {
+    func create(request: Request) throws -> EventLoopFuture<Response> {        
         let roleDto = try request.content.decode(RoleDto.self)
         try RoleDto.validate(request)
 

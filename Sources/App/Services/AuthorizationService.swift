@@ -167,11 +167,15 @@ final class AuthorizationService: AuthorizationServiceType {
 
     private func createAuthorizationPayload(request: Request, forUser user: User) throws -> EventLoopFuture<AuthorizationPayload> {
 
-        return User.query(on: request.db).with(\.$roles).filter(\.$id == user.id!).first().map { userFromDb in
+        guard let userId = user.id else {
+            throw Abort(.unauthorized)
+        }
+        
+        return User.query(on: request.db).with(\.$roles).filter(\.$id == userId).first().map { userFromDb in
 
             let expirationDate = Date().addingTimeInterval(TimeInterval(self.accessTokenTime))
             let authorizationPayload = AuthorizationPayload(
-                id: user.id,
+                id: userId,
                 userName: user.userName,
                 name: user.name,
                 email: user.email,
