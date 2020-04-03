@@ -11,9 +11,12 @@ final class RolesController: RouteCollection {
         let rolesGroup = routes
             .grouped(RolesController.uri)
             .grouped(UserAuthenticator().middleware())
-            .grouped(AuthorizationPayload.guardMiddleware())
+            .grouped(UserPayload.guardMiddleware())
         
-        rolesGroup.post(use: create)
+        rolesGroup
+            .grouped(UserPayload.guardIsSuperUserMiddleware())
+            .post(use: create)
+        
         // routes.get(RolesController.uri, use: list)
         // routes.get(RolesController.uri, String.parameter, use: read)
         // routes.put(RoleDto.self, at: RolesController.uri, String.parameter, use: update)
@@ -25,13 +28,7 @@ final class RolesController: RouteCollection {
         let roleDto = try request.content.decode(RoleDto.self)
         try RoleDto.validate(request)
 
-        let authorizationService = request.application.services.authorizationService
-        let verifySuperUserFuture = try authorizationService.verifySuperUser(request: request)
-
-        let validateCodeFuture = verifySuperUserFuture.flatMap {
-            self.validateCode(on: request, code: roleDto.code)
-        }
-
+        let validateCodeFuture = self.validateCode(on: request, code: roleDto.code)
         let createRoleFuture = validateCodeFuture.map { _ in
             self.createRole(on: request, roleDto: roleDto)
         }.flatMap { roleFuture in
