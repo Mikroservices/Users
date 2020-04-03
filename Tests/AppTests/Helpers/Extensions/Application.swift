@@ -1,10 +1,9 @@
 @testable import App
 import Foundation
 import XCTest
-import Vapor
-import XCTest
+import XCTVapor
 
-/*
+
 enum AuthorizationType {
     case anonymous
     case user(userName: String, password: String)
@@ -16,9 +15,8 @@ extension Application {
                         to path: String, 
                         method: HTTPMethod, 
                         headers: HTTPHeaders = .init(),
-                        body: T? = nil) throws -> Response where T: Content {
+                        body: T? = nil) throws -> XCTHTTPResponse where T: Content {
 
-        let responder = try self.make(Responder.self)
         var allHeaders = HTTPHeaders()
 
         switch authorizationType {
@@ -27,7 +25,7 @@ extension Application {
             let loginRequestDto = LoginRequestDto(userNameOrEmail: userName, password: password)
             let accessTokenDto = try SharedApplication.application()
                 .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
-            allHeaders.add(name: HTTPHeaderName.authorization.description, value: "Bearer \(accessTokenDto.accessToken)")
+            allHeaders.add(name: .authorization, value: "Bearer \(accessTokenDto.accessToken)")
 
         break;
         default: break;
@@ -37,29 +35,30 @@ extension Application {
             allHeaders.add(name: header.name, value: header.value)
         }
 
-        let request = HTTPRequest(method: method, 
-                                  url: URL(string: path)!,
-                                  headers: allHeaders)
-
-        let wrappedRequest = Request(http: request, using: self)
-
+        var content = ByteBufferAllocator().buffer(capacity: 0)
         if let body = body {
-            try wrappedRequest.content.encode(body)
+            try content.writeJSONEncodable(body)
+            allHeaders.add(name: .contentType, value: "application/json")
         }
-
-        return try responder.respond(to: wrappedRequest).wait()
+        
+        var response: XCTHTTPResponse? = nil
+        try SharedApplication.testable().test(method, path, headers: allHeaders, body: content) { res in
+            response = res
+        }
+        
+        return response!
     }
 
     func sendRequest(as authorizationType: AuthorizationType = .anonymous,
                      to path: String, 
                      method: HTTPMethod, 
-                     headers: HTTPHeaders = .init()) throws -> Response {
+                     headers: HTTPHeaders = .init()) throws -> XCTHTTPResponse {
 
         let emptyContent: EmptyContent? = nil
 
         return try sendRequest(as: authorizationType, to: path, method: method, headers: headers, body: emptyContent)
     }
-
+    
     func sendRequest<T>(as authorizationType: AuthorizationType = .anonymous,
                         to path: String,
                         method: HTTPMethod,
@@ -68,7 +67,7 @@ extension Application {
 
         _ = try self.sendRequest(as: authorizationType, to: path, method: method, headers: headers, body: data)
     }
-
+    
     func getResponse<C,T>(as authorizationType: AuthorizationType = .anonymous,
                           to path: String,
                           method: HTTPMethod = .GET, 
@@ -82,7 +81,7 @@ extension Application {
                                             headers: headers, 
                                             body: data)
 
-        return try response.content.decode(type).wait()
+        return try response.content.decode(type)
     }
 
     func getResponse<T>(as authorizationType: AuthorizationType = .anonymous,
@@ -100,7 +99,7 @@ extension Application {
                                     data: emptyContent, 
                                     decodeTo: type)
     }
-
+ 
     func getErrorResponse<T>(as authorizationType: AuthorizationType = .anonymous,
                           to path: String,
                           method: HTTPMethod = .GET,
@@ -113,8 +112,8 @@ extension Application {
                                             headers: headers,
                                             body: data)
 
-        let errorBody = try response.content.decode(ErrorBody.self).wait()
-        let errorResponse = ErrorResponse(error: errorBody, status: response.http.status)
+        let errorBody = try response.content.decode(ErrorBody.self)
+        let errorResponse = ErrorResponse(error: errorBody, status: response.status)
 
         return errorResponse
     }
@@ -132,10 +131,10 @@ extension Application {
                                             headers: headers,
                                             body: emptyContent)
 
-        let errorBody = try response.content.decode(ErrorBody.self).wait()
-        let errorResponse = ErrorResponse(error: errorBody, status: response.http.status)
+        let errorBody = try response.content.decode(ErrorBody.self)
+        let errorResponse = ErrorResponse(error: errorBody, status: response.status)
 
         return errorResponse
     }
 }
-*/
+
