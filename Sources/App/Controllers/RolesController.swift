@@ -12,15 +12,13 @@ final class RolesController: RouteCollection {
             .grouped(RolesController.uri)
             .grouped(UserAuthenticator().middleware())
             .grouped(UserPayload.guardMiddleware())
-        
-        rolesGroup
             .grouped(UserPayload.guardIsSuperUserMiddleware())
-            .post(use: create)
         
-        // routes.get(RolesController.uri, use: list)
-        // routes.get(RolesController.uri, String.parameter, use: read)
-        // routes.put(RoleDto.self, at: RolesController.uri, String.parameter, use: update)
-        // routes.delete(RolesController.uri, String.parameter, use: delete)
+        rolesGroup.post(use: create)
+        rolesGroup.get(use: list)
+        rolesGroup.get(":id", use: read)
+        rolesGroup.put(":id", use: update)
+        rolesGroup.delete(":id", use: delete)
     }
 
     /// Create new role.
@@ -42,55 +40,42 @@ final class RolesController: RouteCollection {
         }
     }
 
-/*
     /// Get all roles.
     func list(request: Request) throws -> EventLoopFuture<[RoleDto]> {
-        let authorizationService = request.application.services.authorizationService
-        let verifySuperUserFuture = try authorizationService.verifySuperUser(request: request)
-
-        let allRolesFuture = verifySuperUserFuture.flatMap {
-            Role.query(on: request).all()
-        }
-
-        return allRolesFuture.map { roles in
+        return Role.query(on: request.db).all().map { roles in
             roles.map { role in RoleDto(from: role) }
         }
     }
 
     /// Get specific role.
     func read(request: Request) throws -> EventLoopFuture<RoleDto> {
-        let authorizationService = request.application.services.authorizationService
-        let verifySuperUserFuture = try authorizationService.verifySuperUser(request: request)
-
-        let roleFuture = verifySuperUserFuture.flatMap {
-            try self.getRoleById(on: request)
+        
+        guard let roleId = request.parameters.get("id", as: UUID.self) else {
+            throw Abort(.badRequest)
         }
 
-        return roleFuture.map { role in 
+        return self.getRoleById(on: request, roleId: roleId).map { role in
             RoleDto(from: role)
         }
     }
 
     /// Update specific role.
-    func update(request: Request, roleDto: RoleDto) throws -> EventLoopFuture<RoleDto> {
-
+    func update(request: Request) throws -> EventLoopFuture<RoleDto> {
+        
+        guard let roleId = request.parameters.get("id", as: UUID.self) else {
+            throw Abort(.badRequest)
+        }
+        
+        let roleDto = try request.content.decode(RoleDto.self)
         try RoleDto.validate(request)
 
-        let authorizationService = request.application.services.authorizationService
-        let verifySuperUserFuture = try authorizationService.verifySuperUser(request: request)
-
-        let roleFuture = verifySuperUserFuture.flatMap {
-            try self.getRoleById(on: request)
-        }
-
-        let validateCodeFuture = roleFuture.flatMap(to: Role.self) { role in
-            return try self.validateCode(on: request, code: roleDto.code, roleId: role.id).map {
-                return role
-            }
+        let roleFuture = self.getRoleById(on: request, roleId: roleId)
+        let validateCodeFuture = roleFuture.flatMap { role in
+            self.validateCode(on: request, code: roleDto.code, roleId: role.id).transform(to: role)
         }
 
         let updateFuture = validateCodeFuture.flatMap { role in
-            try self.updateRole(on: request, from: roleDto, to: role)
+            self.updateRole(on: request, from: roleDto, to: role).transform(to: role)
         }
 
         return updateFuture.map { role in
@@ -100,20 +85,18 @@ final class RolesController: RouteCollection {
 
     /// Delete specific role.
     func delete(request: Request) throws -> EventLoopFuture<HTTPStatus> {
-        let authorizationService = request.application.services.authorizationService
-        let verifySuperUserFuture = try authorizationService.verifySuperUser(request: request)
-
-        let roleFuture = verifySuperUserFuture.flatMap {
-            try self.getRoleById(on: request)
+        guard let roleId = request.parameters.get("id", as: UUID.self) else {
+            throw Abort(.badRequest)
         }
 
+        let roleFuture = self.getRoleById(on: request, roleId: roleId)
         let deleteFuture = roleFuture.flatMap { role in 
-            role.delete(on: request)
+            role.delete(on: request.db)
         }
 
         return deleteFuture.transform(to: HTTPStatus.ok)
     }
-*/
+
     private func validateCode(on request: Request, code: String, roleId: UUID? = nil) -> EventLoopFuture<Void> {
         if let unwrapedRoleId = roleId {
             return Role.query(on: request.db).group(.and) { verifyCodeGroup in
@@ -121,18 +104,18 @@ final class RolesController: RouteCollection {
                 verifyCodeGroup.filter(\.$id != unwrapedRoleId)
             }.first().flatMap { role -> EventLoopFuture<Void> in
                 if role != nil {
-                    return request.eventLoop.makeFailedFuture(RoleError.roleWithCodeExists)
+                    return request.fail(RoleError.roleWithCodeExists)
                 }
                 
-                return request.eventLoop.makeSucceededFuture(())
+                return request.success()
             }
         } else {
             return Role.query(on: request.db).filter(\.$code == code).first().flatMap { role -> EventLoopFuture<Void> in
                 if role != nil {
-                    return request.eventLoop.makeFailedFuture(RoleError.roleWithCodeExists)
+                    return request.fail(RoleError.roleWithCodeExists)
                 }
                 
-                return request.eventLoop.makeSucceededFuture(())
+                return request.success()
             }
         }
     }
@@ -152,24 +135,18 @@ final class RolesController: RouteCollection {
             return response
         }
     }
-/*
-    private func getRoleById(on request: Request) throws -> EventLoopFuture<Role> {
-        let roleId = try request.parameters.next(String.self)
-        guard let uuidRoleId = UUID(uuidString: roleId) else {
-            throw RoleError.incorrectRoleId
-        }
 
-        return Role.find(uuidRoleId, on: request).unwrap(or: EntityNotFoundError.roleNotFound)
+    private func getRoleById(on request: Request, roleId: UUID) -> EventLoopFuture<Role> {
+        return Role.find(roleId, on: request.db).unwrap(or: EntityNotFoundError.roleNotFound)
     }
 
-    private func updateRole(on request: Request, from roleDto: RoleDto, to role: Role) throws -> EventLoopFuture<Role> {
-        role.name = roleDto.name
+    private func updateRole(on request: Request, from roleDto: RoleDto, to role: Role) -> EventLoopFuture<Void> {
+        role.role = roleDto.role
         role.code = roleDto.code
         role.description = roleDto.description
         role.hasSuperPrivileges = roleDto.hasSuperPrivileges
         role.isDefault = roleDto.isDefault
 
-        return role.update(on: request)
+        return role.update(on: request.db)
     }
-*/
 }

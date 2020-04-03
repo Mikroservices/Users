@@ -67,11 +67,11 @@ final class UsersService: UsersServiceType {
         return userFuture.flatMap { userFromDb in
 
             guard let user = userFromDb else {
-                return request.eventLoop.makeFailedFuture(EntityNotFoundError.userNotFound)
+                return request.fail(EntityNotFoundError.userNotFound)
             }
 
             if user.isBlocked {
-                return request.eventLoop.makeFailedFuture(ForgotPasswordError.userAccountIsBlocked)
+                return request.fail(ForgotPasswordError.userAccountIsBlocked)
             }
 
             user.forgotPasswordGuid = UUID.init().uuidString
@@ -86,20 +86,20 @@ final class UsersService: UsersServiceType {
         return userFuture.flatMap { userFromDb in
 
             guard let user = userFromDb else {
-                return request.eventLoop.makeFailedFuture(EntityNotFoundError.userNotFound)
+                return request.fail(EntityNotFoundError.userNotFound)
             }
 
             if user.isBlocked {
-                return request.eventLoop.makeFailedFuture(ForgotPasswordError.userAccountIsBlocked)
+                return request.fail(ForgotPasswordError.userAccountIsBlocked)
             }
 
             guard let forgotPasswordDate = user.forgotPasswordDate else {
-                return request.eventLoop.makeFailedFuture(ForgotPasswordError.tokenNotGenerated)
+                return request.fail(ForgotPasswordError.tokenNotGenerated)
             }
 
             let hoursDifference = Calendar.current.dateComponents([.hour], from: forgotPasswordDate, to: Date()).hour ?? 0
             if hoursDifference > 6 {
-                return request.eventLoop.makeFailedFuture(ForgotPasswordError.tokenExpired)
+                return request.fail(ForgotPasswordError.tokenExpired)
             }
             
             user.forgotPasswordGuid = nil
@@ -110,7 +110,7 @@ final class UsersService: UsersServiceType {
                 user.salt = Password.generateSalt()
                 user.password = try Password.hash(password, withSalt: user.salt)
             } catch {
-                return request.eventLoop.makeFailedFuture(ForgotPasswordError.passwordNotHashed)
+                return request.fail(ForgotPasswordError.passwordNotHashed)
             }
 
             return user.save(on: request.db).transform(to: user)
@@ -153,11 +153,11 @@ final class UsersService: UsersServiceType {
         return User.find(userId, on: request.db).flatMap { userFromDb in
 
             guard let user = userFromDb else {
-                return request.eventLoop.makeFailedFuture(RegisterError.invalidIdOrToken)
+                return request.fail(RegisterError.invalidIdOrToken)
             }
 
             guard user.emailConfirmationGuid == confirmationGuid else {
-                return request.eventLoop.makeFailedFuture(RegisterError.invalidIdOrToken)
+                return request.fail(RegisterError.invalidIdOrToken)
             }
 
             user.emailWasConfirmed = true

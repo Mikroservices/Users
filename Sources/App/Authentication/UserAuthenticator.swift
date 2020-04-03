@@ -6,9 +6,9 @@ struct UserAuthenticator: BearerAuthenticator {
     func authenticate(bearer: BearerAuthorization, for request: Request) -> EventLoopFuture<User?> {
         do {
             let authorizationPayload = try request.jwt.verify(bearer.token, as: UserPayload.self)
-            return request.eventLoop.makeSucceededFuture(authorizationPayload)
+            return request.success(authorizationPayload)
         } catch {
-            return request.eventLoop.makeSucceededFuture(nil)
+            return request.success(nil)
         }
    }
 }

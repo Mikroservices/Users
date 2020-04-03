@@ -36,18 +36,18 @@ final class TokensService: TokensServiceType {
         return RefreshToken.query(on: request.db).filter(\.$token == refreshToken).first().flatMap { refreshTokenFromDb in
 
             guard let refreshToken = refreshTokenFromDb else {
-                return request.eventLoop.makeFailedFuture(EntityNotFoundError.refreshTokenNotFound)
+                return request.fail(EntityNotFoundError.refreshTokenNotFound)
             }
 
             if refreshToken.revoked {
-                return request.eventLoop.makeFailedFuture(RefreshTokenError.refreshTokenRevoked)
+                return request.fail(RefreshTokenError.refreshTokenRevoked)
             }
 
             if refreshToken.expiryDate < Date()  {
-                return request.eventLoop.makeFailedFuture(RefreshTokenError.refreshTokenExpired)
+                return request.fail(RefreshTokenError.refreshTokenExpired)
             }
             
-            return request.eventLoop.makeSucceededFuture(refreshToken)
+            return request.success(refreshToken)
         }
     }
     
@@ -57,14 +57,14 @@ final class TokensService: TokensServiceType {
         let userFuture = refreshTokenFuture.flatMap { refreshTokenFromDb -> EventLoopFuture<User> in
             
             guard let refreshToken = refreshTokenFromDb else {
-                return request.eventLoop.makeFailedFuture(EntityNotFoundError.refreshTokenNotFound)
+                return request.fail(EntityNotFoundError.refreshTokenNotFound)
             }
             
             if refreshToken.user.isBlocked {
-                return request.eventLoop.makeFailedFuture(LoginError.userAccountIsBlocked)
+                return request.fail(LoginError.userAccountIsBlocked)
             }
 
-            return request.eventLoop.makeSucceededFuture(refreshToken.user)
+            return request.success(refreshToken.user)
         }
         
         return userFuture

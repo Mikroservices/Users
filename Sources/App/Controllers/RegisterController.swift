@@ -22,7 +22,6 @@ final class RegisterController: RouteCollection {
     /// Register new user.
     func register(request: Request) throws -> EventLoopFuture<Response> {
         let registerUserDto = try request.content.decode(RegisterUserDto.self)
-        
         try RegisterUserDto.validate(request)
 
         guard let captchaToken = registerUserDto.securityToken else {
@@ -107,10 +106,10 @@ final class RegisterController: RouteCollection {
         let userNameNormalized = userName.uppercased()
         return User.query(on: request.db).filter(\.$userNameNormalized == userNameNormalized).first().flatMap { user in
             if user != nil {
-                return request.eventLoop.makeFailedFuture(RegisterError.userNameIsAlreadyTaken)
+                return request.fail(RegisterError.userNameIsAlreadyTaken)
             }
             
-            return request.eventLoop.makeSucceededFuture(())
+            return request.success()
         }
     }
 
@@ -118,10 +117,10 @@ final class RegisterController: RouteCollection {
         let emailNormalized = (email ?? "").uppercased()
         return User.query(on: request.db).filter(\.$emailNormalized == emailNormalized).first().flatMap { user in
             if user != nil {
-                return request.eventLoop.makeFailedFuture(RegisterError.emailIsAlreadyConnected)
+                return request.fail(RegisterError.emailIsAlreadyConnected)
             }
             
-            return request.eventLoop.makeSucceededFuture(())
+            return request.success()
         }
     }
 

@@ -42,7 +42,7 @@ final class AccountController: RouteCollection {
                 
                 return resultAll
             } catch {
-                return request.eventLoop.makeFailedFuture(LoginError.invalidLoginCredentials)
+                return request.fail(LoginError.invalidLoginCredentials)
             }
         }
     }
@@ -72,7 +72,7 @@ final class AccountController: RouteCollection {
                  
                  return resultAll
              } catch {
-                 return request.eventLoop.makeFailedFuture(LoginError.invalidLoginCredentials)
+                 return request.fail(LoginError.invalidLoginCredentials)
              }
         }
     }
