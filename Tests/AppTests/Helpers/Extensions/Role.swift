@@ -1,9 +1,9 @@
 @testable import App
 import Vapor
+import Fluent
 
-/*
 extension Role {
-
+/*
     static func create(on application: Application,
                        name: String,
                        code: String,
@@ -22,14 +22,12 @@ extension Role {
 
         return role
     }
-
-    static func get(on application: Application, name: String) throws -> Role {
-        let connection = try application.newConnection(to: .psql).wait()
-        guard let role = try Role.query(on: connection).filter(\.name == name).first().wait() else {
+*/
+    static func get(role: String) throws -> Role {
+        guard let role = try Role.query(on: SharedApplication.application().db).filter(\.$role == role).first().wait() else {
             throw SharedApplicationError.unwrap
         }
 
         return role
     }
 }
-*/

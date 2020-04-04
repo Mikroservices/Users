@@ -1,18 +1,14 @@
 @testable import App
 import XCTest
-import Vapor
+import XCTVapor
 import JWT
-import Crypto
-import XCTest
 
-/*
 final class LoginActionTests: XCTestCase {
 
     func testUserWithCorrectCredentialsShouldBeSignedInByUsername() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "nickfury",
+        _ = try User.create(userName: "nickfury",
                             email: "nickfury@testemail.com",
                             name: "Nick Fury")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "nickfury", password: "p@ssword")
@@ -22,8 +18,8 @@ final class LoginActionTests: XCTestCase {
             .sendRequest(to: "/account/login", method: .POST, body: loginRequestDto)
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
-        let accessTokenDto = try response.content.decode(AccessTokenDto.self).wait()
+        XCTAssertEqual(response.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
+        let accessTokenDto = try response.content.decode(AccessTokenDto.self)
         XCTAssert(accessTokenDto.accessToken.count > 0, "Access token should be returned for correct credentials")
         XCTAssert(accessTokenDto.refreshToken.count > 0, "Refresh token should be returned for correct credentials")
     }
@@ -31,8 +27,7 @@ final class LoginActionTests: XCTestCase {
     func testUserWithCorrectCredentialsShouldBeSignedInByEmail() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "stevenfury",
+        _ = try User.create(userName: "stevenfury",
                             email: "stevenfury@testemail.com",
                             name: "Steven Fury")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "stevenfury@testemail.com", password: "p@ssword")
@@ -42,8 +37,8 @@ final class LoginActionTests: XCTestCase {
             .sendRequest(to: "/account/login", method: .POST, body: loginRequestDto)
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
-        let accessTokenDto = try response.content.decode(AccessTokenDto.self).wait()
+        XCTAssertEqual(response.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
+        let accessTokenDto = try response.content.decode(AccessTokenDto.self)
         XCTAssert(accessTokenDto.accessToken.count > 0, "Access token should be returned for correct credentials")
         XCTAssert(accessTokenDto.refreshToken.count > 0, "Refresh token should be returned for correct credentials")
     }
@@ -51,8 +46,7 @@ final class LoginActionTests: XCTestCase {
     func testAccessTokenShouldContainsBasicInformationAboutUser() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "stevenfury",
+        let user = try User.create(userName: "stevenfury",
                                    email: "stevenfury@testemail.com",
                                    name: "Steven Fury")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "stevenfury@testemail.com", password: "p@ssword")
@@ -62,27 +56,25 @@ final class LoginActionTests: XCTestCase {
             .sendRequest(to: "/account/login", method: .POST, body: loginRequestDto)
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
-        let accessTokenDto = try response.content.decode(AccessTokenDto.self).wait()
-        let jwtPrivateKey = try Setting.get(on: SharedApplication.application(), key: .jwtPrivateKey)
-        let rsaKey: RSAKey = try .private(pem: jwtPrivateKey.value)
-        let authorizationPayload = try JWT<AuthorizationPayload>(from: accessTokenDto.accessToken, verifiedUsing: JWTSigner.rs512(key: rsaKey))
-        XCTAssertEqual(authorizationPayload.payload.email, user.email, "Email should be included in JWT access token")
-        XCTAssertEqual(authorizationPayload.payload.id, user.id, "User id should be included in JWT access token")
-        XCTAssertEqual(authorizationPayload.payload.name, user.name, "Name should be included in JWT access token")
-        XCTAssertEqual(authorizationPayload.payload.userName, user.userName, "User name should be included in JWT access token")
-        XCTAssertEqual(authorizationPayload.payload.gravatarHash, user.gravatarHash, "Gravatar hash should be included in JWT access token")
+        XCTAssertEqual(response.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
+        let accessTokenDto = try response.content.decode(AccessTokenDto.self)
+        let authorizationPayload = try SharedApplication.application().jwt.signers.verify(accessTokenDto.accessToken, as: UserPayload.self)
+        XCTAssertEqual(authorizationPayload.email, user.email, "Email should be included in JWT access token")
+        XCTAssertEqual(authorizationPayload.id, user.id, "User id should be included in JWT access token")
+        XCTAssertEqual(authorizationPayload.name, user.name, "Name should be included in JWT access token")
+        XCTAssertEqual(authorizationPayload.userName, user.userName, "User name should be included in JWT access token")
+        XCTAssertEqual(authorizationPayload.gravatarHash, user.gravatarHash, "Gravatar hash should be included in JWT access token")
     }
 
     func testAccessTokenShouldContainsInformationAboutUserRoles() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "yokofury",
+        let user = try User.create(userName: "yokofury",
                                    email: "yokofury@testemail.com",
                                    name: "Yoko Fury")
-        let role = try Role.get(on: SharedApplication.application(), name: "Administrator")
-        try user.attach(role: role, on: SharedApplication.application())
+        let role = try Role.get(role: "Administrator")
+        try user.$roles.attach(role, on: SharedApplication.application().db).wait()
+        
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "yokofury@testemail.com", password: "p@ssword")
 
         // Act.
@@ -90,19 +82,16 @@ final class LoginActionTests: XCTestCase {
             .sendRequest(to: "/account/login", method: .POST, body: loginRequestDto)
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
-        let accessTokenDto = try response.content.decode(AccessTokenDto.self).wait()
-        let jwtPrivateKey = try Setting.get(on: SharedApplication.application(), key: .jwtPrivateKey)
-        let rsaKey: RSAKey = try .private(pem: jwtPrivateKey.value)
-        let authorizationPayload = try JWT<AuthorizationPayload>(from: accessTokenDto.accessToken, verifiedUsing: JWTSigner.rs512(key: rsaKey))
-        XCTAssertEqual(authorizationPayload.payload.roles[0], "administrator", "User roles should be included in JWT access token")
+        XCTAssertEqual(response.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
+        let accessTokenDto = try response.content.decode(AccessTokenDto.self)
+        let authorizationPayload = try SharedApplication.application().jwt.signers.verify(accessTokenDto.accessToken, as: UserPayload.self)
+        XCTAssertEqual(authorizationPayload.roles[0], "administrator", "User roles should be included in JWT access token")
     }
 
     func testUserWithIncorrectPasswordShouldNotBeSignedIn() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "martafury",
+        _ = try User.create(userName: "martafury",
                             email: "martafury@testemail.com",
                             name: "Marta Fury")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "martafury", password: "incorrect")
@@ -122,8 +111,7 @@ final class LoginActionTests: XCTestCase {
     func testUserWithNotConfirmedAccountShouldNotBeSignedIn() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "josefury",
+        _ = try User.create(userName: "josefury",
                             email: "josefury@testemail.com",
                             name: "Jose Fury",
                             emailWasConfirmed: false
@@ -145,12 +133,10 @@ final class LoginActionTests: XCTestCase {
     func testUserWithBlockedAccountShouldNotBeSignedIn() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "tomfury",
+        _ = try User.create(userName: "tomfury",
                             email: "tomfury@testemail.com",
                             name: "Tom Fury",
-                            isBlocked: true
-        )
+                            isBlocked: true)
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "tomfury", password: "p@ssword")
 
         // Act.
@@ -173,4 +159,4 @@ final class LoginActionTests: XCTestCase {
         ("testUserWithBlockedAccountShouldNotBeSignedIn", testUserWithBlockedAccountShouldNotBeSignedIn)
     ]
 }
-*/
+

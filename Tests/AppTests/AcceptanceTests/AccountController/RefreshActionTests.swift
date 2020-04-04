@@ -1,16 +1,13 @@
 @testable import App
 import XCTest
-import Vapor
-import XCTest
+import XCTVapor
 
-/*
 final class RefreshActionTests: XCTestCase {
 
     func testNewTokensShouldBeReturnedWhenOldRefreshTokenIsValid() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "sandragreen",
+        _ = try User.create(userName: "sandragreen",
                             email: "sandragreen@testemail.com",
                             name: "Sandra Green")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "sandragreen", password: "p@ssword")
@@ -29,8 +26,7 @@ final class RefreshActionTests: XCTestCase {
     func testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsNotValid() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "johngreen",
+        _ = try User.create(userName: "johngreen",
                             email: "johngreen@testemail.com",
                             name: "John Green")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "johngreen", password: "p@ssword")
@@ -43,22 +39,21 @@ final class RefreshActionTests: XCTestCase {
             .sendRequest(to: "/account/refresh", method: .POST, body: refreshTokenDto)
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")
+        XCTAssertEqual(response.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")
     }
 
     func testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsValidButUserIsBlocked() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                            userName: "timothygreen",
-                            email: "timothygreen@testemail.com",
-                            name: "Timothy Green")
+        let user = try User.create(userName: "timothygreen",
+                                   email: "timothygreen@testemail.com",
+                                   name: "Timothy Green")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "timothygreen", password: "p@ssword")
         let accessTokenDto = try SharedApplication.application()
             .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
 
         user.isBlocked = true
-        try user.update(on: SharedApplication.application())
+        try user.save(on: SharedApplication.application().db).wait()
         let refreshTokenDto = RefreshTokenDto(refreshToken: accessTokenDto.refreshToken)
 
         // Act.
@@ -76,17 +71,16 @@ final class RefreshActionTests: XCTestCase {
     func testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsExpired() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "wandagreen",
+        _ = try User.create(userName: "wandagreen",
                             email: "wandagreen@testemail.com",
                             name: "Wanda Green")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "wandagreen", password: "p@ssword")
         let accessTokenDto = try SharedApplication.application()
             .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
 
-        let refreshToken = try RefreshToken.get(on: SharedApplication.application(), token: accessTokenDto.refreshToken)
+        let refreshToken = try RefreshToken.get(token: accessTokenDto.refreshToken)
         refreshToken.expiryDate = Calendar.current.date(byAdding: .day, value: -31, to: Date())!
-        try refreshToken.update(on: SharedApplication.application())
+        try refreshToken.save(on: SharedApplication.application().db).wait()
 
         let refreshTokenDto = RefreshTokenDto(refreshToken: accessTokenDto.refreshToken)
 
@@ -105,17 +99,16 @@ final class RefreshActionTests: XCTestCase {
     func testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsRevoked() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "alexagreen",
+        _ = try User.create(userName: "alexagreen",
                             email: "alexagreen@testemail.com",
                             name: "Alexa Green")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "alexagreen", password: "p@ssword")
         let accessTokenDto = try SharedApplication.application()
             .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
 
-        let refreshToken = try RefreshToken.get(on: SharedApplication.application(), token: accessTokenDto.refreshToken)
+        let refreshToken = try RefreshToken.get(token: accessTokenDto.refreshToken)
         refreshToken.revoked = true
-        try refreshToken.update(on: SharedApplication.application())
+        try refreshToken.save(on: SharedApplication.application().db).wait()
 
         let refreshTokenDto = RefreshTokenDto(refreshToken: accessTokenDto.refreshToken)
 
@@ -139,4 +132,3 @@ final class RefreshActionTests: XCTestCase {
         ("testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsRevoked", testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsRevoked)
     ]
 }
-*/

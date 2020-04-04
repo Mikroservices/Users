@@ -1,17 +1,13 @@
 @testable import App
-import Foundation
 import XCTest
-import Vapor
-import XCTest
+import XCTVapor
 
-/*
 final class ForgotConfirmActionTests: XCTestCase {
 
     func testPasswordShouldBeChangeForCorrectToken() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "annapink",
+        _ = try User.create(userName: "annapink",
                             email: "annapink@testemail.com",
                             name: "Anna Pink",
                             forgotPasswordGuid: "ANNAPINKGUID",
@@ -23,7 +19,7 @@ final class ForgotConfirmActionTests: XCTestCase {
             .sendRequest(to: "/forgot/confirm", method: .POST, body: confirmationRequestDto)
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
+        XCTAssertEqual(response.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
         let newLoginRequestDto = LoginRequestDto(userNameOrEmail: "annapink", password: "newP@ssword")
         let newAccessTokenDto = try SharedApplication.application()
             .getResponse(to: "/account/login", method: .POST, data: newLoginRequestDto, decodeTo: AccessTokenDto.self)
@@ -40,14 +36,13 @@ final class ForgotConfirmActionTests: XCTestCase {
             .sendRequest(to: "/forgot/confirm", method: .POST, body: confirmationRequestDto)
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")
+        XCTAssertEqual(response.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")
     }
 
     func testPasswordShouldNotBeChangedForBlockedUser() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "josephpink",
+        _ = try User.create(userName: "josephpink",
                             email: "josephpink@testemail.com",
                             name: "Joseph Pink",
                             isBlocked: true,
@@ -70,8 +65,7 @@ final class ForgotConfirmActionTests: XCTestCase {
     func testPasswordShouldNotBeChangeIfUserDidNotGenerateToken() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "wladpink",
+        _ = try User.create(userName: "wladpink",
                             email: "wladpink@testemail.com",
                             name: "Wlad Pink",
                             forgotPasswordGuid: nil,
@@ -94,8 +88,7 @@ final class ForgotConfirmActionTests: XCTestCase {
         // Arrange.
         let today = Date()
         let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today)
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "mariapink",
+        _ = try User.create(userName: "mariapink",
                             email: "mariapink@testemail.com",
                             name: "Maria Pink",
                             forgotPasswordGuid: "MARIAPINKGUID",
@@ -117,8 +110,7 @@ final class ForgotConfirmActionTests: XCTestCase {
     func testPasswordShouldNotBeChangedWhenNewPasswordIsTooShort() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "tatianapink",
+        _ = try User.create(userName: "tatianapink",
                             email: "tatianapink@testemail.com",
                             name: "Tatiana Pink",
                             forgotPasswordGuid: "TATIANAGUID",
@@ -135,14 +127,14 @@ final class ForgotConfirmActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
-        XCTAssertEqual(errorResponse.error.reason, "'password' is less than required minimum of 8 characters and 'password' is not a valid password", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("password"), "is less than minimum of 8 character(s) and is not a valid password")
     }
 
     func testPasswordShouldNotBeChangedWhenPasswordIsTooLong() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "ewelinapink",
+        _ = try User.create(userName: "ewelinapink",
                             email: "ewelinapink@testemail.com",
                             name: "Ewelina Pink",
                             forgotPasswordGuid: "EWELINAGUID",
@@ -159,7 +151,8 @@ final class ForgotConfirmActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'userAccountIsBlocked'.")
-        XCTAssertEqual(errorResponse.error.reason, "'password' is greater than required maximum of 32 characters and 'password' is not a valid password")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("password"), "is greater than maximum of 32 character(s) and is not a valid password")
     }
 
     static let allTests = [
@@ -172,4 +165,3 @@ final class ForgotConfirmActionTests: XCTestCase {
         ("testPasswordShouldNotBeChangedWhenPasswordIsTooLong", testPasswordShouldNotBeChangedWhenPasswordIsTooLong)
     ]
 }
-*/

@@ -4,13 +4,13 @@ import XCTest
 XCTMain([
 
     // Account controller.
-    // testCase(ChangePasswordActionTests.allTests),
-    // testCase(LoginActionTests.allTests),
-    // testCase(RefreshActionTests.allTests),
+    testCase(ChangePasswordActionTests.allTests),
+    testCase(LoginActionTests.allTests),
+    testCase(RefreshActionTests.allTests),
 
     // Forgot password controller.
-    // testCase(ForgotConfirmActionTests.allTests),
-    // testCase(TokenActionTests.allTests),
+    testCase(ForgotConfirmActionTests.allTests),
+    testCase(TokenActionTests.allTests),
 
     // Register controller.
     testCase(ConfirmActionTests.allTests),

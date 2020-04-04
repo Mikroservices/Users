@@ -1,16 +1,13 @@
 @testable import App
 import XCTest
-import Vapor
-import XCTest
+import XCTVapor
 
-/*
 final class TokenActionTests: XCTestCase {
 
     func testForgotPasswordTokenShouldBeGeneratedForActiveUser() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "johnred",
+        _ = try User.create(userName: "johnred",
                             email: "johnred@testemail.com",
                             name: "John Red")
         let forgotPasswordRequestDto = ForgotPasswordRequestDto(email: "johnred@testemail.com")
@@ -20,7 +17,7 @@ final class TokenActionTests: XCTestCase {
             .sendRequest(to: "/forgot/token", method: .POST, body: forgotPasswordRequestDto)
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
+        XCTAssertEqual(response.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
     }
 
     func testForgotPasswordTokenShouldNotBeGeneratedIfEmailNotExists() throws {
@@ -33,14 +30,13 @@ final class TokenActionTests: XCTestCase {
             .sendRequest(to: "/forgot/token", method: .POST, body: forgotPasswordRequestDto)
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")
+        XCTAssertEqual(response.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")
     }
 
     func testForgotPasswordTokenShouldNotBeGeneratedIfUserIsBlocked() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "wikired",
+        _ = try User.create(userName: "wikired",
                             email: "wikired@testemail.com",
                             name: "Wiki Red",
                             isBlocked: true)
@@ -64,4 +60,3 @@ final class TokenActionTests: XCTestCase {
         ("testForgotPasswordTokenShouldNotBeGeneratedIfUserIsBlocked", testForgotPasswordTokenShouldNotBeGeneratedIfUserIsBlocked)
     ]
 }
-*/

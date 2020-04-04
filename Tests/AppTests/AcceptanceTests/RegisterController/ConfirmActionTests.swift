@@ -13,19 +13,16 @@ final class ConfirmActionTests: XCTestCase {
                             name: "Samantha Smith",
                             emailWasConfirmed: false)
 
-        guard let user = try User.query(on: SharedApplication.application().db).filter(\.$userName == "samanthasmith").first().wait() else {
-            XCTAssertFalse(true, "User not exists")
-            return
-        }
+        let user = try User.get(userName: "samanthasmith")
         let confirmEmailRequestDto = ConfirmEmailRequestDto(id: user.id!, confirmationGuid: user.emailConfirmationGuid)
 
         // Act.
         let response = try SharedApplication.application().sendRequest(to: "/register/confirm", method: .POST, body: confirmEmailRequestDto)
 
         // Assert.
-        let userAfterRequest = try User.query(on: SharedApplication.application().db).filter(\.$userName == "samanthasmith").first().wait()
+        let userAfterRequest = try User.get(userName: "samanthasmith")
         XCTAssertEqual(response.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
-        XCTAssertEqual(userAfterRequest?.emailWasConfirmed, true, "Email is not confirmed.")
+        XCTAssertEqual(userAfterRequest.emailWasConfirmed, true, "Email is not confirmed.")
     }
 
     func testAccountShouldNotBeConfirmedWithIncorrectConfirmationGuid() throws {
@@ -36,19 +33,16 @@ final class ConfirmActionTests: XCTestCase {
                             name: "Erik Smith",
                             emailWasConfirmed: false)
         
-        guard let user = try User.query(on: SharedApplication.application().db).filter(\.$userName == "eriksmith").first().wait() else {
-            XCTAssertFalse(true, "User not exists")
-            return
-        }
+        let user = try User.get(userName: "eriksmith")
         let confirmEmailRequestDto = ConfirmEmailRequestDto(id: user.id!, confirmationGuid: UUID().uuidString)
 
         // Act.
         let response = try SharedApplication.application().sendRequest(to: "/register/confirm", method: .POST, body: confirmEmailRequestDto)
 
-        // Assert.s
-        let userAfterRequest = try User.query(on: SharedApplication.application().db).filter(\.$userName == "eriksmith").first().wait()
+        // Assert.
+        let userAfterRequest = try User.get(userName: "eriksmith")
         XCTAssertEqual(response.status, HTTPResponseStatus.badRequest, "Response http status code should be ok (200).")
-        XCTAssertEqual(userAfterRequest?.emailWasConfirmed, false, "Email is confirmed.")
+        XCTAssertEqual(userAfterRequest.emailWasConfirmed, false, "Email is confirmed.")
     }
 
     static let allTests = [

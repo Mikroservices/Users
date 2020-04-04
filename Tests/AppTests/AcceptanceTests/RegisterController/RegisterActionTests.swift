@@ -96,8 +96,8 @@ final class RegisterActionTests: XCTestCase {
         _ = try SharedApplication.application().getResponse(to: "/register", method: .POST, data: registerUserDto, decodeTo: UserDto.self)
 
         // Assert.
-        let user = try User.query(on: SharedApplication.application().db).with(\.$roles).filter(\.$userName == "briansmith").first().wait()
-        XCTAssertEqual(user?.roles[0].code, "member", "Default user roles should be added to user")
+        let user = try User.get(userName: "briansmith")
+        XCTAssertEqual(user.roles[0].code, "member", "Default user roles should be added to user")
     }
 
     func testUserShouldNotBeCreatedIfUserWithTheSameEmailExists() throws {
