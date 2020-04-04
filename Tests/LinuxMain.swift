@@ -15,7 +15,7 @@ XCTMain([
     // Register controller.
     // testCase(ConfirmActionTests.allTests),
     // testCase(EmailActionTests.allTests),
-    // testCase(RegisterActionTests.allTests),
+    testCase(RegisterActionTests.allTests),
     // testCase(UserNameActionTests.allTests),
 
     // Roles controller.
