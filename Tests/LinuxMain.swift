@@ -13,10 +13,10 @@ XCTMain([
     // testCase(TokenActionTests.allTests),
 
     // Register controller.
-    // testCase(ConfirmActionTests.allTests),
-    // testCase(EmailActionTests.allTests),
+    testCase(ConfirmActionTests.allTests),
+    testCase(EmailActionTests.allTests),
     testCase(RegisterActionTests.allTests),
-    // testCase(UserNameActionTests.allTests),
+    testCase(UserNameActionTests.allTests),
 
     // Roles controller.
     // testCase(RolesCreateActionTests.allTests),

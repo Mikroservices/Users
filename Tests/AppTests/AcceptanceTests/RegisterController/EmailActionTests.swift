@@ -1,16 +1,14 @@
 @testable import App
 import XCTest
-import Vapor
-import XCTest
+import XCTVapor
 
-/*
+
 final class EmailActionTests: XCTestCase {
 
     func testEmailValidationShouldReturnTrueIfEmailExists() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "tomsmith",
+        _ = try User.create(userName: "tomsmith",
                             email: "tomsmith@testemail.com",
                             name: "Tom Smith")
 
@@ -40,4 +38,3 @@ final class EmailActionTests: XCTestCase {
         ("testEmailValidationShouldReturnFalseIfEmailNotExists", testEmailValidationShouldReturnFalseIfEmailNotExists)
     ]
 }
-*/
