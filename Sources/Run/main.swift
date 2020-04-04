@@ -8,7 +8,5 @@ try LoggingSystem.bootstrap(from: &env)
 let app = Application(env)
 defer { app.shutdown() }
 
-app.server.configuration.port = 8082
-
-try configure(app)
+try app.configure()
 try app.run()

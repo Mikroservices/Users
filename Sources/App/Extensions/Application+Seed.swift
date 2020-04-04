@@ -2,15 +2,15 @@ import Vapor
 import Fluent
 import FluentPostgresDriver
 
-public class DatabaseSeed {
+extension Application {
 
-    public static func execute(_ app: Application) throws {
-        let database = app.db(.psql)
+    func seed() throws {
+        let database = self.db(.psql)
         try settings(on: database)
         try roles(on: database)
     }
 
-    private static func settings(on database: Database) throws {
+    private func settings(on database: Database) throws {
         let settings = try Setting.query(on: database).all().wait()
 
         try ensureSettingExists(on: database, existing: settings, key: .emailServiceAddress, value: "http://localhost:8002")
@@ -48,7 +48,7 @@ xrhRAoGAJjk4/TcoOMzSjaiMF3yq82CRblUvpo0cWLN/nLWkwJkhCgzf/fm7Z3Fs
 """)
     }
 
-    private static func roles(on database: Database) throws {
+    private func roles(on database: Database) throws {
         let roles = try Role.query(on: database).all().wait()
 
         try ensureRoleExists(on: database,
@@ -68,24 +68,25 @@ xrhRAoGAJjk4/TcoOMzSjaiMF3yq82CRblUvpo0cWLN/nLWkwJkhCgzf/fm7Z3Fs
                              isDefault: true)
     }
 
-    private static func ensureSettingExists(on database: Database,
-                                            existing settings: [Setting],
-                                            key: SettingKey,
-                                            value: String) throws {
-
+    private func ensureSettingExists(on database: Database,
+                                     existing settings: [Setting],
+                                     key: SettingKey,
+                                     value: String
+    ) throws {
         if !settings.contains(where: { $0.key == key.rawValue }) {
             let setting = Setting(key: key.rawValue, value: value)
             _ = try setting.save(on: database).wait()
         }
     }
 
-    private static func ensureRoleExists(on database: Database,
-                                         existing roles: [Role],
-                                         role: String,
-                                         code: String,
-                                         description: String,
-                                         hasSuperPrivileges: Bool,
-                                         isDefault: Bool) throws {
+    private func ensureRoleExists(on database: Database,
+                                  existing roles: [Role],
+                                  role: String,
+                                  code: String,
+                                  description: String,
+                                  hasSuperPrivileges: Bool,
+                                  isDefault: Bool
+    ) throws {
         if !roles.contains(where: { $0.role == role }) {
             let role = Role(role: role, code: code, description: description, hasSuperPrivileges: hasSuperPrivileges, isDefault: isDefault)
             _ = try role.save(on: database).wait()

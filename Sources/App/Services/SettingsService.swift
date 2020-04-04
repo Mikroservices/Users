@@ -1,12 +1,5 @@
 import Vapor
 
-public enum SettingKey: String {
-    case jwtPrivateKey
-    case emailServiceAddress
-    case isRecaptchaEnabled
-    case recaptchaKey
-}
-
 extension Application.Services {
     struct SettingsServiceKey: StorageKey {
         typealias Value = SettingsServiceType
@@ -23,18 +16,15 @@ extension Application.Services {
 }
 
 protocol SettingsServiceType {
-    func get(on application: Application) -> EventLoopFuture<Configuration>
+    func get(on application: Application) -> EventLoopFuture<[Setting]>
 }
 
 final class SettingsService: SettingsServiceType {
 
-    func get(on application: Application) -> EventLoopFuture<Configuration> {
+    func get(on application: Application) -> EventLoopFuture<[Setting]> {
 
         application.logger.info("Downloading application settings from database")
 
-        return Setting.query(on: application.db).all().map { settings in
-            let configuration = Configuration(settings: settings)
-            return configuration
-        }
+        return Setting.query(on: application.db).all()
     }
 }
