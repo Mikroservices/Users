@@ -14,11 +14,14 @@ let package = Package(
         // 💧 A server-side Swift web framework.
         .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0-rc.3.12"),
 
-        // 🐘 Non-blocking, event-driven Swift client for PostgreSQL.
+        // 🖋 Non-blocking, event-driven Swift client for PostgreSQL.
         .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0-rc.1"),
 
         // 🐘 Swift ORM (queries, models, relations, etc) built on PostgreSQL.
         .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.0.0-rc.1.1"),
+        
+        // 🗄 Fluent driver for SQLite.
+        .package(url: "https://github.com/vapor/fluent-sqlite-driver.git", from: "4.0.0-rc.1.1"),
 
         // 🔏 JSON Web Token signing and verification (HMAC, RSA).
         .package(url: "https://github.com/vapor/jwt.git", from: "4.0.0-rc.1.1"),
@@ -34,6 +37,7 @@ let package = Package(
             .product(name: "Vapor", package: "vapor"),
             .product(name: "Fluent", package: "fluent"),
             .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"),
+            .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver"),
             .product(name: "JWT", package: "jwt"),
             .product(name: "ExtendedError", package: "ExtendedError"),
             .product(name: "Recaptcha", package: "Recaptcha")

@@ -1,5 +1,4 @@
 import Fluent
-import FluentPostgresDriver
 import Vapor
 
 final class User: Model {
@@ -104,39 +103,6 @@ final class User: Model {
 
         self.userNameNormalized = userName.uppercased()
         self.emailNormalized = email.uppercased()
-    }
-}
-
-/// Allows `User` to be used as a dynamic migration.
-extension User: Migration {
-    // Prepares the database for storing Galaxy models.
-    func prepare(on database: Database) -> EventLoopFuture<Void> {
-        database
-            .schema("Users")
-            .id()
-            .field("userName", .string, .required)
-            .field("email", .string, .required)
-            .field("name", .string)
-            .field("password", .string, .required)
-            .field("salt", .string, .required)
-            .field("emailWasConfirmed", .bool, .required)
-            .field("isBlocked", .bool, .required)
-            .field("emailConfirmationGuid", .string, .required)
-            .field("gravatarHash", .string, .required)
-            .field("forgotPasswordGuid", .string)
-            .field("forgotPasswordDate", .datetime)
-            .field("bio", .string)
-            .field("location", .string)
-            .field("website", .string)
-            .field("birthDate", .datetime)
-            .field("userNameNormalized", .string, .required)
-            .field("emailNormalized", .string, .required)
-            .create()
-    }
-
-    // Optionally reverts the changes made in the prepare method.
-    func revert(on database: Database) -> EventLoopFuture<Void> {
-        database.schema("Users").delete()
     }
 }
 

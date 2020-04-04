@@ -1,7 +1,5 @@
 import Fluent
-import FluentPostgresDriver
 import Vapor
-import Crypto
 
 final class RefreshToken: Model {
 
@@ -36,24 +34,6 @@ final class RefreshToken: Model {
         self.revoked = revoked
         
         self.$user.id = userId
-    }
-}
-
-/// Allows `RefreshToken` to be used as a dynamic migration.
-extension RefreshToken: Migration {
-    func prepare(on database: Database) -> EventLoopFuture<Void> {
-        database
-            .schema("RefreshTokens")
-            .id()
-            .field("token", .string, .required)
-            .field("expiryDate", .datetime, .required)
-            .field("revoked", .bool, .required)
-            .field("userId", .uuid, .references("Users", "id"))
-            .create()
-    }
-
-    func revert(on database: Database) -> EventLoopFuture<Void> {
-        database.schema("RefreshTokens").delete()
     }
 }
 

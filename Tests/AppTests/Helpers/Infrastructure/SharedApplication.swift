@@ -30,7 +30,7 @@ final class SharedApplication {
 
     private static func create() throws -> Application {
         let app = Application(.testing)
-        try app.configure(clearDatabase: true)
+        try app.configure()
 
         return app
     }

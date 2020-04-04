@@ -1,7 +1,5 @@
-import Foundation
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
 extension Application.Services {
     struct EmailsServiceKey: StorageKey {

@@ -1,7 +1,4 @@
 import Vapor
-import Fluent
-import FluentPostgresDriver
-import ExtendedError
 
 final class RolesController: RouteCollection {
 
@@ -22,11 +19,12 @@ final class RolesController: RouteCollection {
     }
 
     /// Create new role.
-    func create(request: Request) throws -> EventLoopFuture<Response> {        
+    func create(request: Request) throws -> EventLoopFuture<Response> {
+        let rolesService = request.application.services.rolesService
         let roleDto = try request.content.decode(RoleDto.self)
         try RoleDto.validate(request)
 
-        let validateCodeFuture = self.validateCode(on: request, code: roleDto.code)
+        let validateCodeFuture = rolesService.validateCode(on: request, code: roleDto.code, roleId: nil)
         let createRoleFuture = validateCodeFuture.map { _ in
             self.createRole(on: request, roleDto: roleDto)
         }.flatMap { roleFuture in
@@ -61,7 +59,8 @@ final class RolesController: RouteCollection {
 
     /// Update specific role.
     func update(request: Request) throws -> EventLoopFuture<RoleDto> {
-        
+        let rolesService = request.application.services.rolesService
+
         guard let roleId = request.parameters.get("id", as: UUID.self) else {
             throw Abort(.badRequest)
         }
@@ -71,7 +70,7 @@ final class RolesController: RouteCollection {
 
         let roleFuture = self.getRoleById(on: request, roleId: roleId)
         let validateCodeFuture = roleFuture.flatMap { role in
-            self.validateCode(on: request, code: roleDto.code, roleId: role.id).transform(to: role)
+            rolesService.validateCode(on: request, code: roleDto.code, roleId: role.id).transform(to: role)
         }
 
         let updateFuture = validateCodeFuture.flatMap { role in
@@ -95,29 +94,6 @@ final class RolesController: RouteCollection {
         }
 
         return deleteFuture.transform(to: HTTPStatus.ok)
-    }
-
-    private func validateCode(on request: Request, code: String, roleId: UUID? = nil) -> EventLoopFuture<Void> {
-        if let unwrapedRoleId = roleId {
-            return Role.query(on: request.db).group(.and) { verifyCodeGroup in
-                verifyCodeGroup.filter(\.$code == code)
-                verifyCodeGroup.filter(\.$id != unwrapedRoleId)
-            }.first().flatMap { role -> EventLoopFuture<Void> in
-                if role != nil {
-                    return request.fail(RoleError.roleWithCodeExists)
-                }
-                
-                return request.success()
-            }
-        } else {
-            return Role.query(on: request.db).filter(\.$code == code).first().flatMap { role -> EventLoopFuture<Void> in
-                if role != nil {
-                    return request.fail(RoleError.roleWithCodeExists)
-                }
-                
-                return request.success()
-            }
-        }
     }
 
     private func createRole(on request: Request, roleDto: RoleDto) -> EventLoopFuture<Role> {

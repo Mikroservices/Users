@@ -1,22 +1,18 @@
 import Vapor
-import Foundation
 
 public struct ApplicationSettings {
     public let emailServiceAddress: String?
     public let isRecaptchaEnabled: Bool
     public let recaptchaKey: String
-    public let jwtPrivateKey: String
     
     init(application: Application,
          emailServiceAddress: String? = nil,
          isRecaptchaEnabled: Bool = false,
-         recaptchaKey: String = "",
-         jwtPrivateKey: String = ""
+         recaptchaKey: String = ""
     ) {
         self.emailServiceAddress = emailServiceAddress
         self.isRecaptchaEnabled = isRecaptchaEnabled
         self.recaptchaKey = recaptchaKey
-        self.jwtPrivateKey = jwtPrivateKey
     }
 }
 

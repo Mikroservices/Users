@@ -1,10 +1,4 @@
-import Foundation
 import Vapor
-import JWT
-import Crypto
-import Recaptcha
-import Fluent
-import FluentPostgresDriver
 
 final class RegisterController: RouteCollection {
 
@@ -30,12 +24,14 @@ final class RegisterController: RouteCollection {
 
         let captchaValidateFuture = try self.validateCaptcha(on: request, captchaToken: captchaToken)
         
+        let usersService = request.application.services.usersService
+
         let validateUserNameFuture = captchaValidateFuture.flatMap {
-            self.validateUserName(on: request, userName: registerUserDto.userName)
+            usersService.validateUserName(on: request, userName: registerUserDto.userName)
         }
 
         let validateEmailFuture = validateUserNameFuture.flatMap {
-            self.validateEmail(on: request, email: registerUserDto.email)
+            usersService.validateEmail(on: request, email: registerUserDto.email)
         }
 
         let createUserFuture = validateEmailFuture.flatMapThrowing {
@@ -102,30 +98,9 @@ final class RegisterController: RouteCollection {
         }
     }
 
-    private func validateUserName(on request: Request, userName: String) -> EventLoopFuture<Void> {
-        let userNameNormalized = userName.uppercased()
-        return User.query(on: request.db).filter(\.$userNameNormalized == userNameNormalized).first().flatMap { user in
-            if user != nil {
-                return request.fail(RegisterError.userNameIsAlreadyTaken)
-            }
-            
-            return request.success()
-        }
-    }
-
-    private func validateEmail(on request: Request, email: String?) -> EventLoopFuture<Void> {
-        let emailNormalized = (email ?? "").uppercased()
-        return User.query(on: request.db).filter(\.$emailNormalized == emailNormalized).first().flatMap { user in
-            if user != nil {
-                return request.fail(RegisterError.emailIsAlreadyConnected)
-            }
-            
-            return request.success()
-        }
-    }
-
     private func createUser(on request: Request, registerUserDto: RegisterUserDto) throws -> EventLoopFuture<User> {
 
+        let rolesService = request.application.services.rolesService
         let salt = Password.generateSalt()
         let passwordHash = try Password.hash(registerUserDto.password, withSalt: salt)
         let emailConfirmationGuid = UUID.init().uuidString
@@ -138,8 +113,9 @@ final class RegisterController: RouteCollection {
                         gravatarHash: gravatarHash)
 
         let saveUserFuture = user.save(on: request.db)
+
         let rolesWrappedFuture = saveUserFuture.map { _ in
-            Role.query(on: request.db).filter(\.$isDefault == true).all()
+            rolesService.getDefault(on: request)
         }
         
         let rolesFuture = rolesWrappedFuture.flatMap { roles in

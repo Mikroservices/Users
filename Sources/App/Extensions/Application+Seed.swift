@@ -1,11 +1,10 @@
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
 extension Application {
 
-    func seed() throws {
-        let database = self.db(.psql)
+    func seedDatabase() throws {
+        let database = self.db
         try settings(on: database)
         try roles(on: database)
     }

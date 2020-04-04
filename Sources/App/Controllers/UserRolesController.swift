@@ -1,7 +1,4 @@
 import Vapor
-import Fluent
-import FluentPostgresDriver
-import ExtendedError
 
 /// Connect/disconnect user with role.
 final class UserRolesController: RouteCollection {

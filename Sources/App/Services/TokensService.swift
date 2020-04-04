@@ -1,8 +1,5 @@
 import Vapor
-import JWT
-import Crypto
 import Fluent
-import FluentPostgresDriver
 
 extension Application.Services {
     struct TokensServiceKey: StorageKey {

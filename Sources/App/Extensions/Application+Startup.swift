@@ -1,14 +1,14 @@
 import Vapor
-import Recaptcha
 import Fluent
 import FluentPostgresDriver
+import FluentSQLiteDriver
 import ExtendedError
 import JWT
 
 extension Application {
 
     /// Called before your application initializes.
-    public func configure(clearDatabase: Bool = false) throws {
+    public func configure() throws {
 
         // Register routes to the router.
         try routes()
@@ -17,10 +17,13 @@ extension Application {
         registerMiddlewares()
 
         // Configure database.
-        try configureDatabase(clearDatabase: clearDatabase)
+        try configureDatabase()
+        
+        // Migrate database.
+        try migrateDatabase()
         
         // Seed database.
-        try seed()
+        try seedDatabase()
         
         // Read configuration from database.
         try loadConfiguration()
@@ -61,51 +64,47 @@ extension Application {
 
     private func configureDatabase(clearDatabase: Bool = false) throws {
 
+        // In testing environmebt we are using in memory database.
+        if self.environment == .testing {
+            self.logger.info("In memory SQLite is used during testing")
+            self.databases.use(.sqlite(.memory), as: .sqlite)
+            return
+        }
+        
         // Retrieve connection string from Env variables.
-        let connectionString = try Environment.require("MIKROSERVICE_USERS_CONNECTION_STRING")
+        guard let connectionString = Environment.get("MIKROSERVICE_USERS_CONNECTION_STRING") else {
+            self.logger.info("In memory SQLite is used during testing")
+            self.databases.use(.sqlite(.memory), as: .sqlite)
+            return
+        }
+        
+        // When environment variable is not configured we are using in memory database.
         guard let connectionUrl = URL(string: connectionString) else {
-            throw Abort(.internalServerError, reason: "Database connection string has wrong format.")
+            self.logger.warning("No 'MIKROSERVICE_USERS_CONNECTION_STRING' environment variable configured. In memory SQLite is used.")
+            self.databases.use(.sqlite(.memory), as: .sqlite)
+            return
+        }
+            
+        // Configuration for Postgres.
+        if connectionUrl.scheme?.hasPrefix("postgres") == true {
+            self.logger.info("Postgres database is configured in environment variable (host: \(connectionUrl.host ?? ""), db: \(connectionUrl.path)")
+            try self.configurePostgres(connectionUrl: connectionUrl)
+            return
         }
         
-        // Configure a PostgreSQL database.
-        var tlsConfiguration = TLSConfiguration.forClient()
-        tlsConfiguration.certificateVerification = .none
-        
-        guard connectionUrl.scheme?.hasPrefix("postgres") == true else {
-            throw Abort(.internalServerError, reason: "Database connection string has wrong format.")
-        }
-        guard let username = connectionUrl.user else {
-            throw Abort(.internalServerError, reason: "Database connection string has wrong format.")
-        }
-        guard let password = connectionUrl.password else {
-            throw Abort(.internalServerError, reason: "Database connection string has wrong format.")
-        }
-        guard let hostname = connectionUrl.host else {
-            throw Abort(.internalServerError, reason: "Database connection string has wrong format.")
-        }
-        guard let port = connectionUrl.port else {
-            throw Abort(.internalServerError, reason: "Database connection string has wrong format.")
-        }
-        
-        self.databases.use(.postgres(
-            hostname: hostname,
-            port: port,
-            username: username,
-            password: password,
-            database: connectionUrl.path.split(separator: "/").last.flatMap(String.init),
-            tlsConfiguration: tlsConfiguration
-        ), as: .psql)
+        // When we have environment variable but it's not Postgres we are trying to run SQLite in file.
+        self.logger.info("SQLite file database is configured in environment variable (file: \(connectionUrl.path)")
+        self.databases.use(.sqlite(.file(connectionUrl.path)), as: .sqlite)
+    }
+    
+    private func migrateDatabase() throws {
 
         // Configure migrations
-        self.migrations.add(User())
-        self.migrations.add(RefreshToken())
-        self.migrations.add(Setting())
-        self.migrations.add(Role())
-        self.migrations.add(UserRole())
-
-        if clearDatabase {
-            try self.autoRevert().wait()
-        }
+        self.migrations.add(CreateUsers())
+        self.migrations.add(CreateRefreshTokens())
+        self.migrations.add(CreateSettings())
+        self.migrations.add(CreateRoles())
+        self.migrations.add(CreateUserRoles())
         
         try self.autoMigrate().wait()
     }
@@ -113,21 +112,48 @@ extension Application {
     private func loadConfiguration() throws {
         let settings = try self.services.settingsService.get(on: self).wait()
         
+        guard let privateKey = settings.getString(.jwtPrivateKey)?.data(using: .ascii) else {
+            throw Abort(.internalServerError, reason: "Private key is not configured in database.")
+        }
+        
+        let rsaKey: RSAKey = try .private(pem: privateKey)
+        self.jwt.signers.use(.rs512(key: rsaKey))
+        
         self.settings.configuration = ApplicationSettings(
             application: self,
             emailServiceAddress: settings.getString(.emailServiceAddress),
             isRecaptchaEnabled: settings.getBool(.isRecaptchaEnabled) ?? false,
-            recaptchaKey: settings.getString(.recaptchaKey) ?? "",
-            jwtPrivateKey: settings.getString(.jwtPrivateKey) ?? ""
+            recaptchaKey: settings.getString(.recaptchaKey) ?? ""
         )
+    }
+    
+    private func configurePostgres(connectionUrl: URL) throws {
+        var tlsConfiguration = TLSConfiguration.forClient()
+        tlsConfiguration.certificateVerification = .none
         
-        if self.settings.configuration.jwtPrivateKey != "" {
-            guard let privateKey = self.settings.configuration.jwtPrivateKey.data(using: .ascii) else {
-                throw Abort(.internalServerError, reason: "Private key is not configured in database.")
-            }
-            
-            let rsaKey: RSAKey = try .private(pem: privateKey)
-            self.jwt.signers.use(.rs512(key: rsaKey))
+        guard let username = connectionUrl.user else {
+            throw DatabaseConnectionError.userNameNotSpecified
         }
+        guard let password = connectionUrl.password else {
+            throw DatabaseConnectionError.passwordNotSpecified
+        }
+        guard let hostname = connectionUrl.host else {
+            throw DatabaseConnectionError.hostNotSpecified
+        }
+        guard let port = connectionUrl.port else {
+            throw DatabaseConnectionError.portNotSpecified
+        }
+        guard let database = connectionUrl.path.split(separator: "/").last.flatMap(String.init) else {
+            throw DatabaseConnectionError.databaseNotSpecified
+        }
+        
+        self.databases.use(.postgres(
+            hostname: hostname,
+            port: port,
+            username: username,
+            password: password,
+            database: database,
+            tlsConfiguration: tlsConfiguration
+        ), as: .psql)
     }
 }

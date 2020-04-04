@@ -1,5 +1,4 @@
 import Fluent
-import FluentPostgresDriver
 import Vapor
 
 final class UserRole: Model {
@@ -19,22 +18,6 @@ final class UserRole: Model {
     init(userId: UUID, roleId: UUID) {
         self.$user.id = userId
         self.$role.id = roleId
-    }
-
-}
-
-/// Allows `UserRole` to be used as a dynamic migration.
-extension UserRole: Migration {
-    func prepare(on database: Database) -> EventLoopFuture<Void> {
-        database.schema("UserRoles")
-            .id()
-            .field("userId", .uuid, .required, .references("Users", "id"))
-            .field("roleId", .uuid, .required, .references("Roles", "id"))
-            .create()
-    }
-
-    func revert(on database: Database) -> EventLoopFuture<Void> {
-        database.schema("UserRoles").delete()
     }
 }
 

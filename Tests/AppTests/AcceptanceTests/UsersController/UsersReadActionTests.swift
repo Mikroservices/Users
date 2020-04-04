@@ -43,35 +43,36 @@ final class UsersReadActionTests: XCTestCase {
         XCTAssertEqual(userDto.website, user.website, "Property 'website' should be equal.")
         XCTAssertEqual(userDto.birthDate?.description, user.birthDate?.description, "Property 'birthDate' should be equal.")
     }
-/*
+
     func testUserProfileShouldNotBeReturnedForNotExistingUser() throws {
 
         // Act.
         let response = try SharedApplication.application().sendRequest(to: "/users/@not-exists", method: .GET)
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")
+        XCTAssertEqual(response.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")
     }
 
     func testPublicProfileShouldNotContainsSensitiveInformation() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "elizabush",
-                                   email: "elizabush@testemail.com",
-                                   name: "Eliza Bush",
-                                   password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                                   salt: "TNhZYL4F66KY7fUuqS/Juw==",
-                                   emailWasConfirmed: true,
-                                   isBlocked: false,
-                                   emailConfirmationGuid: "",
-                                   gravatarHash: "75025190efa55edb9948ae7ced5c6ccf1a553c",
-                                   forgotPasswordGuid: "1234567890",
-                                   forgotPasswordDate: Date(),
-                                   bio: "Tester in most innovative company.",
-                                   location: "Cupertino",
-                                   website: "http://elizabush.com",
-                                   birthDate: Date())
+        let user = User(userName: "elizabush",
+                        email: "elizabush@testemail.com",
+                        name: "Eliza Bush",
+                        password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
+                        salt: "TNhZYL4F66KY7fUuqS/Juw==",
+                        emailWasConfirmed: true,
+                        isBlocked: false,
+                        emailConfirmationGuid: "",
+                        gravatarHash: "75025190efa55edb9948ae7ced5c6ccf1a553c",
+                        forgotPasswordGuid: "1234567890",
+                        forgotPasswordDate: Date(),
+                        bio: "Tester in most innovative company.",
+                        location: "Cupertino",
+                        website: "http://elizabush.com",
+                        birthDate: Date())
+
+        try user.create(on: SharedApplication.application().db).wait()
 
         // Act.
         let userDto = try SharedApplication.application()
@@ -94,5 +95,4 @@ final class UsersReadActionTests: XCTestCase {
         ("testUserProfileShouldNotBeReturnedForNotExistingUser", testUserProfileShouldNotBeReturnedForNotExistingUser),
         ("testPublicProfileShouldNotContainsSensitiveInformation", testPublicProfileShouldNotContainsSensitiveInformation)
     ]
-*/
 }

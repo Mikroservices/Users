@@ -1,5 +1,4 @@
 import Fluent
-import FluentPostgresDriver
 import Vapor
 
 final class Role: Model {
@@ -42,25 +41,6 @@ final class Role: Model {
         self.description = description
         self.hasSuperPrivileges = hasSuperPrivileges
         self.isDefault = isDefault
-    }
-}
-
-/// Allows `Role` to be used as a dynamic migration.
-extension Role: Migration {
-    func prepare(on database: Database) -> EventLoopFuture<Void> {
-        database
-            .schema("Roles")
-            .id()
-            .field("role", .string, .required)
-            .field("code", .string, .required)
-            .field("description", .string)
-            .field("hasSuperPrivileges", .bool, .required)
-            .field("isDefault", .bool, .required)
-            .create()
-    }
-
-    func revert(on database: Database) -> EventLoopFuture<Void> {
-        database.schema("Roles").delete()
     }
 }
 

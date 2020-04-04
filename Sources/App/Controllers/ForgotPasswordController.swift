@@ -1,10 +1,4 @@
-import Foundation
 import Vapor
-import JWT
-import Crypto
-import Recaptcha
-import Fluent
-import FluentPostgresDriver
 
 final class ForgotPasswordController: RouteCollection {
 

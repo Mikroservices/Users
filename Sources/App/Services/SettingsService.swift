@@ -1,4 +1,5 @@
 import Vapor
+import Fluent
 
 extension Application.Services {
     struct SettingsServiceKey: StorageKey {

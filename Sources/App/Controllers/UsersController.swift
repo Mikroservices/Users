@@ -1,6 +1,4 @@
 import Vapor
-import Fluent
-import FluentPostgresDriver
 
 /// Controls basic operations for User object.
 final class UsersController: RouteCollection {
@@ -11,11 +9,16 @@ final class UsersController: RouteCollection {
         let usersGroup = routes
             .grouped(UsersController.uri)
             .grouped(UserAuthenticator().middleware())
-            .grouped(UserPayload.guardMiddleware())
         
         usersGroup.get(":name", use: read)
-        usersGroup.put(":name", use: update)
-        usersGroup.delete(":name", use: delete)
+
+        usersGroup
+            .grouped(UserPayload.guardMiddleware())
+            .put(":name", use: update)
+        
+        usersGroup
+            .grouped(UserPayload.guardMiddleware())
+            .delete(":name", use: delete)
     }
 
     /// User profile.
@@ -25,17 +28,18 @@ final class UsersController: RouteCollection {
             throw Abort(.badRequest)
         }
         
+        let usersService = request.application.services.usersService
         let userNameNormalized = userName.replacingOccurrences(of: "@", with: "").uppercased()
-        let userFuture = User.query(on: request.db).filter(\.$userNameNormalized == userNameNormalized).first()
+        let userFuture = usersService.get(on: request, userName: userNameNormalized)
 
         return userFuture.flatMap { userFromDb in
             guard let user = userFromDb else {
                 return request.fail(EntityNotFoundError.userNotFound)
             }
             
-            let userProfile = self.getUserProfile(on: request,
-                                                  user: user,
-                                                  userNameFromRequest: userNameNormalized)
+            let userProfile = self.cleanUserProfile(on: request,
+                                                    user: user,
+                                                    userNameFromRequest: userNameNormalized)
             
             return request.success(userProfile)
         }
@@ -59,7 +63,8 @@ final class UsersController: RouteCollection {
             throw EntityForbiddenError.userForbidden
         }
         
-        return self.updateUser(on: request, userDto: userDto, userNameNormalized: userNameNormalized).map { user in
+        let usersService = request.application.services.usersService
+        return usersService.updateUser(on: request, userDto: userDto, userNameNormalized: userNameNormalized).map { user in
             UserDto(from: user)
         }
     }
@@ -79,11 +84,12 @@ final class UsersController: RouteCollection {
             throw EntityForbiddenError.userForbidden
         }
         
-        return self.deleteUser(on: request, userNameNormalized: userNameNormalized)
+        let usersService = request.application.services.usersService
+        return usersService.deleteUser(on: request, userNameNormalized: userNameNormalized)
             .transform(to: HTTPStatus.ok)
     }
 
-    private func getUserProfile(on request: Request, user: User, userNameFromRequest: String) -> UserDto {
+    private func cleanUserProfile(on request: Request, user: User, userNameFromRequest: String) -> UserDto {
         let userDto = UserDto(from: user)
 
         let userNameFromToken = request.auth.get(UserPayload.self)?.userName
@@ -95,32 +101,5 @@ final class UsersController: RouteCollection {
         }
 
         return userDto
-    }
-
-    private func updateUser(on request: Request, userDto: UserDto, userNameNormalized: String) -> EventLoopFuture<User> {
-        return User.query(on: request.db).filter(\.$userNameNormalized == userNameNormalized).first().flatMap { userFromDb in
-
-            guard let user = userFromDb else {
-                return request.fail(EntityNotFoundError.userNotFound)
-            }
-
-            user.name = userDto.name
-            user.bio = userDto.bio
-            user.birthDate = userDto.birthDate
-            user.location = userDto.location
-            user.website = userDto.website
-
-            return user.update(on: request.db).transform(to: user)
-        }
-    }
-    
-    private func deleteUser(on request: Request, userNameNormalized: String) -> EventLoopFuture<Void> {
-        return User.query(on: request.db).filter(\.$userNameNormalized == userNameNormalized).first().flatMap { userFromDb -> EventLoopFuture<Void> in
-            guard let user = userFromDb else {
-                return request.fail(EntityNotFoundError.userNotFound)
-            }
-            
-            return user.delete(on: request.db)
-        }
     }
 }

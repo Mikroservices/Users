@@ -1,6 +1,4 @@
-import Foundation
 import Vapor
-import JWT
 
 struct GuardIsSuperUserMiddleware: Middleware {
     func respond(to request: Request, chainingTo next: Responder) -> EventLoopFuture<Response> {

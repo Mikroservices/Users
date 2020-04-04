@@ -1,7 +1,5 @@
-import Foundation
 import Vapor
 import Fluent
-import FluentPostgresDriver
 
 extension Application.Services {
     struct UsersServiceKey: StorageKey {
@@ -19,6 +17,7 @@ extension Application.Services {
 }
 
 protocol UsersServiceType {
+    func get(on request: Request, userName: String) -> EventLoopFuture<User?>
     func login(on request: Request, userNameOrEmail: String, password: String) throws -> EventLoopFuture<User>
     func forgotPassword(on request: Request, email: String) -> EventLoopFuture<User>
     func confirmForgotPassword(on request: Request, forgotPasswordGuid: String, password: String) -> EventLoopFuture<User>
@@ -26,10 +25,19 @@ protocol UsersServiceType {
     func confirmEmail(on request: Request, userId: UUID, confirmationGuid: String) -> EventLoopFuture<User>
     func isUserNameTaken(on request: Request, userName: String) -> EventLoopFuture<Bool>
     func isEmailConnected(on request: Request, email: String) -> EventLoopFuture<Bool>
+    func validateUserName(on request: Request, userName: String) -> EventLoopFuture<Void>
+    func validateEmail(on request: Request, email: String?) -> EventLoopFuture<Void>
+    func updateUser(on request: Request, userDto: UserDto, userNameNormalized: String) -> EventLoopFuture<User>
+    func deleteUser(on request: Request, userNameNormalized: String) -> EventLoopFuture<Void>
 }
 
 final class UsersService: UsersServiceType {
 
+    func get(on request: Request, userName: String) -> EventLoopFuture<User?> {
+        let userNameNormalized = userName.uppercased()
+        return User.query(on: request.db).filter(\.$userNameNormalized == userNameNormalized).first()
+    }
+    
     func login(on request: Request, userNameOrEmail: String, password: String) throws -> EventLoopFuture<User> {
 
         let userNameOrEmailNormalized = userNameOrEmail.uppercased()
@@ -193,6 +201,55 @@ final class UsersService: UsersServiceType {
             }
 
             return false
+        }
+    }
+    
+    func validateUserName(on request: Request, userName: String) -> EventLoopFuture<Void> {
+        let userNameNormalized = userName.uppercased()
+        return User.query(on: request.db).filter(\.$userNameNormalized == userNameNormalized).first().flatMap { user in
+            if user != nil {
+                return request.fail(RegisterError.userNameIsAlreadyTaken)
+            }
+            
+            return request.success()
+        }
+    }
+
+    func validateEmail(on request: Request, email: String?) -> EventLoopFuture<Void> {
+        let emailNormalized = (email ?? "").uppercased()
+        return User.query(on: request.db).filter(\.$emailNormalized == emailNormalized).first().flatMap { user in
+            if user != nil {
+                return request.fail(RegisterError.emailIsAlreadyConnected)
+            }
+            
+            return request.success()
+        }
+    }
+    
+    func updateUser(on request: Request, userDto: UserDto, userNameNormalized: String) -> EventLoopFuture<User> {
+        return self.get(on: request, userName: userNameNormalized).flatMap { userFromDb in
+
+            guard let user = userFromDb else {
+                return request.fail(EntityNotFoundError.userNotFound)
+            }
+
+            user.name = userDto.name
+            user.bio = userDto.bio
+            user.birthDate = userDto.birthDate
+            user.location = userDto.location
+            user.website = userDto.website
+
+            return user.update(on: request.db).transform(to: user)
+        }
+    }
+    
+    func deleteUser(on request: Request, userNameNormalized: String) -> EventLoopFuture<Void> {
+        return self.get(on: request, userName: userNameNormalized).flatMap { userFromDb -> EventLoopFuture<Void> in
+            guard let user = userFromDb else {
+                return request.fail(EntityNotFoundError.userNotFound)
+            }
+            
+            return user.delete(on: request.db)
         }
     }
 }
