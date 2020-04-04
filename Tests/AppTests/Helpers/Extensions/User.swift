@@ -41,7 +41,7 @@ extension User {
     }
     
     static func get(userName: String) throws -> User {
-        guard let user = try User.query(on: SharedApplication.application().db).filter(\.$userName == userName).first().wait() else {
+        guard let user = try User.query(on: SharedApplication.application().db).with(\.$roles).filter(\.$userName == userName).first().wait() else {
             throw SharedApplicationError.unwrap
         }
 
