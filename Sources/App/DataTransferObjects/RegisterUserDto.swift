@@ -21,10 +21,10 @@ extension RegisterUserDto: Validatable {
         validations.add("email", as: String.self, is: .email)
         validations.add("password", as: String.self, is: .count(8...32) && .password)
 
-        validations.add("name", as: String?.self, is: .count(...50) || .nil)
-        validations.add("location", as: String?.self, is: .count(...50) || .nil)
-        validations.add("website", as: String?.self, is: .count(...50) || .nil)
-        validations.add("bio", as: String?.self, is: .count(...200) || .nil)
+        validations.add("name", as: String?.self, is: .nil || .count(...50), required: false)
+        validations.add("location", as: String?.self, is: .nil || .count(...50), required: false)
+        validations.add("website", as: String?.self, is: .nil || .count(...50), required: false)
+        validations.add("bio", as: String?.self, is: .nil || .count(...200), required: false)
 
         validations.add("securityToken", as: String?.self, is: !.nil)
     }

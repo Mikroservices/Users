@@ -42,8 +42,8 @@ final class RegisterController: RouteCollection {
             try self.sendNewUserEmail(on: request, user: user)
         }.flatMap { user in user }
 
-        return sendEmailFuture.flatMapThrowing { user in
-            try self.createNewUserResponse(on: request, user: user)
+        return sendEmailFuture.flatMap { user in
+            self.createNewUserResponse(on: request, user: user)
         }
     }
 
@@ -141,15 +141,13 @@ final class RegisterController: RouteCollection {
         return sendEmailFuture.transform(to: user)
     }
 
-    private func createNewUserResponse(on request: Request, user: User) throws -> Response {
+    private func createNewUserResponse(on request: Request, user: User) -> EventLoopFuture<Response> {
         let createdUserDto = UserDto(from: user)
-                
-        let body = try Response.Body(data: JSONEncoder().encode(createdUserDto))
-        let response = Response(status: .created, headers: HTTPHeaders(), body: body)
-        response.headers.replaceOrAdd(name: .contentType, value: "application/json; charset=utf-8")
-        response.headers.replaceOrAdd(name: .location, value: "/\(UsersController.uri)/@\(user.userName)")
         
-        return response
+        var headers = HTTPHeaders()
+        headers.replaceOrAdd(name: .location, value: "/\(UsersController.uri)/@\(user.userName)")
+        
+        return createdUserDto.encodeResponse(status: .created, headers: headers, for: request)
     }
     
     private func getGravatarHash(email: String) -> String {

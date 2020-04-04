@@ -39,32 +39,4 @@ extension User {
 
         return user
     }
-/*
-    static func get(on application: Application, userName: String) throws -> User {
-        guard let user = try User.query(on: SharedApplication.application().db).filter(\.$userName == userName).first().wait() else {
-            throw SharedApplicationError.unwrap
-        }
-
-        return user
-    }
-
-    func update() throws {
-        _ = try self.save(on: SharedApplication.application().db).wait()
-    }
-
-    func attach(role: Role, on application: Application) throws {
-        let connection = try application.newConnection(to: .psql).wait()
-        _ = try self.roles.attach(role, on: connection).wait()
-    }
-
-    func attach(roleName: String, on application: Application) throws {
-        let role = try Role.get(on: application, name: roleName)
-        try self.attach(role: role, on: application)
-    }
-
-    func getRoles(on application: Application) throws -> [Role] {
-        let connection = try application.newConnection(to: .psql).wait()
-        return try self.roles.query(on: connection).all().wait()
-    }
-*/
 }

@@ -1,11 +1,8 @@
 @testable import App
 import XCTest
-import Vapor
-import JWT
-import Crypto
-import XCTest
+import XCTVapor
+import Fluent
 
-/*
 final class RegisterActionTests: XCTestCase {
 
     func testUserAccountShouldBeCreatedForValidUserData() throws {
@@ -38,7 +35,7 @@ final class RegisterActionTests: XCTestCase {
         let response = try SharedApplication.application().sendRequest(to: "/register", method: .POST, body: registerUserDto)
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.created, "Response http status code should be created (201).")
+        XCTAssertEqual(response.status, HTTPResponseStatus.created, "Response http status code should be created (201).")
     }
 
     func testHeaderLocationShouldBeReturnedAfterCreatingNewUser() throws {
@@ -54,8 +51,8 @@ final class RegisterActionTests: XCTestCase {
         let response = try SharedApplication.application().sendRequest(to: "/register", method: .POST, body: registerUserDto)
 
         // Assert.
-        let location = response.http.headers[.location][0]
-        let user = try response.content.decode(UserDto.self).wait()
+        let location = response.headers.first(name: .location)
+        let user = try response.content.decode(UserDto.self)
         XCTAssertEqual(location, "/users/@\(user.userName)", "Location header should contains created username.")
     }
 
@@ -99,16 +96,14 @@ final class RegisterActionTests: XCTestCase {
         _ = try SharedApplication.application().getResponse(to: "/register", method: .POST, data: registerUserDto, decodeTo: UserDto.self)
 
         // Assert.
-        let user = try User.get(on: SharedApplication.application(), userName: "briansmith")
-        let roles = try user.getRoles(on: SharedApplication.application())
-        XCTAssertEqual(roles[0].code, "member", "Default user roles should be added to user")
+        let user = try User.query(on: SharedApplication.application().db).with(\.$roles).filter(\.$userName == "briansmith").first().wait()
+        XCTAssertEqual(user?.roles[0].code, "member", "Default user roles should be added to user")
     }
 
     func testUserShouldNotBeCreatedIfUserWithTheSameEmailExists() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "jurgensmith",
+        _ = try User.create(userName: "jurgensmith",
                             email: "jurgensmith@testemail.com",
                             name: "Jurgen Smith")
 
@@ -133,8 +128,7 @@ final class RegisterActionTests: XCTestCase {
     func testUserShouldNotBeCreatedIfUserWithTheSameUserNameExists() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "samanthasmith",
+        _ = try User.create(userName: "samanthasmith",
                             email: "samanthasmith@testemail.com",
                             name: "Samantha Smith")
 
@@ -175,7 +169,8 @@ final class RegisterActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
-        XCTAssertEqual(errorResponse.error.reason, "'userName' is less than required minimum of 1 character", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("userName"), "is less than minimum of 1 character(s)")
     }
 
     func testUserShouldNotBeCreatedIfUserNameWasTooLong() throws {
@@ -197,7 +192,8 @@ final class RegisterActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
-        XCTAssertEqual(errorResponse.error.reason, "'userName' is greater than required maximum of 50 characters", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("userName"), "is greater than maximum of 50 character(s)")
     }
 
     func testUserShouldNotBeCreatedIfEmailWasNotSpecified() throws {
@@ -219,7 +215,8 @@ final class RegisterActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
-        XCTAssertEqual(errorResponse.error.reason, "'email' is not a valid email address", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("email"), "is not a valid email address")
     }
 
     func testUserShouldNotBeCreatedIfEmailHasWrongFormat() throws {
@@ -241,7 +238,8 @@ final class RegisterActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
-        XCTAssertEqual(errorResponse.error.reason, "'email' is not a valid email address", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("email"), "is not a valid email address")
     }
 
     func testUserShouldNotBeCreatedIfPasswordWasNotSpecified() throws {
@@ -263,7 +261,8 @@ final class RegisterActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
-        XCTAssertEqual(errorResponse.error.reason, "'password' is less than required minimum of 8 characters and 'password' is not a valid password", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("password"), "is less than minimum of 8 character(s) and is not a valid password")
     }
 
     func testUserShouldNotBeCreatedIfPasswordIsTooShort() throws {
@@ -285,7 +284,8 @@ final class RegisterActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
-        XCTAssertEqual(errorResponse.error.reason, "'password' is less than required minimum of 8 characters and 'password' is not a valid password", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("password"), "is less than minimum of 8 character(s) and is not a valid password")
     }
 
     func testUserShouldNotBeCreatedIfPasswordIsTooLong() throws {
@@ -307,7 +307,8 @@ final class RegisterActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
-        XCTAssertEqual(errorResponse.error.reason, "'password' is greater than required maximum of 32 characters and 'password' is not a valid password", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("password"), "is greater than maximum of 32 character(s) and is not a valid password")
     }
 
     func testUserShouldNotBeCreatedIfNameIsTooLong() throws {
@@ -329,7 +330,8 @@ final class RegisterActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
-        XCTAssertEqual(errorResponse.error.reason, "'name' is greater than required maximum of 50 characters and 'name' is not nil", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("name"), "is not null and is greater than maximum of 50 character(s)")
     }
 
     func testUserShouldNotBeCreatedIfLocationIsTooLong() throws {
@@ -352,7 +354,8 @@ final class RegisterActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
-        XCTAssertEqual(errorResponse.error.reason, "'location' is greater than required maximum of 50 characters and 'location' is not nil", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("location"), "is not null and is greater than maximum of 50 character(s)")
     }
 
     func testUserShouldNotBeCreatedIfWebsiteIsTooLong() throws {
@@ -375,7 +378,8 @@ final class RegisterActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
-        XCTAssertEqual(errorResponse.error.reason, "'website' is greater than required maximum of 50 characters and 'website' is not nil", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("website"), "is not null and is greater than maximum of 50 character(s)")
     }
 
     func testUserShouldNotBeCreatedIfBioIsTooLong() throws {
@@ -401,7 +405,8 @@ final class RegisterActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
-        XCTAssertEqual(errorResponse.error.reason, "'bio' is greater than required maximum of 200 characters and 'bio' is not nil", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("bio"), "is not null and is greater than maximum of 200 character(s)")
     }
 
     func testUserShouldNotBeCreatedIfSecurityTokenWasNotSpecified() throws {
@@ -423,7 +428,8 @@ final class RegisterActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
-        XCTAssertEqual(errorResponse.error.reason, "'securityToken' is nil", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("securityToken"), "is required")
     }
 
     static let allTests = [
@@ -447,4 +453,3 @@ final class RegisterActionTests: XCTestCase {
         ("testUserShouldNotBeCreatedIfSecurityTokenWasNotSpecified", testUserShouldNotBeCreatedIfSecurityTokenWasNotSpecified)
     ]
 }
-*/

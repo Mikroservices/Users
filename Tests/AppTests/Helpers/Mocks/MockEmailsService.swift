@@ -1,15 +1,13 @@
 @testable import App
-import Foundation
-import Vapor
+import XCTVapor
 
-/*
 final class MockEmailsService: EmailsServiceType {
-    func sendForgotPasswordEmail(on request: Request, user: User) throws -> Future<Bool> {
-        return request.future().map { return true }
+    func sendForgotPasswordEmail(on request: Request, user: User) throws -> EventLoopFuture<Bool> {
+        return request.eventLoop.makeSucceededFuture(true)
     }
 
-    func sendConfirmAccountEmail(on request: Request, user: User) throws -> Future<Bool> {
-        return request.future().map { return true }
+    func sendConfirmAccountEmail(on request: Request, user: User) throws -> EventLoopFuture<Bool> {
+        return request.eventLoop.makeSucceededFuture(true)
     }
 }
-*/
+

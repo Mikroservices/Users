@@ -31,6 +31,9 @@ final class SharedApplication {
     private static func create() throws -> Application {
         let app = Application(.testing)
         try app.configure()
+        
+        // Services mocks.
+        app.services.emailsService = MockEmailsService()
 
         return app
     }

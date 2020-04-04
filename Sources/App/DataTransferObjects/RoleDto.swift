@@ -28,6 +28,6 @@ extension RoleDto: Validatable {
     static func validations(_ validations: inout Validations) {
         validations.add("role", as: String.self, is: .count(...50))
         validations.add("code", as: String.self, is: .count(...20))
-        validations.add("description", as: String?.self, is: .count(...200) || .nil)
+        validations.add("description", as: String?.self, is: .count(...200) || .nil, required: false)
     }
 }
