@@ -12,6 +12,8 @@ jobs:
     - uses: YOCKOW/Action-setup-swift@master
       with:
         swift-version: '5.2'
+    - name: Install SQLite libs
+      run: sudo apt-get install libsqlite3-dev
     - name: Build
       run: swift build
     - name: Tests
