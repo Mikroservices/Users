@@ -7,6 +7,7 @@ struct CreateUserRoles: Migration {
             .id()
             .field("userId", .uuid, .required, .references("Users", "id"))
             .field("roleId", .uuid, .required, .references("Roles", "id"))
+            .field("createdAt", .datetime)
             .create()
     }
 

@@ -1,7 +1,6 @@
 import Vapor
 
-final class RegisterUserDto {
-
+struct RegisterUserDto {
     var userName: String
     var email: String
     var password: String
@@ -12,29 +11,6 @@ final class RegisterUserDto {
     var birthDate: Date?
     var gravatarHash: String?
     var securityToken: String?
-
-    init(userName: String,
-         email: String,
-         password: String,
-         gravatarHash: String? = nil,
-         name: String? = nil,
-         bio: String? = nil,
-         location: String? = nil,
-         website: String? = nil,
-         birthDate: Date? = nil,
-         securityToken: String? = nil
-    ) {
-        self.userName = userName
-        self.email = email
-        self.password = password
-        self.gravatarHash = gravatarHash
-        self.name = name
-        self.bio = bio
-        self.location = location
-        self.website = website
-        self.birthDate = birthDate
-        self.securityToken = securityToken
-    }
 }
 
 extension RegisterUserDto: Content { }

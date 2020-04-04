@@ -23,6 +23,15 @@ final class Role: Model {
     @Field(key: "isDefault")
     var isDefault: Bool
     
+    @Timestamp(key: "createdAt", on: .create)
+    var createdAt: Date?
+
+    @Timestamp(key: "updatedAt", on: .update)
+    var updatedAt: Date?
+    
+    @Timestamp(key: "deletedAt", on: .delete)
+    var deletedAt: Date?
+    
     @Siblings(through: UserRole.self, from: \.$role, to: \.$user)
     var users: [User]
 

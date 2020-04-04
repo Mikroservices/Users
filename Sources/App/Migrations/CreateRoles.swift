@@ -11,6 +11,9 @@ struct CreateRoles: Migration {
             .field("description", .string)
             .field("hasSuperPrivileges", .bool, .required)
             .field("isDefault", .bool, .required)
+            .field("createdAt", .datetime)
+            .field("updatedAt", .datetime)
+            .field("deletedAt", .datetime)
             .create()
     }
 

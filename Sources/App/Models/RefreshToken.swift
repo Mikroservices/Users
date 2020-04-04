@@ -16,6 +16,12 @@ final class RefreshToken: Model {
     
     @Field(key: "revoked")
     var revoked: Bool
+    
+    @Timestamp(key: "createdAt", on: .create)
+    var createdAt: Date?
+
+    @Timestamp(key: "updatedAt", on: .update)
+    var updatedAt: Date?
 
     @Parent(key: "userId")
     var user: User

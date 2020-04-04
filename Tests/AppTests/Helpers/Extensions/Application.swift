@@ -37,7 +37,9 @@ extension Application {
 
         var content = ByteBufferAllocator().buffer(capacity: 0)
         if let body = body {
-            try content.writeJSONEncodable(body)
+            let jsonEncoder = JSONEncoder()
+            jsonEncoder.dateEncodingStrategy = .iso8601
+            try content.writeJSONEncodable(body, encoder: jsonEncoder)
             allHeaders.add(name: .contentType, value: "application/json")
         }
         
@@ -81,7 +83,10 @@ extension Application {
                                             headers: headers, 
                                             body: data)
 
-        return try response.content.decode(type)
+        let jsonDecoder = JSONDecoder()
+        jsonDecoder.dateDecodingStrategy = .iso8601
+        
+        return try response.content.decode(type, using: jsonDecoder)
     }
 
     func getResponse<T>(as authorizationType: AuthorizationType = .anonymous,
@@ -112,7 +117,10 @@ extension Application {
                                             headers: headers,
                                             body: data)
 
-        let errorBody = try response.content.decode(ErrorBody.self)
+        let jsonDecoder = JSONDecoder()
+        jsonDecoder.dateDecodingStrategy = .iso8601
+        
+        let errorBody = try response.content.decode(ErrorBody.self, using: jsonDecoder)
         let errorResponse = ErrorResponse(error: errorBody, status: response.status)
 
         return errorResponse
@@ -131,7 +139,10 @@ extension Application {
                                             headers: headers,
                                             body: emptyContent)
 
-        let errorBody = try response.content.decode(ErrorBody.self)
+        let jsonDecoder = JSONDecoder()
+        jsonDecoder.dateDecodingStrategy = .iso8601
+
+        let errorBody = try response.content.decode(ErrorBody.self, using: jsonDecoder)
         let errorResponse = ErrorResponse(error: errorBody, status: response.status)
 
         return errorResponse

@@ -1,14 +1,8 @@
 import Vapor
 
-final class ForgotPasswordConfirmationRequestDto {
-
+struct ForgotPasswordConfirmationRequestDto {
     var forgotPasswordGuid: String
     var password: String
-
-    init(forgotPasswordGuid: String, password: String) {
-        self.forgotPasswordGuid = forgotPasswordGuid
-        self.password = password
-    }
 }
 
 extension ForgotPasswordConfirmationRequestDto: Content { }

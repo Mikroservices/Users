@@ -59,6 +59,15 @@ final class User: Model {
     @Field(key: "gravatarHash")
     var gravatarHash: String
     
+    @Timestamp(key: "createdAt", on: .create)
+    var createdAt: Date?
+
+    @Timestamp(key: "updatedAt", on: .update)
+    var updatedAt: Date?
+    
+    @Timestamp(key: "deletedAt", on: .delete)
+    var deletedAt: Date?
+    
     @Children(for: \.$user)
     var refreshTokens: [RefreshToken]
     

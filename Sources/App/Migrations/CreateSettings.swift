@@ -8,6 +8,8 @@ struct CreateSettings: Migration {
             .id()
             .field("key", .string, .required)
             .field("value", .string, .required)
+            .field("createdAt", .datetime)
+            .field("updatedAt", .datetime)
             .create()
     }
 

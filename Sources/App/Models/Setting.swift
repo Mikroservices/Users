@@ -13,6 +13,12 @@ final class Setting: Model {
     @Field(key: "value")
     var value: String
 
+    @Timestamp(key: "createdAt", on: .create)
+    var createdAt: Date?
+
+    @Timestamp(key: "updatedAt", on: .update)
+    var updatedAt: Date?
+    
     init() { }
     
     init(id: UUID? = nil,
@@ -35,7 +41,7 @@ public enum SettingKey: String {
     case recaptchaKey
 }
 
-extension Array where Element:Setting {
+extension Array where Element == Setting {
     func getSetting(_ key: SettingKey) -> Setting? {
         for item in self {
             if item.key == key.rawValue {

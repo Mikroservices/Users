@@ -24,6 +24,9 @@ struct CreateUsers: Migration {
             .field("birthDate", .datetime)
             .field("userNameNormalized", .string, .required)
             .field("emailNormalized", .string, .required)
+            .field("createdAt", .datetime)
+            .field("updatedAt", .datetime)
+            .field("deletedAt", .datetime)
             .create()
     }
 

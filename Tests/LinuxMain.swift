@@ -30,8 +30,8 @@ XCTMain([
     // testCase(UserRolesDisconnectActionTests.allTests),
 
     // Users controller.
-    // testCase(UsersDeleteActionTests.allTests),
+    testCase(UsersDeleteActionTests.allTests),
     testCase(UsersReadActionTests.allTests),
-    // testCase(UsersUpdateActionTests.allTests)
+    testCase(UsersUpdateActionTests.allTests)
 
 ])

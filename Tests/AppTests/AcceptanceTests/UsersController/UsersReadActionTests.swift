@@ -7,23 +7,9 @@ final class UsersReadActionTests: XCTestCase {
     func testUserProfileShouldBeReturnedForExistingUser() throws {
 
         // Arrange.
-        let user = User(userName: "johnbush",
-                        email: "johnbush@testemail.com",
-                        name: "John Bush",
-                        password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                        salt: "TNhZYL4F66KY7fUuqS/Juw==",
-                        emailWasConfirmed: true,
-                        isBlocked: false,
-                        emailConfirmationGuid: "",
-                        gravatarHash: "048a975025190efa55edb9948ae7ced5",
-                        forgotPasswordGuid: "1234567890",
-                        forgotPasswordDate: Date(),
-                        bio: "Developer in most innovative company.",
-                        location: "Cupertino",
-                        website: "http://johnbush.com",
-                        birthDate: Date())
-
-        try user.create(on: SharedApplication.application().db).wait()
+        let user = try User.create(userName: "johnbush",
+                                   email: "johnbush@testemail.com",
+                                   name: "John Bush")
 
         // Act.
         let userDto = try SharedApplication.application().getResponse(
@@ -56,23 +42,9 @@ final class UsersReadActionTests: XCTestCase {
     func testPublicProfileShouldNotContainsSensitiveInformation() throws {
 
         // Arrange.
-        let user = User(userName: "elizabush",
-                        email: "elizabush@testemail.com",
-                        name: "Eliza Bush",
-                        password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                        salt: "TNhZYL4F66KY7fUuqS/Juw==",
-                        emailWasConfirmed: true,
-                        isBlocked: false,
-                        emailConfirmationGuid: "",
-                        gravatarHash: "75025190efa55edb9948ae7ced5c6ccf1a553c",
-                        forgotPasswordGuid: "1234567890",
-                        forgotPasswordDate: Date(),
-                        bio: "Tester in most innovative company.",
-                        location: "Cupertino",
-                        website: "http://elizabush.com",
-                        birthDate: Date())
-
-        try user.create(on: SharedApplication.application().db).wait()
+        let user = try User.create(userName: "elizabush",
+                                   email: "elizabush@testemail.com",
+                                   name: "Eliza Bush")
 
         // Act.
         let userDto = try SharedApplication.application()

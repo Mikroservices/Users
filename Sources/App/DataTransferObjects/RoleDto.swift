@@ -1,31 +1,16 @@
 import Vapor
 
-final class RoleDto {
-
+struct RoleDto {
     var id: UUID?
     var role: String
     var code: String
     var description: String?
     var hasSuperPrivileges: Bool
     var isDefault: Bool
-
-    init(id: UUID? = nil,
-         role: String,
-         code: String,
-         description: String?,
-         hasSuperPrivileges: Bool = false,
-         isDefault: Bool = false) {
-        self.id = id
-        self.role = role
-        self.code = code
-        self.description = description
-        self.hasSuperPrivileges = hasSuperPrivileges
-        self.isDefault = isDefault
-    }
 }
 
 extension RoleDto {
-    convenience init(from role: Role) {
+    init(from role: Role) {
         self.init(
             id: role.id,
             role: role.role,

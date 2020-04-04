@@ -1,14 +1,8 @@
 import Vapor
 
-final class ChangePasswordRequestDto {
-
+struct ChangePasswordRequestDto {
     var currentPassword: String
     var newPassword: String
-
-    init(currentPassword: String, newPassword: String) {
-        self.currentPassword = currentPassword
-        self.newPassword = newPassword
-    }
 }
 
 extension ChangePasswordRequestDto: Content { }

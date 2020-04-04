@@ -10,6 +10,8 @@ struct CreateRefreshTokens: Migration {
             .field("expiryDate", .datetime, .required)
             .field("revoked", .bool, .required)
             .field("userId", .uuid, .references("Users", "id"))
+            .field("createdAt", .datetime)
+            .field("updatedAt", .datetime)
             .create()
     }
 

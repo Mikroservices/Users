@@ -51,9 +51,6 @@ final class UsersController: RouteCollection {
         guard let userName = request.parameters.get("name") else {
             throw Abort(.badRequest)
         }
-        
-        let userDto = try request.content.decode(UserDto.self)
-        try UserDto.validate(request)
 
         let userNameNormalized = userName.replacingOccurrences(of: "@", with: "").uppercased()
         let userNameFromToken = request.auth.get(UserPayload.self)?.userName
@@ -62,6 +59,9 @@ final class UsersController: RouteCollection {
         guard isProfileOwner else {
             throw EntityForbiddenError.userForbidden
         }
+        
+        let userDto = try request.content.decode(UserDto.self)
+        try UserDto.validate(request)
         
         let usersService = request.application.services.usersService
         return usersService.updateUser(on: request, userDto: userDto, userNameNormalized: userNameNormalized).map { user in
@@ -90,7 +90,7 @@ final class UsersController: RouteCollection {
     }
 
     private func cleanUserProfile(on request: Request, user: User, userNameFromRequest: String) -> UserDto {
-        let userDto = UserDto(from: user)
+        var userDto = UserDto(from: user)
 
         let userNameFromToken = request.auth.get(UserPayload.self)?.userName
         let isProfileOwner = userNameFromToken?.uppercased() == userNameFromRequest

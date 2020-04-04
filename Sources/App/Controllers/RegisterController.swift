@@ -70,7 +70,7 @@ final class RegisterController: RouteCollection {
         let isUserNameTakenFuture = usersService.isUserNameTaken(on: request, userName: userName)
 
         return isUserNameTakenFuture.map { result in
-            BooleanResponseDto(result)
+            BooleanResponseDto(result: result)
         }
     }
 
@@ -85,7 +85,7 @@ final class RegisterController: RouteCollection {
         let isEmailConnectedFuture = usersService.isEmailConnected(on: request, email: email)
 
         return isEmailConnectedFuture.map { result in
-            BooleanResponseDto(result)
+            BooleanResponseDto(result: result)
         }
     }
 

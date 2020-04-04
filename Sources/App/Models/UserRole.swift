@@ -7,6 +7,9 @@ final class UserRole: Model {
     @ID(key: .id)
     var id: UUID?
 
+    @Timestamp(key: "createdAt", on: .create)
+    var createdAt: Date?
+    
     @Parent(key: "userId")
     var user: User
 
