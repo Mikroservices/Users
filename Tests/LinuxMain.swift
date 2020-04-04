@@ -2,7 +2,6 @@ import XCTest
 @testable import AppTests
 
 XCTMain([
-
     // Account controller.
     testCase(ChangePasswordActionTests.allTests),
     testCase(LoginActionTests.allTests),
@@ -19,11 +18,11 @@ XCTMain([
     testCase(UserNameActionTests.allTests),
 
     // Roles controller.
-    // testCase(RolesCreateActionTests.allTests),
-    // testCase(RolesDeleteActionTests.allTests),
-    // testCase(RolesListActionTests.allTests),
-    // testCase(RolesReadActionTests.allTests),
-    // testCase(RolesUpdateActionTests.allTests),
+    testCase(RolesCreateActionTests.allTests),
+    testCase(RolesDeleteActionTests.allTests),
+    testCase(RolesListActionTests.allTests),
+    testCase(RolesReadActionTests.allTests),
+    testCase(RolesUpdateActionTests.allTests),
 
     // User roles controller.
     testCase(UserRolesConnectActionTests.allTests),
@@ -33,5 +32,4 @@ XCTMain([
     testCase(UsersDeleteActionTests.allTests),
     testCase(UsersReadActionTests.allTests),
     testCase(UsersUpdateActionTests.allTests)
-
 ])

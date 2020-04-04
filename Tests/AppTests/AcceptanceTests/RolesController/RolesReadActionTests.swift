@@ -1,21 +1,19 @@
 @testable import App
 import XCTest
-import Vapor
-import XCTest
+import XCTVapor
 
-/*
 final class RolesReadActionTests: XCTestCase {
 
     func testRoleShouldBeReturnedForSuperUser() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "robinyellow",
+        let user = try User.create(userName: "robinyellow",
                                    email: "robinyellow@testemail.com",
                                    name: "Robin Yellow")
-        try user.attach(roleName: "Administrator", on: SharedApplication.application())
-        let role = try Role.create(on: SharedApplication.application(),
-                                   name: "Senior architect",
+        let administrator = try Role.get(role: "Administrator")
+        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        
+        let role = try Role.create(name: "Senior architect",
                                    code: "senior-architect",
                                    description: "Senior architect")
 
@@ -29,7 +27,7 @@ final class RolesReadActionTests: XCTestCase {
 
         // Assert.
         XCTAssertEqual(roleDto.id, role.id, "Role id should be correct.")
-        XCTAssertEqual(roleDto.name, role.name, "Role name should be correct.")
+        XCTAssertEqual(roleDto.role, role.role, "Role name should be correct.")
         XCTAssertEqual(roleDto.code, role.code, "Role code should be correct.")
         XCTAssertEqual(roleDto.description, role.description, "Role description should be correct.")
         XCTAssertEqual(roleDto.hasSuperPrivileges, role.hasSuperPrivileges, "Role super privileges should be correct.")
@@ -39,12 +37,10 @@ final class RolesReadActionTests: XCTestCase {
     func testRoleShouldNotBeReturnedIfUserIsNotSuperUser() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "hulkyellow",
+        _ = try User.create(userName: "hulkyellow",
                             email: "hulkyellow@testemail.com",
                             name: "Hulk Yellow")
-        let role = try Role.create(on: SharedApplication.application(),
-                                   name: "Senior developer",
+        let role = try Role.create(name: "Senior developer",
                                    code: "senior-developer",
                                    description: "Senior developer")
 
@@ -56,17 +52,17 @@ final class RolesReadActionTests: XCTestCase {
         )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.forbidden, "Response http status code should be bad request (400).")
+        XCTAssertEqual(response.status, HTTPResponseStatus.forbidden, "Response http status code should be bad request (400).")
     }
 
     func testCorrectStatusCodeShouldBeReturnedIdRoleNotExists() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "tedyellow",
+        let user = try User.create(userName: "tedyellow",
                                    email: "tedyellow@testemail.com",
                                    name: "Ted Yellow")
-        try user.attach(roleName: "Administrator", on: SharedApplication.application())
+        let administrator = try Role.get(role: "Administrator")
+        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
@@ -76,7 +72,7 @@ final class RolesReadActionTests: XCTestCase {
         )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")
+        XCTAssertEqual(response.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")
     }
 
     static let allTests = [
@@ -85,4 +81,3 @@ final class RolesReadActionTests: XCTestCase {
         ("testCorrectStatusCodeShouldBeReturnedIdRoleNotExists", testCorrectStatusCodeShouldBeReturnedIdRoleNotExists)
     ]
 }
-*/

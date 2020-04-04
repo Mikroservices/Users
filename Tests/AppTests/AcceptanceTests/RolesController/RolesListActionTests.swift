@@ -1,19 +1,17 @@
 @testable import App
 import XCTest
-import Vapor
-import XCTest
+import XCTVapor
 
-/*
 final class RolesListActionTests: XCTestCase {
 
     func testListOfRolesShouldBeReturnedForSuperUser() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "robinorange",
+        let user = try User.create(userName: "robinorange",
                                    email: "robinorange@testemail.com",
                                    name: "Robin Orange")
-        try user.attach(roleName: "Administrator", on: SharedApplication.application())
+        let administrator = try Role.get(role: "Administrator")
+        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
 
         // Act.
         let roles = try SharedApplication.application().getResponse(
@@ -30,8 +28,7 @@ final class RolesListActionTests: XCTestCase {
     func testListOfRolesShouldNotBeReturnedForNotSuperUser() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "wictororange",
+        _ = try User.create(userName: "wictororange",
                             email: "robinorange@testemail.com",
                             name: "Wictor Orange")
 
@@ -43,7 +40,7 @@ final class RolesListActionTests: XCTestCase {
         )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.forbidden, "Response http status code should be bad request (400).")
+        XCTAssertEqual(response.status, HTTPResponseStatus.forbidden, "Response http status code should be bad request (400).")
     }
 
     static let allTests = [
@@ -51,4 +48,3 @@ final class RolesListActionTests: XCTestCase {
         ("testListOfRolesShouldNotBeReturnedForNotSuperUser", testListOfRolesShouldNotBeReturnedForNotSuperUser)
     ]
 }
-*/
