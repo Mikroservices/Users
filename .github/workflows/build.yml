@@ -15,6 +15,6 @@ jobs:
     - name: Install SQLite libs
       run: sudo apt-get install libsqlite3-dev
     - name: Build
-      run: swift build
+      run: swift build --enable-test-discovery
     - name: Tests
-      run: swift test
+      run: swift test --enable-test-discovery
