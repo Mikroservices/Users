@@ -22,7 +22,7 @@ extension Role {
     }
 
     static func get(role: String) throws -> Role {
-        guard let role = try Role.query(on: SharedApplication.application().db).filter(\.$role == role).first().wait() else {
+        guard let role = try Role.query(on: SharedApplication.application().db).filter(\.$title == role).first().wait() else {
             throw SharedApplicationError.unwrap
         }
 

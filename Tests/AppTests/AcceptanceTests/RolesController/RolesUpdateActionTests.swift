@@ -14,7 +14,7 @@ final class RolesUpdateActionTests: XCTestCase {
         let administrator = try Role.get(role: "Administrator")
         try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
         let role = try Role.create(name: "Seller", code: "seller", description: "Seller")
-        let roleToUpdate = RoleDto(id: role.id, role: "Junior serller", code: "junior-seller", description: "Junior seller", hasSuperPrivileges: false, isDefault: true)
+        let roleToUpdate = RoleDto(id: role.id, title: "Junior serller", code: "junior-seller", description: "Junior seller", hasSuperPrivileges: false, isDefault: true)
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
@@ -32,7 +32,7 @@ final class RolesUpdateActionTests: XCTestCase {
         }
 
         XCTAssertEqual(updatedRole.id, roleToUpdate.id, "Role id should be correct.")
-        XCTAssertEqual(updatedRole.role, roleToUpdate.role, "Role name should be correct.")
+        XCTAssertEqual(updatedRole.title, roleToUpdate.title, "Role name should be correct.")
         XCTAssertEqual(updatedRole.code, roleToUpdate.code, "Role code should be correct.")
         XCTAssertEqual(updatedRole.description, roleToUpdate.description, "Role description should be correct.")
         XCTAssertEqual(updatedRole.hasSuperPrivileges, roleToUpdate.hasSuperPrivileges, "Role super privileges should be correct.")
@@ -46,7 +46,7 @@ final class RolesUpdateActionTests: XCTestCase {
                             email: "georgelee@testemail.com",
                             name: "Geaorge Lee")
         let role = try Role.create(name: "Senior seller", code: "senior-seller", description: "Senior seller")
-        let roleToUpdate = RoleDto(id: role.id, role: "Junior serller", code: "junior-seller", description: "Junior seller", hasSuperPrivileges: false, isDefault: true)
+        let roleToUpdate = RoleDto(id: role.id, title: "Junior serller", code: "junior-seller", description: "Junior seller", hasSuperPrivileges: false, isDefault: true)
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
@@ -69,7 +69,7 @@ final class RolesUpdateActionTests: XCTestCase {
         let administrator = try Role.get(role: "Administrator")
         try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
         let role = try Role.create(name: "Marketer", code: "marketer", description: "marketer")
-        let roleToUpdate = RoleDto(id: role.id, role: "Administrator", code: "administrator", description: "Administrator", hasSuperPrivileges: false, isDefault: true)
+        let roleToUpdate = RoleDto(id: role.id, title: "Administrator", code: "administrator", description: "Administrator", hasSuperPrivileges: false, isDefault: true)
 
         // Act.
         let errorResponse = try SharedApplication.application().getErrorResponse(
@@ -93,7 +93,7 @@ final class RolesUpdateActionTests: XCTestCase {
         let administrator = try Role.get(role: "Administrator")
         try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
         let role = try Role.create(name: "Manager1", code: "manager1", description: "Manager")
-        let roleToUpdate = RoleDto(id: role.id, role: "Senior manager", code: "123456789012345678901", description: "Senior manager", hasSuperPrivileges: false, isDefault: true)
+        let roleToUpdate = RoleDto(id: role.id, title: "Senior manager", code: "123456789012345678901", description: "Senior manager", hasSuperPrivileges: false, isDefault: true)
 
         // Act.
         let errorResponse = try SharedApplication.application().getErrorResponse(
@@ -120,7 +120,7 @@ final class RolesUpdateActionTests: XCTestCase {
         try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
         let role = try Role.create(name: "Manager2", code: "manager2", description: "Manager")
         let roleToUpdate = RoleDto(id: role.id,
-                                   role: "123456789012345678901234567890123456789012345678901",
+                                   title: "123456789012345678901234567890123456789012345678901",
                                    code: "senior-manager",
                                    description: "Senior manager",
                                    hasSuperPrivileges: false,
@@ -138,7 +138,7 @@ final class RolesUpdateActionTests: XCTestCase {
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
         XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
-        XCTAssertEqual(errorResponse.error.failures?.getFailure("role"), "is greater than maximum of 50 character(s)")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("title"), "is greater than maximum of 50 character(s)")
     }
 
     func testRoleShouldNotBeUpdatedIfDescriptionIsTooLong() throws {
@@ -151,7 +151,7 @@ final class RolesUpdateActionTests: XCTestCase {
         try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
         let role = try Role.create(name: "Manager3", code: "manager3", description: "Manager")
         let roleToUpdate = RoleDto(id: role.id,
-                                   role: "Senior manager",
+                                   title: "Senior manager",
                                    code: "senior-manager",
                                    description: "12345678901234567890123456789012345678901234567890" +
                                                 "12345678901234567890123456789012345678901234567890" +

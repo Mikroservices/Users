@@ -8,8 +8,8 @@ final class Role: Model {
     @ID(key: .id)
     var id: UUID?
     
-    @Field(key: "role")
-    var role: String
+    @Field(key: "title")
+    var title: String
 
     @Field(key: "code")
     var code: String
@@ -45,7 +45,7 @@ final class Role: Model {
          isDefault: Bool
     ) {
         self.id = id
-        self.role = role
+        self.title = role
         self.code = code
         self.description = description
         self.hasSuperPrivileges = hasSuperPrivileges
@@ -58,7 +58,7 @@ extension Role: Content { }
 
 extension Role {
     convenience init(from roleDto: RoleDto) {
-        self.init(role: roleDto.role,
+        self.init(role: roleDto.title,
                   code: roleDto.code,
                   description: roleDto.description,
                   hasSuperPrivileges: roleDto.hasSuperPrivileges,

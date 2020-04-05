@@ -6,7 +6,7 @@ struct CreateRoles: Migration {
         database
             .schema(Role.schema)
             .id()
-            .field("role", .string, .required)
+            .field("title", .string, .required)
             .field("code", .string, .required)
             .field("description", .string)
             .field("hasSuperPrivileges", .bool, .required)

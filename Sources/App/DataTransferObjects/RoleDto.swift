@@ -2,7 +2,7 @@ import Vapor
 
 struct RoleDto {
     var id: UUID?
-    var role: String
+    var title: String
     var code: String
     var description: String?
     var hasSuperPrivileges: Bool
@@ -13,7 +13,7 @@ extension RoleDto {
     init(from role: Role) {
         self.init(
             id: role.id,
-            role: role.role,
+            title: role.title,
             code: role.code,
             description: role.description,
             hasSuperPrivileges: role.hasSuperPrivileges,
@@ -26,7 +26,7 @@ extension RoleDto: Content { }
 
 extension RoleDto: Validatable {
     static func validations(_ validations: inout Validations) {
-        validations.add("role", as: String.self, is: .count(...50))
+        validations.add("title", as: String.self, is: .count(...50))
         validations.add("code", as: String.self, is: .count(...20))
         validations.add("description", as: String?.self, is: .count(...200) || .nil, required: false)
     }

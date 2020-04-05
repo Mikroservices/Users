@@ -86,7 +86,7 @@ xrhRAoGAJjk4/TcoOMzSjaiMF3yq82CRblUvpo0cWLN/nLWkwJkhCgzf/fm7Z3Fs
                                   hasSuperPrivileges: Bool,
                                   isDefault: Bool
     ) throws {
-        if !roles.contains(where: { $0.role == role }) {
+        if !roles.contains(where: { $0.title == role }) {
             let role = Role(role: role, code: code, description: description, hasSuperPrivileges: hasSuperPrivileges, isDefault: isDefault)
             _ = try role.save(on: database).wait()
         }

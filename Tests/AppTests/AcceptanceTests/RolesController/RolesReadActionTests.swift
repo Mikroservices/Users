@@ -27,7 +27,7 @@ final class RolesReadActionTests: XCTestCase {
 
         // Assert.
         XCTAssertEqual(roleDto.id, role.id, "Role id should be correct.")
-        XCTAssertEqual(roleDto.role, role.role, "Role name should be correct.")
+        XCTAssertEqual(roleDto.title, role.title, "Role name should be correct.")
         XCTAssertEqual(roleDto.code, role.code, "Role code should be correct.")
         XCTAssertEqual(roleDto.description, role.description, "Role description should be correct.")
         XCTAssertEqual(roleDto.hasSuperPrivileges, role.hasSuperPrivileges, "Role super privileges should be correct.")

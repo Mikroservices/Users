@@ -117,7 +117,7 @@ final class RolesController: RouteCollection {
     }
 
     private func updateRole(on request: Request, from roleDto: RoleDto, to role: Role) -> EventLoopFuture<Void> {
-        role.role = roleDto.role
+        role.title = roleDto.title
         role.code = roleDto.code
         role.description = roleDto.description
         role.hasSuperPrivileges = roleDto.hasSuperPrivileges
