@@ -17,11 +17,12 @@ extension Application.Services {
 }
 
 protocol TokensServiceType {
+    func createAccessToken(on request: Request, forUser user: User) throws -> EventLoopFuture<String>
     func validateRefreshToken(on request: Request, refreshToken: String) -> EventLoopFuture<RefreshToken>
     func getUserByRefreshToken(on request: Request, refreshToken: String) -> EventLoopFuture<User>
-    func createAccessToken(request: Request, forUser user: User) throws -> EventLoopFuture<String>
-    func createRefreshToken(request: Request, forUser user: User) throws -> EventLoopFuture<String>
-    func updateRefreshToken(request: Request, forToken refreshToken: RefreshToken) throws -> EventLoopFuture<String>
+    func createRefreshToken(on request: Request, forUser user: User) throws -> EventLoopFuture<String>
+    func updateRefreshToken(on request: Request, forToken refreshToken: RefreshToken) throws -> EventLoopFuture<String>
+    func revokeRefreshTokens(on request: Request, forUser user: User) -> EventLoopFuture<Void>
 }
 
 final class TokensService: TokensServiceType {
@@ -29,6 +30,15 @@ final class TokensService: TokensServiceType {
     private let refreshTokenTime: TimeInterval = 30 * 24 * 60 * 60  // 30 days
     private let accessTokenTime: TimeInterval = 60 * 60             // 1 hour
 
+    public func createAccessToken(on request: Request, forUser user: User) throws -> EventLoopFuture<String> {
+        let authorizationPayloadFlatFuture = try self.createAuthenticationPayload(request: request, forUser: user)
+
+        return authorizationPayloadFlatFuture.flatMapThrowing { authorizationPayload in
+            let accessToken = try request.jwt.sign(authorizationPayload)
+            return accessToken
+        }
+    }
+    
     public func validateRefreshToken(on request: Request, refreshToken: String) -> EventLoopFuture<RefreshToken> {
         return RefreshToken.query(on: request.db).filter(\.$token == refreshToken).first().flatMap { refreshTokenFromDb in
 
@@ -67,16 +77,7 @@ final class TokensService: TokensServiceType {
         return userFuture
     }
 
-    public func createAccessToken(request: Request, forUser user: User) throws -> EventLoopFuture<String> {
-        let authorizationPayloadFlatFuture = try self.createAuthenticationPayload(request: request, forUser: user)
-
-        return authorizationPayloadFlatFuture.flatMapThrowing { authorizationPayload in
-            let accessToken = try request.jwt.sign(authorizationPayload)
-            return accessToken
-        }
-    }
-
-    public func createRefreshToken(request: Request, forUser user: User) throws -> EventLoopFuture<String> {
+    public func createRefreshToken(on request: Request, forUser user: User) throws -> EventLoopFuture<String> {
 
         guard let userId = user.id else {
             throw RefreshTokenError.userIdNotSpecified
@@ -91,12 +92,26 @@ final class TokensService: TokensServiceType {
         }
     }
 
-    public func updateRefreshToken(request: Request, forToken refreshToken: RefreshToken) throws -> EventLoopFuture<String> {
+    public func updateRefreshToken(on request: Request, forToken refreshToken: RefreshToken) throws -> EventLoopFuture<String> {
         refreshToken.token = self.createRefreshTokenString()
         refreshToken.expiryDate = Date().addingTimeInterval(self.refreshTokenTime)
 
         return refreshToken.save(on: request.db).map {
             refreshToken.token
+        }
+    }
+    
+    public func revokeRefreshTokens(on request: Request, forUser user: User) -> EventLoopFuture<Void> {
+        let refreshTokensFuture = RefreshToken.query(on: request.db).filter(\.$user.$id == user.id!).all()
+        return refreshTokensFuture.flatMap { refreshTokens in
+            var refreshTokensSavedFuture: [EventLoopFuture<Void>] = [EventLoopFuture<Void>]()
+            refreshTokens.forEach { refreshToken in
+                refreshToken.revoked = true
+                let savedFuture = refreshToken.save(on: request.db)
+                refreshTokensSavedFuture.append(savedFuture)
+            }
+            
+            return EventLoopFuture.andAllSucceed(refreshTokensSavedFuture, on: request.eventLoop)
         }
     }
 

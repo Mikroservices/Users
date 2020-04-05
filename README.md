@@ -42,6 +42,7 @@ User account management:
 - [`POST /account/login`](Docs/account/login.md) - login user into system (returns JWT access token)
 - [`POST /account/refresh`](Docs/account/refresh.md) - refresh JWT access token
 - [`POST /account/change-password`](Docs/account/change-password.md) - change user password
+- [`POST /account/revoke/@{username}`](Docs/account/revoke.md) - revoke all refresh tokens for user
 
 Forgot password actions:
 
@@ -82,7 +83,7 @@ $ swift build
 Now you can run the application:
 
 ```bash
-$ .build/debug/Run --port 8001
+$ .build/debug/Run serve --port 8000
 ```
 
 If application starts open following link in your browser: [http://localhost:8001](http://localhost:8001).

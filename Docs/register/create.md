@@ -82,6 +82,12 @@ BODY:
 {
     "error": true,
     "code": "validationError",
-    "reason": "[different validation messages for each field]"
+    "reason": "Validation errors occurs.",
+    "failures": [
+        {
+            "field": "[FIELD]",
+            "failure": "[VALIDATION MESSAGE]"
+        }
+    ]
 }
 ```
