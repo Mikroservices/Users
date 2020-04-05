@@ -8,8 +8,6 @@ final class ForgotConfirmActionTests: XCTestCase {
 
         // Arrange.
         _ = try User.create(userName: "annapink",
-                            email: "annapink@testemail.com",
-                            name: "Anna Pink",
                             forgotPasswordGuid: "ANNAPINKGUID",
                             forgotPasswordDate: Date())
         let confirmationRequestDto = ForgotPasswordConfirmationRequestDto(forgotPasswordGuid: "ANNAPINKGUID", password: "newP@ssword")
@@ -43,8 +41,6 @@ final class ForgotConfirmActionTests: XCTestCase {
 
         // Arrange.
         _ = try User.create(userName: "josephpink",
-                            email: "josephpink@testemail.com",
-                            name: "Joseph Pink",
                             isBlocked: true,
                             forgotPasswordGuid: "JOSEPHPINKGUID",
                             forgotPasswordDate: Date())
@@ -66,8 +62,6 @@ final class ForgotConfirmActionTests: XCTestCase {
 
         // Arrange.
         _ = try User.create(userName: "wladpink",
-                            email: "wladpink@testemail.com",
-                            name: "Wlad Pink",
                             forgotPasswordGuid: nil,
                             forgotPasswordDate: nil)
         let confirmationRequestDto = ForgotPasswordConfirmationRequestDto(forgotPasswordGuid: "WLADPINKGUID", password: "newP@ssword")
@@ -89,8 +83,6 @@ final class ForgotConfirmActionTests: XCTestCase {
         let today = Date()
         let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: today)
         _ = try User.create(userName: "mariapink",
-                            email: "mariapink@testemail.com",
-                            name: "Maria Pink",
                             forgotPasswordGuid: "MARIAPINKGUID",
                             forgotPasswordDate: yesterday)
         let confirmationRequestDto = ForgotPasswordConfirmationRequestDto(forgotPasswordGuid: "MARIAPINKGUID", password: "newP@ssword")
@@ -111,8 +103,6 @@ final class ForgotConfirmActionTests: XCTestCase {
 
         // Arrange.
         _ = try User.create(userName: "tatianapink",
-                            email: "tatianapink@testemail.com",
-                            name: "Tatiana Pink",
                             forgotPasswordGuid: "TATIANAGUID",
                             forgotPasswordDate: Date())
         let confirmationRequestDto = ForgotPasswordConfirmationRequestDto(forgotPasswordGuid: "TATIANAGUID", password: "1234567")
@@ -135,8 +125,6 @@ final class ForgotConfirmActionTests: XCTestCase {
 
         // Arrange.
         _ = try User.create(userName: "ewelinapink",
-                            email: "ewelinapink@testemail.com",
-                            name: "Ewelina Pink",
                             forgotPasswordGuid: "EWELINAGUID",
                             forgotPasswordDate: Date())
         let confirmationRequestDto = ForgotPasswordConfirmationRequestDto(forgotPasswordGuid: "EWELINAGUID", password: "123456789012345678901234567890123")

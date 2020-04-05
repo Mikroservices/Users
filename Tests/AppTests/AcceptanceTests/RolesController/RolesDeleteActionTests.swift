@@ -7,10 +7,7 @@ final class RolesDeleteActionTests: XCTestCase {
     func testRoleShouldBeDeletedIfRoleExistsAndUserIsSuperUser() throws {
 
         // Arrange.
-        let user = try User.create(userName: "alinahood",
-                                   email: "alinahood@testemail.com",
-                                   name: "Alina Hood")
-        
+        let user = try User.create(userName: "alinahood")
         try user.attach(role: "Administrator")
         let roleToDelete = try Role.create(name: "Tester analyst", code: "tester-analyst", description: "Tester analyst")
 
@@ -30,9 +27,7 @@ final class RolesDeleteActionTests: XCTestCase {
     func testRoleShouldNotBeDeletedIfRoleExistsButUserIsNotSuperUser() throws {
 
         // Arrange.
-        _ = try User.create(userName: "robinhood",
-                            email: "robinhood@testemail.com",
-                            name: "Robin Hood")
+        _ = try User.create(userName: "robinhood")
         let roleToDelete = try Role.create(name: "Technican", code: "technican", description: "Technican")
 
         // Act.
@@ -49,9 +44,7 @@ final class RolesDeleteActionTests: XCTestCase {
     func testCorrectStatusCodeShouldBeReturnedIfRoleNotExists() throws {
 
         // Arrange.
-        let user = try User.create(userName: "wikihood",
-                                   email: "wikihood@testemail.com",
-                                   name: "Wiki Hood")
+        let user = try User.create(userName: "wikihood")
         try user.attach(role: "Administrator")
 
         // Act.

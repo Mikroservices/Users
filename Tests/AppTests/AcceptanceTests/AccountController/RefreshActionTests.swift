@@ -7,9 +7,7 @@ final class RefreshActionTests: XCTestCase {
     func testNewTokensShouldBeReturnedWhenOldRefreshTokenIsValid() throws {
 
         // Arrange.
-        _ = try User.create(userName: "sandragreen",
-                            email: "sandragreen@testemail.com",
-                            name: "Sandra Green")
+        _ = try User.create(userName: "sandragreen")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "sandragreen", password: "p@ssword")
         let accessTokenDto = try SharedApplication.application()
             .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
@@ -26,9 +24,7 @@ final class RefreshActionTests: XCTestCase {
     func testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsNotValid() throws {
 
         // Arrange.
-        _ = try User.create(userName: "johngreen",
-                            email: "johngreen@testemail.com",
-                            name: "John Green")
+        _ = try User.create(userName: "johngreen")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "johngreen", password: "p@ssword")
         let accessTokenDto = try SharedApplication.application()
             .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
@@ -45,9 +41,7 @@ final class RefreshActionTests: XCTestCase {
     func testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsValidButUserIsBlocked() throws {
 
         // Arrange.
-        let user = try User.create(userName: "timothygreen",
-                                   email: "timothygreen@testemail.com",
-                                   name: "Timothy Green")
+        let user = try User.create(userName: "timothygreen")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "timothygreen", password: "p@ssword")
         let accessTokenDto = try SharedApplication.application()
             .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
@@ -71,9 +65,7 @@ final class RefreshActionTests: XCTestCase {
     func testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsExpired() throws {
 
         // Arrange.
-        _ = try User.create(userName: "wandagreen",
-                            email: "wandagreen@testemail.com",
-                            name: "Wanda Green")
+        _ = try User.create(userName: "wandagreen")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "wandagreen", password: "p@ssword")
         let accessTokenDto = try SharedApplication.application()
             .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
@@ -99,9 +91,7 @@ final class RefreshActionTests: XCTestCase {
     func testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsRevoked() throws {
 
         // Arrange.
-        _ = try User.create(userName: "alexagreen",
-                            email: "alexagreen@testemail.com",
-                            name: "Alexa Green")
+        _ = try User.create(userName: "alexagreen")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "alexagreen", password: "p@ssword")
         let accessTokenDto = try SharedApplication.application()
             .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)

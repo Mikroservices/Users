@@ -4,8 +4,8 @@ import Fluent
 
 extension User {
     static func create(userName: String,
-                       email: String,
-                       name: String,
+                       email: String? = nil,
+                       name: String? = nil,
                        password: String = "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
                        salt: String = "TNhZYL4F66KY7fUuqS/Juw==",
                        emailWasConfirmed: Bool = true,
@@ -19,9 +19,10 @@ extension User {
                        website: String? = nil,
                        birthDate: Date? = nil) throws -> User {
 
+        
         let user = User(userName: userName,
-                  email: email,
-                  name: name,
+                  email: email ?? "\(userName)@testemail.com",
+                  name: name ?? userName,
                   password: password,
                   salt: salt,
                   emailWasConfirmed: emailWasConfirmed,

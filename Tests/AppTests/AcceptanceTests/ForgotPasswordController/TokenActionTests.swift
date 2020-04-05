@@ -7,9 +7,7 @@ final class TokenActionTests: XCTestCase {
     func testForgotPasswordTokenShouldBeGeneratedForActiveUser() throws {
 
         // Arrange.
-        _ = try User.create(userName: "johnred",
-                            email: "johnred@testemail.com",
-                            name: "John Red")
+        _ = try User.create(userName: "johnred")
         let forgotPasswordRequestDto = ForgotPasswordRequestDto(email: "johnred@testemail.com")
 
         // Act.
@@ -36,10 +34,7 @@ final class TokenActionTests: XCTestCase {
     func testForgotPasswordTokenShouldNotBeGeneratedIfUserIsBlocked() throws {
 
         // Arrange.
-        _ = try User.create(userName: "wikired",
-                            email: "wikired@testemail.com",
-                            name: "Wiki Red",
-                            isBlocked: true)
+        _ = try User.create(userName: "wikired", isBlocked: true)
         let forgotPasswordRequestDto = ForgotPasswordRequestDto(email: "wikired@testemail.com")
 
         // Act.

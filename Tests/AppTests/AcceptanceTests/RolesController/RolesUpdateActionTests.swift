@@ -8,12 +8,10 @@ final class RolesUpdateActionTests: XCTestCase {
     func testCorrectRoleShouldBeUpdatedBySuperUser() throws {
 
         // Arrange.
-        let user = try User.create(userName: "brucelee",
-                                   email: "brucelee@testemail.com",
-                                   name: "Bruce Lee")
+        let user = try User.create(userName: "brucelee")
         try user.attach(role: "Administrator")
         let role = try Role.create(name: "Seller", code: "seller", description: "Seller")
-        let roleToUpdate = RoleDto(id: role.id, title: "Junior serller", code: "junior-seller", description: "Junior seller", hasSuperPrivileges: false, isDefault: true)
+        let roleToUpdate = RoleDto(id: role.id, title: "Junior serller", code: "junior-seller", description: "Junior seller")
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
@@ -41,11 +39,9 @@ final class RolesUpdateActionTests: XCTestCase {
     func testRoleShouldNotBeUpdatedIfUserIsNotSuperUser() throws {
 
         // Arrange.
-        _ = try User.create(userName: "georgelee",
-                            email: "georgelee@testemail.com",
-                            name: "Geaorge Lee")
+        _ = try User.create(userName: "georgelee")
         let role = try Role.create(name: "Senior seller", code: "senior-seller", description: "Senior seller")
-        let roleToUpdate = RoleDto(id: role.id, title: "Junior serller", code: "junior-seller", description: "Junior seller", hasSuperPrivileges: false, isDefault: true)
+        let roleToUpdate = RoleDto(id: role.id, title: "Junior serller", code: "junior-seller", description: "Junior seller")
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
@@ -62,12 +58,10 @@ final class RolesUpdateActionTests: XCTestCase {
     func testRoleShouldNotBeUpdatedIfRoleWithSameCodeExists() throws {
 
         // Arrange.
-        let user = try User.create(userName: "samlee",
-                                   email: "samlee@testemail.com",
-                                   name: "Sam Lee")
+        let user = try User.create(userName: "samlee")
         try user.attach(role: "Administrator")
         let role = try Role.create(name: "Marketer", code: "marketer", description: "marketer")
-        let roleToUpdate = RoleDto(id: role.id, title: "Administrator", code: "administrator", description: "Administrator", hasSuperPrivileges: false, isDefault: true)
+        let roleToUpdate = RoleDto(id: role.id, title: "Administrator", code: "administrator", description: "Administrator")
 
         // Act.
         let errorResponse = try SharedApplication.application().getErrorResponse(
@@ -85,12 +79,10 @@ final class RolesUpdateActionTests: XCTestCase {
     func testRoleShouldNotBeUpdatedIfCodeIsTooLong() throws {
 
         // Arrange.
-        let user = try User.create(userName: "wandalee",
-                                   email: "wandalee@testemail.com",
-                                   name: "Wanda Lee")
+        let user = try User.create(userName: "wandalee")
         try user.attach(role: "Administrator")
         let role = try Role.create(name: "Manager1", code: "manager1", description: "Manager")
-        let roleToUpdate = RoleDto(id: role.id, title: "Senior manager", code: "123456789012345678901", description: "Senior manager", hasSuperPrivileges: false, isDefault: true)
+        let roleToUpdate = RoleDto(id: role.id, title: "Senior manager", code: "123456789012345678901", description: "Senior manager")
 
         // Act.
         let errorResponse = try SharedApplication.application().getErrorResponse(
@@ -110,9 +102,7 @@ final class RolesUpdateActionTests: XCTestCase {
     func testRoleShouldNotBeUpdatedIfNameIsTooLong() throws {
 
         // Arrange.
-        let user = try User.create(userName: "monikalee",
-                                   email: "monikalee@testemail.com",
-                                   name: "Monika Lee")
+        let user = try User.create(userName: "monikalee")
         try user.attach(role: "Administrator")
         let role = try Role.create(name: "Manager2", code: "manager2", description: "Manager")
         let roleToUpdate = RoleDto(id: role.id,
@@ -140,9 +130,7 @@ final class RolesUpdateActionTests: XCTestCase {
     func testRoleShouldNotBeUpdatedIfDescriptionIsTooLong() throws {
 
         // Arrange.
-        let user = try User.create(userName: "annalee",
-                                   email: "annalee@testemail.com",
-                                   name: "Anna Lee")
+        let user = try User.create(userName: "annalee")
         try user.attach(role: "Administrator")
         let role = try Role.create(name: "Manager3", code: "manager3", description: "Manager")
         let roleToUpdate = RoleDto(id: role.id,

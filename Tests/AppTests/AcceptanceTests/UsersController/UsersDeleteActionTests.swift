@@ -8,9 +8,7 @@ final class UsersDeleteActionTests: XCTestCase {
     func testAccountShouldBeDeletedForAuthorizedUser() throws {
 
         // Arrange.
-        _ = try User.create(userName: "zibibonjek",
-                            email: "zibibonjek@testemail.com",
-                            name: "Zibi Bonjek")
+        _ = try User.create(userName: "zibibonjek")
         
         // Act.
         let response = try SharedApplication.application().sendRequest(
@@ -28,9 +26,7 @@ final class UsersDeleteActionTests: XCTestCase {
     func testAccountShouldNotBeDeletedIfUserIsNotAuthorized() throws {
 
         // Arrange.
-        _ = try User.create(userName: "victoriabonjek",
-                            email: "victoriabonjek@testemail.com",
-                            name: "Victoria Bonjek")
+        _ = try User.create(userName: "victoriabonjek")
 
         // Act.
         let response = try SharedApplication.application()
@@ -43,9 +39,7 @@ final class UsersDeleteActionTests: XCTestCase {
     func testAccountShouldNotDeletedWhenUserTriesToDeleteNotHisAccount() throws {
 
         // Arrange.
-        _ = try User.create(userName: "martabonjek",
-                            email: "martabonjek@testemail.com",
-                            name: "Marta Bonjek")
+        _ = try User.create(userName: "martabonjek")
         
         _ = try User.create(userName: "kingabonjek",
                             email: "kingabonjek@testemail.com",
@@ -65,9 +59,7 @@ final class UsersDeleteActionTests: XCTestCase {
     func testForbiddenShouldBeReturnedIfAccountNotExists() throws {
 
         // Arrange.
-        _ = try User.create(userName: "henrybonjek",
-                            email: "henrybonjek@testemail.com",
-                            name: "Henry Bonjek")
+        _ = try User.create(userName: "henrybonjek")
 
         // Act.
         let response = try SharedApplication.application().sendRequest(

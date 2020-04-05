@@ -8,10 +8,7 @@ final class UserRolesDisconnectActionTests: XCTestCase {
     func testUserShouldBeDisconnectedWithRoleForSuperUser() throws {
 
         // Arrange.
-        let user = try User.create(userName: "nickviolet",
-                                   email: "nickviolet@testemail.com",
-                                   name: "Nick Violet")
-        
+        let user = try User.create(userName: "nickviolet")
         try user.attach(role: "Administrator")
         let role = try Role.create(name: "Accountant", code: "accountant", description: "Accountant")
         try user.$roles.attach(role, on: SharedApplication.application().db).wait()
@@ -35,12 +32,8 @@ final class UserRolesDisconnectActionTests: XCTestCase {
     func testNothingShouldHappanedWhenUserTriesDisconnectNotConnectedRole() throws {
 
         // Arrange.
-        let user = try User.create(userName: "alanviolet",
-                                   email: "alanviolet@testemail.com",
-                                   name: "Alan Violet")
-        
+        let user = try User.create(userName: "alanviolet")
         try user.attach(role: "Administrator")
-        
         let role = try Role.create(name: "Teacher", code: "teacher", description: "Teacher")
         let userRoleDto = UserRoleDto(userId: user.id!, roleId: role.id!)
 
@@ -61,9 +54,7 @@ final class UserRolesDisconnectActionTests: XCTestCase {
     func testUserShouldNotBeDisconnectedWithRoleIfUserIsNotSuperUser() throws {
 
         // Arrange.
-        let user = try User.create(userName: "ronaldviolet",
-                                   email: "ronaldviolet@testemail.com",
-                                   name: "Ronald Violet")
+        let user = try User.create(userName: "ronaldviolet")
         let role = try Role.create(name: "Junior accountant", code: "junior-consultant", description: "Junior accountant")
         try user.$roles.attach(role, on: SharedApplication.application().db).wait()
         let userRoleDto = UserRoleDto(userId: user.id!, roleId: role.id!)
@@ -83,15 +74,10 @@ final class UserRolesDisconnectActionTests: XCTestCase {
     func testCorrectStatsCodeShouldBeReturnedIfUserNotExists() throws {
 
         // Arrange.
-        let user = try User.create(userName: "wikiviolet",
-                                   email: "wikiviolet@testemail.com",
-                                   name: "Wiki Violet")
+        let user = try User.create(userName: "wikiviolet")
+        try user.attach(role: "Administrator")
         let role = try Role.create(name: "Senior accountant", code: "senior-consultant", description: "Senior accountant")
         try user.$roles.attach(role, on: SharedApplication.application().db).wait()
-        
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
-        
         let userRoleDto = UserRoleDto(userId: UUID(), roleId: role.id!)
 
         // Act.
@@ -109,9 +95,7 @@ final class UserRolesDisconnectActionTests: XCTestCase {
     func testCorrectStatusCodeShouldBeReturnedIfRoleNotExists() throws {
 
         // Arrange.
-        let user = try User.create(userName: "danviolet",
-                                   email: "danviolet@testemail.com",
-                                   name: "Dan Violet")
+        let user = try User.create(userName: "danviolet")
         try user.attach(role: "Administrator")
         let userRoleDto = UserRoleDto(userId: UUID(), roleId: UUID())
 

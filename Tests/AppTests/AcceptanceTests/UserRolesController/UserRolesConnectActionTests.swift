@@ -8,9 +8,7 @@ final class UserRolesConnectActionTests: XCTestCase {
     func testUserShouldBeConnectedToRoleForSuperUser() throws {
 
         // Arrange.
-        let user = try User.create(userName: "nickford",
-                                   email: "nickford@testemail.com",
-                                   name: "Nick Ford")
+        let user = try User.create(userName: "nickford")
         try user.attach(role: "Administrator")
         let role = try Role.create(name: "Consultant", code: "consultant", description: "Consultant")
         let userRoleDto = UserRoleDto(userId: user.id!, roleId: role.id!)
@@ -32,9 +30,7 @@ final class UserRolesConnectActionTests: XCTestCase {
     func testNothingShouldHappendWhenUserTriesToConnectAlreadyConnectedRole() throws {
 
         // Arrange.
-        let user = try User.create(userName: "alanford",
-                                   email: "alanford@testemail.com",
-                                   name: "Alan Ford")
+        let user = try User.create(userName: "alanford")
         try user.attach(role: "Administrator")
         let role = try Role.create(name: "Policeman", code: "policeman", description: "Policeman")
         try user.$roles.attach(role, on: SharedApplication.application().db).wait()
@@ -58,9 +54,7 @@ final class UserRolesConnectActionTests: XCTestCase {
     func testUserShouldNotBeConnectedToRoleIfUserIsNotSuperUser() throws {
 
         // Arrange.
-        let user = try User.create(userName: "wandaford",
-                                   email: "wandaford@testemail.com",
-                                   name: "Wanda Ford")
+        let user = try User.create(userName: "wandaford")
         let role = try Role.create(name: "Senior consultant", code: "senior-consultant", description: "Senior consultant")
         let userRoleDto = UserRoleDto(userId: user.id!, roleId: role.id!)
 
@@ -79,9 +73,7 @@ final class UserRolesConnectActionTests: XCTestCase {
     func testCorrectStatsCodeShouldBeReturnedIfUserNotExists() throws {
 
         // Arrange.
-        let user = try User.create(userName: "henryford",
-                                   email: "henryford@testemail.com",
-                                   name: "Henry Ford")
+        let user = try User.create(userName: "henryford")
         try user.attach(role: "Administrator")
         let role = try Role.create(name: "Junior consultant", code: "junior-consultant", description: "Junior consultant")
         let userRoleDto = UserRoleDto(userId: UUID(), roleId: role.id!)
@@ -101,9 +93,7 @@ final class UserRolesConnectActionTests: XCTestCase {
     func testCorrectStatusCodeShouldBeReturnedIfRoleNotExists() throws {
 
         // Arrange.
-        let user = try User.create(userName: "erikford",
-                                   email: "erikford@testemail.com",
-                                   name: "Erik Ford")
+        let user = try User.create(userName: "erikford")
         try user.attach(role: "Administrator")
         let userRoleDto = UserRoleDto(userId: user.id!, roleId: UUID())
 

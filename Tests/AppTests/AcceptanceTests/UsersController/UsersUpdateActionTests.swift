@@ -7,10 +7,7 @@ final class UsersUpdateActionTests: XCTestCase {
     func testAccountShouldBeUpdatedForAuthorizedUser() throws {
 
         // Arrange.
-        let user = try User.create(userName: "nickperry",
-                                   email: "nickperry@testemail.com",
-                                   name: "Nick Perry")
-        
+        let user = try User.create(userName: "nickperry")
         let userDto = UserDto(id: UUID(),
                               userName: "user name should not be changed",
                               email: "email should not be changed",
@@ -45,9 +42,7 @@ final class UsersUpdateActionTests: XCTestCase {
     func testAccountShouldNotBeUpdatedIfUserIsNotAuthorized() throws {
 
         // Arrange.
-        _ = try User.create(userName: "josepfperry",
-                            email: "josepfperry@testemail.com",
-                            name: "Joseph Perry")
+        _ = try User.create(userName: "josepfperry")
 
         let userDto = UserDto(id: UUID(),
                               userName: "user name should not be changed",
@@ -70,14 +65,8 @@ final class UsersUpdateActionTests: XCTestCase {
     func testAccountShouldNotUpdatedWhenUserTriesToUpdateNotHisAccount() throws {
 
         // Arrange.
-        _ = try User.create(userName: "annaperry",
-                            email: "annaperry@testemail.com",
-                            name: "Anna Perry")
-
-        _ = try User.create(userName: "chrisperry",
-                            email: "chrisperry@testemail.com",
-                            name: "Chris Perry")
-
+        _ = try User.create(userName: "annaperry")
+        _ = try User.create(userName: "chrisperry")
         let userDto = UserDto(id: UUID(), userName: "chrisperry", email: "chrisperry@testemail.com", name: "Tiger Perry")
 
         // Act.
@@ -95,10 +84,7 @@ final class UsersUpdateActionTests: XCTestCase {
     func testAccountShouldNotBeUpdatedIfNameIsTooLong() throws {
 
         // Arrange.
-        _ = try User.create(userName: "brianperry",
-                            email: "brianperry@testemail.com",
-                            name: "Brian Perry")
-
+        _ = try User.create(userName: "brianperry")
         let userDto = UserDto(userName: "brianperry",
                               email: "gregsmith@testemail.com",
                               name: "123456789012345678901234567890123456789012345678901")
@@ -121,24 +107,7 @@ final class UsersUpdateActionTests: XCTestCase {
     func testAccountShouldNotBeUpdatedIfLocationIsTooLong() throws {
 
         // Arrange.
-        let user = User(userName: "chrisperry",
-                        email: "chrisperry@testemail.com",
-                        name: "Chris Perry",
-                        password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                        salt: "TNhZYL4F66KY7fUuqS/Juw==",
-                        emailWasConfirmed: true,
-                        isBlocked: false,
-                        emailConfirmationGuid: "",
-                        gravatarHash: "048a975025190efa55edb9948ae7ced5",
-                        forgotPasswordGuid: "1234567890",
-                        forgotPasswordDate: Date(),
-                        bio: "Developer in most innovative company.",
-                        location: "Cupertino",
-                        website: "http://annaperry.com",
-                        birthDate: Date())
-        
-        try user.create(on: SharedApplication.application().db).wait()
-
+        let user = try User.create(userName: "chrisperry")
         let userDto = UserDto(userName: "chrisperry",
                               email: "gregsmith@testemail.com",
                               name: "Chris Perry",
@@ -162,24 +131,7 @@ final class UsersUpdateActionTests: XCTestCase {
     func testAccountShouldNotBeUpdatedIfWebsiteIsTooLong() throws {
 
         // Arrange.
-        let user = User(userName: "lukeperry",
-                        email: "lukeperry@testemail.com",
-                        name: "Luke Perry",
-                        password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                        salt: "TNhZYL4F66KY7fUuqS/Juw==",
-                        emailWasConfirmed: true,
-                        isBlocked: false,
-                        emailConfirmationGuid: "",
-                        gravatarHash: "048a975025190efa55edb9948ae7ced5",
-                        forgotPasswordGuid: "1234567890",
-                        forgotPasswordDate: Date(),
-                        bio: "Developer in most innovative company.",
-                        location: "Cupertino",
-                        website: "http://annaperry.com",
-                        birthDate: Date())
-        
-        try user.create(on: SharedApplication.application().db).wait()
-
+        let user = try User.create(userName: "lukeperry")
         let userDto = UserDto(userName: "lukeperry",
                               email: "gregsmith@testemail.com",
                               name: "Chris Perry",
@@ -203,24 +155,7 @@ final class UsersUpdateActionTests: XCTestCase {
     func testAccountShouldNotBeUpdatedIfBioIsTooLong() throws {
 
         // Arrange.
-        let user = User(userName: "francisperry",
-                        email: "francisperry@testemail.com",
-                        name: "Francis Perry",
-                        password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                        salt: "TNhZYL4F66KY7fUuqS/Juw==",
-                        emailWasConfirmed: true,
-                        isBlocked: false,
-                        emailConfirmationGuid: "",
-                        gravatarHash: "048a975025190efa55edb9948ae7ced5",
-                        forgotPasswordGuid: "1234567890",
-                        forgotPasswordDate: Date(),
-                        bio: "Developer in most innovative company.",
-                        location: "Cupertino",
-                        website: "http://annaperry.com",
-                        birthDate: Date())
-        
-        try user.create(on: SharedApplication.application().db).wait()
-
+        let user = try User.create(userName: "francisperry")
         let userDto = UserDto(userName: "francisperry",
                               email: "gregsmith@testemail.com",
                               name: "Chris Perry",

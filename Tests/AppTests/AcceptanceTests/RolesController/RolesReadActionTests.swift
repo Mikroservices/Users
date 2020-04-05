@@ -7,11 +7,8 @@ final class RolesReadActionTests: XCTestCase {
     func testRoleShouldBeReturnedForSuperUser() throws {
 
         // Arrange.
-        let user = try User.create(userName: "robinyellow",
-                                   email: "robinyellow@testemail.com",
-                                   name: "Robin Yellow")
+        let user = try User.create(userName: "robinyellow")
         try user.attach(role: "Administrator")
-        
         let role = try Role.create(name: "Senior architect",
                                    code: "senior-architect",
                                    description: "Senior architect")
@@ -36,9 +33,7 @@ final class RolesReadActionTests: XCTestCase {
     func testRoleShouldNotBeReturnedIfUserIsNotSuperUser() throws {
 
         // Arrange.
-        _ = try User.create(userName: "hulkyellow",
-                            email: "hulkyellow@testemail.com",
-                            name: "Hulk Yellow")
+        _ = try User.create(userName: "hulkyellow")
         let role = try Role.create(name: "Senior developer",
                                    code: "senior-developer",
                                    description: "Senior developer")
@@ -57,9 +52,7 @@ final class RolesReadActionTests: XCTestCase {
     func testCorrectStatusCodeShouldBeReturnedIdRoleNotExists() throws {
 
         // Arrange.
-        let user = try User.create(userName: "tedyellow",
-                                   email: "tedyellow@testemail.com",
-                                   name: "Ted Yellow")
+        let user = try User.create(userName: "tedyellow")
         try user.attach(role: "Administrator")
 
         // Act.

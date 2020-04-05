@@ -7,9 +7,7 @@ final class UserNameActionTests: XCTestCase {
     func testUserNameValidationShouldReturnTrueIfUserNameExists() throws {
 
         // Arrange.
-        _ = try User.create(userName: "johndoe",
-                            email: "johndoe@testemail.com",
-                            name: "John Doe")
+        _ = try User.create(userName: "johndoe")
 
         // Act.
         let booleanResponseDto = try SharedApplication.application()

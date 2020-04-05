@@ -8,11 +8,9 @@ final class RolesCreateActionTests: XCTestCase {
     func testRoleShouldBeCreatedBySuperUser() throws {
 
         // Arrange.
-        let user = try User.create(userName: "laracroft",
-                                   email: "laracroft@testemail.com",
-                                   name: "Lara Croft")
+        let user = try User.create(userName: "laracroft")
         try user.attach(role: "Administrator")
-        let roleDto = RoleDto(title: "Reviewer", code: "reviewer", description: "Code reviewers", hasSuperPrivileges: false, isDefault: true)
+        let roleDto = RoleDto(title: "Reviewer", code: "reviewer", description: "Code reviewers")
 
         // Act.
         let createdRoleDto = try SharedApplication.application().getResponse(
@@ -30,11 +28,9 @@ final class RolesCreateActionTests: XCTestCase {
     func testCreatedStatusCodeShouldBeReturnedAfterCreatingNewRole() throws {
 
         // Arrange.
-        let user = try User.create(userName: "martincroft",
-                                   email: "martincroft@testemail.com",
-                                   name: "Martin Croft")
+        let user = try User.create(userName: "martincroft")
         try user.attach(role: "Administrator")
-        let roleDto = RoleDto(title: "Technical writer", code: "tech-writer", description: "Technical writer", hasSuperPrivileges: false, isDefault: true)
+        let roleDto = RoleDto(title: "Technical writer", code: "tech-writer", description: "Technical writer")
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
@@ -51,11 +47,9 @@ final class RolesCreateActionTests: XCTestCase {
     func testHeaderLocationShouldBeReturnedAfterCreatingNewRole() throws {
 
         // Arrange.
-        let user = try User.create(userName: "victorcroft",
-                                   email: "victorcroft@testemail.com",
-                                   name: "Victor Croft")
+        let user = try User.create(userName: "victorcroft")
         try user.attach(role: "Administrator")
-        let roleDto = RoleDto(title: "Business analyst", code: "business-analyst", description: "Business analyst", hasSuperPrivileges: false, isDefault: true)
+        let roleDto = RoleDto(title: "Business analyst", code: "business-analyst", description: "Business analyst")
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
@@ -74,10 +68,8 @@ final class RolesCreateActionTests: XCTestCase {
     func testRoleShouldNotBeCreatedIfUserIsNotSuperUser() throws {
 
         // Arrange.
-        _ = try User.create(userName: "robincroft",
-                            email: "robincroft@testemail.com",
-                            name: "Robin Croft")
-        let roleDto = RoleDto(title: "Developer", code: "developer", description: "Developer", hasSuperPrivileges: false, isDefault: true)
+        _ = try User.create(userName: "robincroft")
+        let roleDto = RoleDto(title: "Developer", code: "developer", description: "Developer")
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
@@ -94,11 +86,9 @@ final class RolesCreateActionTests: XCTestCase {
     func testRoleShouldNotBeCreatedIfRoleWithSameCodeExists() throws {
 
         // Arrange.
-        let user = try User.create(userName: "erikcroft",
-                                   email: "erikcroft@testemail.com",
-                                   name: "Erik Croft")
+        let user = try User.create(userName: "erikcroft")
         try user.attach(role: "Administrator")
-        let roleDto = RoleDto(title: "Administrator", code: "administrator", description: "Administrator", hasSuperPrivileges: false, isDefault: true)
+        let roleDto = RoleDto(title: "Administrator", code: "administrator", description: "Administrator")
 
         // Act.
         let errorResponse = try SharedApplication.application().getErrorResponse(
@@ -116,11 +106,9 @@ final class RolesCreateActionTests: XCTestCase {
     func testRoleShouldNotBeCreatedIfCodeIsTooLong() throws {
 
         // Arrange.
-        let user = try User.create(userName: "tedcroft",
-                                   email: "tedcroft@testemail.com",
-                                   name: "Ted Croft")
+        let user = try User.create(userName: "tedcroft")
         try user.attach(role: "Administrator")
-        let roleDto = RoleDto(title: "name", code: "123456789012345678901", description: "description", hasSuperPrivileges: false, isDefault: true)
+        let roleDto = RoleDto(title: "name", code: "123456789012345678901", description: "description")
 
         // Act.
         let errorResponse = try SharedApplication.application().getErrorResponse(
@@ -140,11 +128,9 @@ final class RolesCreateActionTests: XCTestCase {
     func testRoleShouldNotBeCreatedIfNameIsTooLong() throws {
 
         // Arrange.
-        let user = try User.create(userName: "romancroft",
-                                   email: "romancroft@testemail.com",
-                                   name: "Roman Croft")
+        let user = try User.create(userName: "romancroft")
         try user.attach(role: "Administrator")
-        let roleDto = RoleDto(title: "123456789012345678901234567890123456789012345678901", code: "code", description: "description", hasSuperPrivileges: false, isDefault: true)
+        let roleDto = RoleDto(title: "123456789012345678901234567890123456789012345678901", code: "code", description: "description")
 
         // Act.
         let errorResponse = try SharedApplication.application().getErrorResponse(
@@ -164,9 +150,7 @@ final class RolesCreateActionTests: XCTestCase {
     func testRoleShouldNotBeCreatedIfDescriptionIsTooLong() throws {
 
         // Arrange.
-        let user = try User.create(userName: "samcroft",
-                                   email: "samcroft@testemail.com",
-                                   name: "Sam Croft")
+        let user = try User.create(userName: "samcroft")
         try user.attach(role: "Administrator")
         let roleDto = RoleDto(title: "name",
                               code: "code",

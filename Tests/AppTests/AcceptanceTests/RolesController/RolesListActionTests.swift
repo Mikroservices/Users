@@ -7,9 +7,7 @@ final class RolesListActionTests: XCTestCase {
     func testListOfRolesShouldBeReturnedForSuperUser() throws {
 
         // Arrange.
-        let user = try User.create(userName: "robinorange",
-                                   email: "robinorange@testemail.com",
-                                   name: "Robin Orange")
+        let user = try User.create(userName: "robinorange")
         try user.attach(role: "Administrator")
 
         // Act.
@@ -27,9 +25,7 @@ final class RolesListActionTests: XCTestCase {
     func testListOfRolesShouldNotBeReturnedForNotSuperUser() throws {
 
         // Arrange.
-        _ = try User.create(userName: "wictororange",
-                            email: "robinorange@testemail.com",
-                            name: "Wictor Orange")
+        _ = try User.create(userName: "wictororange")
 
         // Act.
         let response = try SharedApplication.application().sendRequest(

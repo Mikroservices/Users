@@ -7,9 +7,7 @@ final class UsersReadActionTests: XCTestCase {
     func testUserProfileShouldBeReturnedForExistingUser() throws {
 
         // Arrange.
-        let user = try User.create(userName: "johnbush",
-                                   email: "johnbush@testemail.com",
-                                   name: "John Bush")
+        let user = try User.create(userName: "johnbush")
 
         // Act.
         let userDto = try SharedApplication.application().getResponse(
@@ -42,9 +40,7 @@ final class UsersReadActionTests: XCTestCase {
     func testPublicProfileShouldNotContainsSensitiveInformation() throws {
 
         // Arrange.
-        let user = try User.create(userName: "elizabush",
-                                   email: "elizabush@testemail.com",
-                                   name: "Eliza Bush")
+        let user = try User.create(userName: "elizabush")
 
         // Act.
         let userDto = try SharedApplication.application()

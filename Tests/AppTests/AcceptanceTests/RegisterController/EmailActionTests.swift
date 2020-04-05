@@ -8,9 +8,7 @@ final class EmailActionTests: XCTestCase {
     func testEmailValidationShouldReturnTrueIfEmailExists() throws {
 
         // Arrange.
-        _ = try User.create(userName: "tomsmith",
-                            email: "tomsmith@testemail.com",
-                            name: "Tom Smith")
+        _ = try User.create(userName: "tomsmith")
 
         // Act.
         let booleanResponseDto = try SharedApplication.application()

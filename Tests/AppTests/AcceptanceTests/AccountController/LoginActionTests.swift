@@ -8,9 +8,7 @@ final class LoginActionTests: XCTestCase {
     func testUserWithCorrectCredentialsShouldBeSignedInByUsername() throws {
 
         // Arrange.
-        _ = try User.create(userName: "nickfury",
-                            email: "nickfury@testemail.com",
-                            name: "Nick Fury")
+        _ = try User.create(userName: "nickfury")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "nickfury", password: "p@ssword")
 
         // Act.
@@ -27,9 +25,7 @@ final class LoginActionTests: XCTestCase {
     func testUserWithCorrectCredentialsShouldBeSignedInByEmail() throws {
 
         // Arrange.
-        _ = try User.create(userName: "stevenfury",
-                            email: "stevenfury@testemail.com",
-                            name: "Steven Fury")
+        _ = try User.create(userName: "stevenfury")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "stevenfury@testemail.com", password: "p@ssword")
 
         // Act.
@@ -46,9 +42,7 @@ final class LoginActionTests: XCTestCase {
     func testAccessTokenShouldContainsBasicInformationAboutUser() throws {
 
         // Arrange.
-        let user = try User.create(userName: "stevenfury",
-                                   email: "stevenfury@testemail.com",
-                                   name: "Steven Fury")
+        let user = try User.create(userName: "stevenfury")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "stevenfury@testemail.com", password: "p@ssword")
 
         // Act.
@@ -69,12 +63,8 @@ final class LoginActionTests: XCTestCase {
     func testAccessTokenShouldContainsInformationAboutUserRoles() throws {
 
         // Arrange.
-        let user = try User.create(userName: "yokofury",
-                                   email: "yokofury@testemail.com",
-                                   name: "Yoko Fury")
-        let role = try Role.get(role: "Administrator")
-        try user.$roles.attach(role, on: SharedApplication.application().db).wait()
-        
+        let user = try User.create(userName: "yokofury")
+        try user.attach(role: "Administrator")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "yokofury@testemail.com", password: "p@ssword")
 
         // Act.
@@ -91,9 +81,7 @@ final class LoginActionTests: XCTestCase {
     func testUserWithIncorrectPasswordShouldNotBeSignedIn() throws {
 
         // Arrange.
-        _ = try User.create(userName: "martafury",
-                            email: "martafury@testemail.com",
-                            name: "Marta Fury")
+        _ = try User.create(userName: "martafury")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "martafury", password: "incorrect")
 
         // Act.
@@ -111,11 +99,7 @@ final class LoginActionTests: XCTestCase {
     func testUserWithNotConfirmedAccountShouldNotBeSignedIn() throws {
 
         // Arrange.
-        _ = try User.create(userName: "josefury",
-                            email: "josefury@testemail.com",
-                            name: "Jose Fury",
-                            emailWasConfirmed: false
-        )
+        _ = try User.create(userName: "josefury", emailWasConfirmed: false)
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "josefury", password: "p@ssword")
 
         // Act.
@@ -133,10 +117,7 @@ final class LoginActionTests: XCTestCase {
     func testUserWithBlockedAccountShouldNotBeSignedIn() throws {
 
         // Arrange.
-        _ = try User.create(userName: "tomfury",
-                            email: "tomfury@testemail.com",
-                            name: "Tom Fury",
-                            isBlocked: true)
+        _ = try User.create(userName: "tomfury", isBlocked: true)
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "tomfury", password: "p@ssword")
 
         // Act.

@@ -8,12 +8,7 @@ final class ConfirmActionTests: XCTestCase {
     func testAccountShouldBeConfirmedWithCorrectConfirmationGuid() throws {
 
         // Arrange.
-        _ = try User.create(userName: "samanthasmith",
-                            email: "samanthasmith@testemail.com",
-                            name: "Samantha Smith",
-                            emailWasConfirmed: false)
-
-        let user = try User.get(userName: "samanthasmith")
+        let user = try User.create(userName: "samanthasmith", emailWasConfirmed: false)
         let confirmEmailRequestDto = ConfirmEmailRequestDto(id: user.id!, confirmationGuid: user.emailConfirmationGuid)
 
         // Act.
@@ -28,12 +23,7 @@ final class ConfirmActionTests: XCTestCase {
     func testAccountShouldNotBeConfirmedWithIncorrectConfirmationGuid() throws {
 
         // Arrange.
-        _ = try User.create(userName: "eriksmith",
-                            email: "eriksmith@testemail.com",
-                            name: "Erik Smith",
-                            emailWasConfirmed: false)
-        
-        let user = try User.get(userName: "eriksmith")
+        let user = try User.create(userName: "eriksmith", emailWasConfirmed: false)
         let confirmEmailRequestDto = ConfirmEmailRequestDto(id: user.id!, confirmationGuid: UUID().uuidString)
 
         // Act.

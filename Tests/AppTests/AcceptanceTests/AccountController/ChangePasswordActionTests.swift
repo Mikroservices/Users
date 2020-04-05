@@ -7,10 +7,7 @@ final class ChangePasswordActionTests: XCTestCase {
     func testPasswordShouldBeChangedWhenAuthorizedUserChangePassword() throws {
 
         // Arrange.
-        _ = try User.create(userName: "markuswhite",
-                            email: "markuswhite@testemail.com",
-                            name: "Markus White")
-
+        _ = try User.create(userName: "markuswhite")
         let changePasswordRequestDto = ChangePasswordRequestDto(currentPassword: "p@ssword", newPassword: "newP@ssword")
 
         // Act.
@@ -45,9 +42,7 @@ final class ChangePasswordActionTests: XCTestCase {
     func testPasswordShouldNotBeChangedWhenAuthorizedUserEntersWrongOldPassword() throws {
 
         // Arrange.
-        _ = try User.create(userName: "annawhite",
-                            email: "annawhite@testemail.com",
-                            name: "Anna White")
+        _ = try User.create(userName: "annawhite")
         let changePasswordRequestDto = ChangePasswordRequestDto(currentPassword: "p@ssword-bad", newPassword: "newP@ssword")
 
         // Act.
@@ -66,9 +61,7 @@ final class ChangePasswordActionTests: XCTestCase {
     func testPasswordShouldNotBeChangedWhenUserAccountIsBlocked() throws {
 
         // Arrange.
-        let user = try User.create(userName: "willwhite",
-                                   email: "willwhite@testemail.com",
-                                   name: "Will White")
+        let user = try User.create(userName: "willwhite")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "willwhite", password: "p@ssword")
         let accessTokenDto = try SharedApplication.application()
             .getResponse(to: "/account/login", method: .POST, data: loginRequestDto, decodeTo: AccessTokenDto.self)
@@ -95,9 +88,7 @@ final class ChangePasswordActionTests: XCTestCase {
     func testValidationErrorShouldBeReturnedWhenPasswordIsTooShort() throws {
 
         // Arrange.
-        _ = try User.create(userName: "timwhite",
-                            email: "timwhite@testemail.com",
-                            name: "Tim White")
+        _ = try User.create(userName: "timwhite")
         let changePasswordRequestDto = ChangePasswordRequestDto(currentPassword: "p@ssword", newPassword: "1234567")
 
         // Act.
@@ -118,9 +109,7 @@ final class ChangePasswordActionTests: XCTestCase {
     func testValidationErrorShouldBeReturnedWhenPasswordIsTooLong() throws {
 
         // Arrange.
-        _ = try User.create(userName: "robinwhite",
-                            email: "robinwhite@testemail.com",
-                            name: "Robin White")
+        _ = try User.create(userName: "robinwhite")
         let changePasswordRequestDto = ChangePasswordRequestDto(currentPassword: "p@ssword", newPassword: "123456789012345678901234567890123")
 
         // Act.

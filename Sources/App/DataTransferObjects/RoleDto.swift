@@ -5,8 +5,8 @@ struct RoleDto {
     var title: String
     var code: String
     var description: String?
-    var hasSuperPrivileges: Bool
-    var isDefault: Bool
+    var hasSuperPrivileges: Bool = false
+    var isDefault: Bool = false
 }
 
 extension RoleDto {
