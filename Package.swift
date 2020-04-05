@@ -27,10 +27,10 @@ let package = Package(
         .package(url: "https://github.com/vapor/jwt.git", from: "4.0.0-rc.1.1"),
 
         // 🔑 Google Recaptcha for securing anonymous endpoints.
-        .package(url: "https://github.com/Mikroservices/Recaptcha.git", from: "2.0.0-rc.1"),
+        .package(url: "https://github.com/Mikroservices/Recaptcha.git", from: "2.0.0-rc.2"),
 
         // 🐞 Custom error middleware for Vapor.
-        .package(url: "https://github.com/Mikroservices/ExtendedError.git", from: "2.0.0-rc.1")
+        .package(url: "https://github.com/Mikroservices/ExtendedError.git", from: "2.0.0-rc.2")
     ],
     targets: [
         .target(name: "App", dependencies: [
