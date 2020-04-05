@@ -11,8 +11,7 @@ final class UserRolesConnectActionTests: XCTestCase {
         let user = try User.create(userName: "nickford",
                                    email: "nickford@testemail.com",
                                    name: "Nick Ford")
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
         let role = try Role.create(name: "Consultant", code: "consultant", description: "Consultant")
         let userRoleDto = UserRoleDto(userId: user.id!, roleId: role.id!)
 
@@ -36,8 +35,7 @@ final class UserRolesConnectActionTests: XCTestCase {
         let user = try User.create(userName: "alanford",
                                    email: "alanford@testemail.com",
                                    name: "Alan Ford")
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
         let role = try Role.create(name: "Policeman", code: "policeman", description: "Policeman")
         try user.$roles.attach(role, on: SharedApplication.application().db).wait()
         
@@ -84,8 +82,7 @@ final class UserRolesConnectActionTests: XCTestCase {
         let user = try User.create(userName: "henryford",
                                    email: "henryford@testemail.com",
                                    name: "Henry Ford")
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
         let role = try Role.create(name: "Junior consultant", code: "junior-consultant", description: "Junior consultant")
         let userRoleDto = UserRoleDto(userId: UUID(), roleId: role.id!)
 
@@ -107,8 +104,7 @@ final class UserRolesConnectActionTests: XCTestCase {
         let user = try User.create(userName: "erikford",
                                    email: "erikford@testemail.com",
                                    name: "Erik Ford")
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
         let userRoleDto = UserRoleDto(userId: user.id!, roleId: UUID())
 
         // Act.

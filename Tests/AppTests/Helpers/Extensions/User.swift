@@ -47,4 +47,9 @@ extension User {
 
         return user
     }
+    
+    func attach(role: String) throws {
+        let roleFromDb = try Role.get(role: role)
+        try self.$roles.attach(roleFromDb, on: SharedApplication.application().db).wait()
+    }
 }

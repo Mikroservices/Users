@@ -10,8 +10,7 @@ final class RolesListActionTests: XCTestCase {
         let user = try User.create(userName: "robinorange",
                                    email: "robinorange@testemail.com",
                                    name: "Robin Orange")
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
 
         // Act.
         let roles = try SharedApplication.application().getResponse(

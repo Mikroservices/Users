@@ -11,8 +11,7 @@ final class RolesUpdateActionTests: XCTestCase {
         let user = try User.create(userName: "brucelee",
                                    email: "brucelee@testemail.com",
                                    name: "Bruce Lee")
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
         let role = try Role.create(name: "Seller", code: "seller", description: "Seller")
         let roleToUpdate = RoleDto(id: role.id, title: "Junior serller", code: "junior-seller", description: "Junior seller", hasSuperPrivileges: false, isDefault: true)
 
@@ -66,8 +65,7 @@ final class RolesUpdateActionTests: XCTestCase {
         let user = try User.create(userName: "samlee",
                                    email: "samlee@testemail.com",
                                    name: "Sam Lee")
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
         let role = try Role.create(name: "Marketer", code: "marketer", description: "marketer")
         let roleToUpdate = RoleDto(id: role.id, title: "Administrator", code: "administrator", description: "Administrator", hasSuperPrivileges: false, isDefault: true)
 
@@ -90,8 +88,7 @@ final class RolesUpdateActionTests: XCTestCase {
         let user = try User.create(userName: "wandalee",
                                    email: "wandalee@testemail.com",
                                    name: "Wanda Lee")
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
         let role = try Role.create(name: "Manager1", code: "manager1", description: "Manager")
         let roleToUpdate = RoleDto(id: role.id, title: "Senior manager", code: "123456789012345678901", description: "Senior manager", hasSuperPrivileges: false, isDefault: true)
 
@@ -116,8 +113,7 @@ final class RolesUpdateActionTests: XCTestCase {
         let user = try User.create(userName: "monikalee",
                                    email: "monikalee@testemail.com",
                                    name: "Monika Lee")
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
         let role = try Role.create(name: "Manager2", code: "manager2", description: "Manager")
         let roleToUpdate = RoleDto(id: role.id,
                                    title: "123456789012345678901234567890123456789012345678901",
@@ -147,8 +143,7 @@ final class RolesUpdateActionTests: XCTestCase {
         let user = try User.create(userName: "annalee",
                                    email: "annalee@testemail.com",
                                    name: "Anna Lee")
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
         let role = try Role.create(name: "Manager3", code: "manager3", description: "Manager")
         let roleToUpdate = RoleDto(id: role.id,
                                    title: "Senior manager",

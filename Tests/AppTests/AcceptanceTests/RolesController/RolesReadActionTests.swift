@@ -10,8 +10,7 @@ final class RolesReadActionTests: XCTestCase {
         let user = try User.create(userName: "robinyellow",
                                    email: "robinyellow@testemail.com",
                                    name: "Robin Yellow")
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
         
         let role = try Role.create(name: "Senior architect",
                                    code: "senior-architect",
@@ -61,8 +60,7 @@ final class RolesReadActionTests: XCTestCase {
         let user = try User.create(userName: "tedyellow",
                                    email: "tedyellow@testemail.com",
                                    name: "Ted Yellow")
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
 
         // Act.
         let response = try SharedApplication.application().sendRequest(

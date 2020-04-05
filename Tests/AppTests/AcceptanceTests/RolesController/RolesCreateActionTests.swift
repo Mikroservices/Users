@@ -11,8 +11,7 @@ final class RolesCreateActionTests: XCTestCase {
         let user = try User.create(userName: "laracroft",
                                    email: "laracroft@testemail.com",
                                    name: "Lara Croft")
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
         let roleDto = RoleDto(title: "Reviewer", code: "reviewer", description: "Code reviewers", hasSuperPrivileges: false, isDefault: true)
 
         // Act.
@@ -34,8 +33,7 @@ final class RolesCreateActionTests: XCTestCase {
         let user = try User.create(userName: "martincroft",
                                    email: "martincroft@testemail.com",
                                    name: "Martin Croft")
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
         let roleDto = RoleDto(title: "Technical writer", code: "tech-writer", description: "Technical writer", hasSuperPrivileges: false, isDefault: true)
 
         // Act.
@@ -56,8 +54,7 @@ final class RolesCreateActionTests: XCTestCase {
         let user = try User.create(userName: "victorcroft",
                                    email: "victorcroft@testemail.com",
                                    name: "Victor Croft")
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
         let roleDto = RoleDto(title: "Business analyst", code: "business-analyst", description: "Business analyst", hasSuperPrivileges: false, isDefault: true)
 
         // Act.
@@ -100,8 +97,7 @@ final class RolesCreateActionTests: XCTestCase {
         let user = try User.create(userName: "erikcroft",
                                    email: "erikcroft@testemail.com",
                                    name: "Erik Croft")
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
         let roleDto = RoleDto(title: "Administrator", code: "administrator", description: "Administrator", hasSuperPrivileges: false, isDefault: true)
 
         // Act.
@@ -123,8 +119,7 @@ final class RolesCreateActionTests: XCTestCase {
         let user = try User.create(userName: "tedcroft",
                                    email: "tedcroft@testemail.com",
                                    name: "Ted Croft")
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
         let roleDto = RoleDto(title: "name", code: "123456789012345678901", description: "description", hasSuperPrivileges: false, isDefault: true)
 
         // Act.
@@ -148,8 +143,7 @@ final class RolesCreateActionTests: XCTestCase {
         let user = try User.create(userName: "romancroft",
                                    email: "romancroft@testemail.com",
                                    name: "Roman Croft")
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
         let roleDto = RoleDto(title: "123456789012345678901234567890123456789012345678901", code: "code", description: "description", hasSuperPrivileges: false, isDefault: true)
 
         // Act.
@@ -173,8 +167,7 @@ final class RolesCreateActionTests: XCTestCase {
         let user = try User.create(userName: "samcroft",
                                    email: "samcroft@testemail.com",
                                    name: "Sam Croft")
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
         let roleDto = RoleDto(title: "name",
                               code: "code",
                               description: "12345678901234567890123456789012345678901234567890" +

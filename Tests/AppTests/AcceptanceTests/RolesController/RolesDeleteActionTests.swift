@@ -11,8 +11,7 @@ final class RolesDeleteActionTests: XCTestCase {
                                    email: "alinahood@testemail.com",
                                    name: "Alina Hood")
         
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
         let roleToDelete = try Role.create(name: "Tester analyst", code: "tester-analyst", description: "Tester analyst")
 
         // Act.
@@ -53,8 +52,7 @@ final class RolesDeleteActionTests: XCTestCase {
         let user = try User.create(userName: "wikihood",
                                    email: "wikihood@testemail.com",
                                    name: "Wiki Hood")
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
 
         // Act.
         let errorResponse = try SharedApplication.application().getErrorResponse(

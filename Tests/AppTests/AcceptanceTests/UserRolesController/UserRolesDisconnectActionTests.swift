@@ -12,9 +12,7 @@ final class UserRolesDisconnectActionTests: XCTestCase {
                                    email: "nickviolet@testemail.com",
                                    name: "Nick Violet")
         
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
-        
+        try user.attach(role: "Administrator")
         let role = try Role.create(name: "Accountant", code: "accountant", description: "Accountant")
         try user.$roles.attach(role, on: SharedApplication.application().db).wait()
         
@@ -41,8 +39,7 @@ final class UserRolesDisconnectActionTests: XCTestCase {
                                    email: "alanviolet@testemail.com",
                                    name: "Alan Violet")
         
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
         
         let role = try Role.create(name: "Teacher", code: "teacher", description: "Teacher")
         let userRoleDto = UserRoleDto(userId: user.id!, roleId: role.id!)
@@ -115,8 +112,7 @@ final class UserRolesDisconnectActionTests: XCTestCase {
         let user = try User.create(userName: "danviolet",
                                    email: "danviolet@testemail.com",
                                    name: "Dan Violet")
-        let administrator = try Role.get(role: "Administrator")
-        try user.$roles.attach(administrator, on: SharedApplication.application().db).wait()
+        try user.attach(role: "Administrator")
         let userRoleDto = UserRoleDto(userId: UUID(), roleId: UUID())
 
         // Act.
