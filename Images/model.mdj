@@ -1433,7 +1433,7 @@
 									"font": "Arial;13;0",
 									"left": 383,
 									"top": 361,
-									"width": 15.7548828125,
+									"width": 15.76123046875,
 									"height": 13,
 									"alpha": 1.5707963267948966,
 									"distance": 15,
@@ -1986,7 +1986,7 @@
 											"top": 471,
 											"width": 180.9970703125,
 											"height": 13,
-											"text": "Events"
+											"text": "Event"
 										},
 										{
 											"_type": "LabelView",
@@ -2787,7 +2787,7 @@
 					"_parent": {
 						"$ref": "AAAAAAFF+qBWK6M3Z8Y="
 					},
-					"name": "Events",
+					"name": "Event",
 					"attributes": [
 						{
 							"_type": "UMLAttribute",
