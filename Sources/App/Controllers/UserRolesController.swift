@@ -12,8 +12,13 @@ final class UserRolesController: RouteCollection {
             .grouped(UserPayload.guardMiddleware())
             .grouped(UserPayload.guardIsSuperUserMiddleware())
         
-        userRolesGroup.post("connect", use: connect)
-        userRolesGroup.post("disconnect", use: disconnect)
+        userRolesGroup
+            .grouped(EventHandlerMiddleware(.userRolesConnect))
+            .post("connect", use: connect)
+        
+        userRolesGroup
+            .grouped(EventHandlerMiddleware(.userRolesDisconnect))
+            .post("disconnect", use: disconnect)
     }
     
     /// Connect role to the user.

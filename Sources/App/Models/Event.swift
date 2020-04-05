@@ -1,9 +1,32 @@
 import Fluent
 import Vapor
 
-public enum EventType: String, Codable {
-    case login
-    case changePassword
+public enum EventType: String, Codable, CaseIterable {
+    case accountLogin
+    case accountRefresh
+    case accountChangePassword
+    case accountRevoke
+    
+    case forgotToken
+    case forgotConfirm
+    
+    case registerNewUser
+    case registerConfirm
+    case registerUserName
+    case registerEmail
+    
+    case rolesCreate
+    case rolesList
+    case rolesRead
+    case rolesUpdate
+    case rolesDelete
+    
+    case userRolesConnect
+    case userRolesDisconnect
+    
+    case usersRead
+    case usersUpdate
+    case usersDelete
 }
 
 final class Event: Model {
@@ -15,6 +38,12 @@ final class Event: Model {
     
     @Field(key: "type")
     var type: EventType
+  
+    @Field(key: "method")
+    var method: String
+    
+    @Field(key: "uri")
+    var uri: String
     
     @Field(key: "wasSuccess")
     var wasSuccess: Bool
@@ -36,10 +65,20 @@ final class Event: Model {
 
     init() { }
     
-    init(id: UUID? = nil, type: EventType, wasSuccess: Bool, userId: UUID? = nil,
-         requestBody: String? = nil, responseBody: String? = nil, error: String? = nil) {
+    init(id: UUID? = nil,
+         type: EventType,
+         method: HTTPMethod,
+         uri: String,
+         wasSuccess: Bool,
+         userId: UUID? = nil,
+         requestBody: String? = nil,
+         responseBody: String? = nil,
+         error: String? = nil
+    ) {
         self.id = id
         self.type = type
+        self.method = method.rawValue
+        self.uri = uri
         self.wasSuccess = wasSuccess
         self.userId = userId
         self.requestBody = requestBody

@@ -130,20 +130,20 @@ final class UsersService: UsersServiceType {
         return userFuture.flatMapThrowing { userFromDb in
 
             guard let user = userFromDb else {
-                throw LoginError.invalidLoginCredentials
+                throw ChangePasswordError.userNotFound
             }
 
             let currentPasswordHash = try Password.hash(currentPassword, withSalt: user.salt)
             if user.password != currentPasswordHash {
-                throw LoginError.invalidLoginCredentials
+                throw ChangePasswordError.invalidOldPassword
             }
 
             if !user.emailWasConfirmed {
-                throw LoginError.emailNotConfirmed
+                throw ChangePasswordError.emailNotConfirmed
             }
 
             if user.isBlocked {
-                throw LoginError.userAccountIsBlocked
+                throw ChangePasswordError.userAccountIsBlocked
             }
 
             let salt = Password.generateSalt()

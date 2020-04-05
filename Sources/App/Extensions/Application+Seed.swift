@@ -18,7 +18,7 @@ extension Application {
         try ensureSettingExists(on: database,
                                 existing: settings,
                                 key: .eventsToStore,
-                                value: "\(EventType.login.rawValue), \(EventType.changePassword.rawValue)")
+                                value: EventType.allCases.map { item -> String in item.rawValue }.joined(separator: ","))
         try ensureSettingExists(on: database, existing: settings, key: .jwtPrivateKey, value:
 """
 -----BEGIN RSA PRIVATE KEY-----

@@ -55,7 +55,7 @@ final class ChangePasswordActionTests: XCTestCase {
 
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
-        XCTAssertEqual(errorResponse.error.code, "invalidLoginCredentials", "Error code should be equal 'invalidLoginCredentials'.")
+        XCTAssertEqual(errorResponse.error.code, "invalidOldPassword", "Error code should be equal 'invalidOldPassword'.")
     }
 
     func testPasswordShouldNotBeChangedWhenUserAccountIsBlocked() throws {

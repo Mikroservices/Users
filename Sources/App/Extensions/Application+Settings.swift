@@ -17,8 +17,10 @@ public struct ApplicationSettings {
         self.recaptchaKey = recaptchaKey
         
         var eventsArray: [EventType] = []
-        if eventsToStore.contains(EventType.login.rawValue) {
-            eventsArray = [.login]
+        EventType.allCases.forEach {
+            if eventsToStore.contains($0.rawValue) {
+                eventsArray.append($0)
+            }
         }
         
         self.eventsToStore = eventsArray

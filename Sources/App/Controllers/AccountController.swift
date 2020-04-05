@@ -11,15 +11,21 @@ final class AccountController: RouteCollection {
             .grouped(LoginHandlerMiddleware())
             .post("login", use: login)
         
-        accountGroup.post("refresh", use: refresh)
+        accountGroup
+            .grouped(EventHandlerMiddleware(.accountRefresh))
+            .post("refresh", use: refresh)
+
         accountGroup
             .grouped(UserAuthenticator().middleware())
             .grouped(UserPayload.guardMiddleware())
+            .grouped(EventHandlerMiddleware(.accountChangePassword, storeRequest: false))
             .post("change-password", use: changePassword)
+
         accountGroup
             .grouped(UserAuthenticator().middleware())
             .grouped(UserPayload.guardMiddleware())
             .grouped(UserPayload.guardIsSuperUserMiddleware())
+            .grouped(EventHandlerMiddleware(.accountRevoke))
             .post("revoke", ":username", use: revoke)
     }
 
@@ -42,7 +48,7 @@ final class AccountController: RouteCollection {
 
                 let combinedFuture = accessTokenFuture.and(refreshTokenFuture)
                 let resultAll = combinedFuture.map { (accessToken, refreshToken) in
-                    AccessTokenDto(userId: user.id, accessToken: accessToken, refreshToken: refreshToken)
+                    AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
                 }
 
                 return resultAll

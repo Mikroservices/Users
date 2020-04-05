@@ -7,14 +7,25 @@ final class RegisterController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let registerGroup = routes.grouped(RegisterController.uri)
         
-        registerGroup.post(use: register)
-        registerGroup.post("confirm", use: confirm)
-        registerGroup.get("username", ":name", use: isUserNameTaken)
-        registerGroup.get("email", ":email", use: isEmailConnected)
+        registerGroup
+            .grouped(EventHandlerMiddleware(.registerNewUser, storeRequest: false))
+            .post(use: newUser)
+        
+        registerGroup
+            .grouped(EventHandlerMiddleware(.registerConfirm))
+            .post("confirm", use: confirm)
+        
+        registerGroup
+            .grouped(EventHandlerMiddleware(.registerUserName))
+            .get("username", ":name", use: isUserNameTaken)
+        
+        registerGroup
+            .grouped(EventHandlerMiddleware(.registerEmail))
+            .get("email", ":email", use: isEmailConnected)
     }
 
     /// Register new user.
-    func register(request: Request) throws -> EventLoopFuture<Response> {
+    func newUser(request: Request) throws -> EventLoopFuture<Response> {
         let registerUserDto = try request.content.decode(RegisterUserDto.self)
         try RegisterUserDto.validate(request)
 

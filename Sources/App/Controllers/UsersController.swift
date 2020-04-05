@@ -10,14 +10,18 @@ final class UsersController: RouteCollection {
             .grouped(UsersController.uri)
             .grouped(UserAuthenticator().middleware())
         
-        usersGroup.get(":name", use: read)
+        usersGroup
+            .grouped(EventHandlerMiddleware(.usersRead))
+            .get(":name", use: read)
 
         usersGroup
             .grouped(UserPayload.guardMiddleware())
+            .grouped(EventHandlerMiddleware(.usersUpdate))
             .put(":name", use: update)
         
         usersGroup
             .grouped(UserPayload.guardMiddleware())
+            .grouped(EventHandlerMiddleware(.usersDelete))
             .delete(":name", use: delete)
     }
 

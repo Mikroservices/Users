@@ -1,26 +1,35 @@
 import Vapor
 
-struct LoginHandlerMiddleware: Middleware {
+struct EventHandlerMiddleware: Middleware {
+    private let eventType: EventType
+    private let storeRequest: Bool
+    
+    init(_ eventType: EventType, storeRequest: Bool = true) {
+        self.eventType = eventType
+        self.storeRequest = storeRequest
+    }
+    
     func respond(to request: Request, chainingTo next: Responder) -> EventLoopFuture<Response> {
-        
-        if request.application.settings.configuration.eventsToStore.contains(.accountLogin) == false {
+            
+        if request.application.settings.configuration.eventsToStore.contains(self.eventType) == false {
             return next.respond(to: request)
         }
         
-        let event = Event(type: .accountLogin,
+        let event = Event(type: self.eventType,
                           method: request.method,
                           uri: request.url.description,
                           wasSuccess: false,
-                          requestBody: self.getSecureRequestBody(from: request))
+                          requestBody: self.storeRequest ? request.body.string : nil)
     
         return next.respond(to: request).always { result in
             switch result {
             case .success(let response):
-                event.responseBody = response.body.string
                 event.wasSuccess = true
+                event.responseBody = response.body.string
                 event.userId = request.auth.get(UserPayload.self)?.id
             case .failure(let error):
                 event.error = error.localizedDescription
+                event.userId = request.auth.get(UserPayload.self)?.id
             }
         }.flatMap { response in
             return event.save(on: request.db).map { _ in
@@ -31,20 +40,6 @@ struct LoginHandlerMiddleware: Middleware {
             return event.save(on: request.db).flatMap { _ in
                 request.fail(error)
             }
-        }
-    }
-    
-    private func getSecureRequestBody(from request: Request) -> String? {
-        do {
-            var loginRequestDto = try request.content.decode(LoginRequestDto.self)
-            loginRequestDto.password = "********"
-            let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .iso8601
-            let data = try encoder.encode(loginRequestDto)
-            return String(data: data, encoding: .utf8)
-        } catch {
-            request.logger.error("Error during decoding access token during logging.")
-            return nil
         }
     }
 }

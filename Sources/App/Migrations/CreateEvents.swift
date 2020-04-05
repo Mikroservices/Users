@@ -7,6 +7,8 @@ struct CreateEvents: Migration {
             .schema(Event.schema)
             .id()
             .field("type", .string, .required)
+            .field("method", .string, .required)
+            .field("uri", .string, .required)
             .field("wasSuccess", .bool, .required)
             .field("userId", .uuid)
             .field("requestBody", .string)

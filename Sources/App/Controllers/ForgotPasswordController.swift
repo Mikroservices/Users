@@ -7,8 +7,13 @@ final class ForgotPasswordController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let forgotGroup = routes.grouped(ForgotPasswordController.uri)
 
-        forgotGroup.post("token", use: forgotPasswordToken)
-        forgotGroup.post("confirm", use: forgotPasswordConfirm)
+        forgotGroup
+            .grouped(EventHandlerMiddleware(.forgotToken))
+            .post("token", use: forgotPasswordToken)
+        
+        forgotGroup
+            .grouped(EventHandlerMiddleware(.forgotConfirm, storeRequest: false))
+            .post("confirm", use: forgotPasswordConfirm)
     }
 
     /// Forgot password.

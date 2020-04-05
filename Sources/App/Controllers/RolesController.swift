@@ -11,11 +11,25 @@ final class RolesController: RouteCollection {
             .grouped(UserPayload.guardMiddleware())
             .grouped(UserPayload.guardIsSuperUserMiddleware())
         
-        rolesGroup.post(use: create)
-        rolesGroup.get(use: list)
-        rolesGroup.get(":id", use: read)
-        rolesGroup.put(":id", use: update)
-        rolesGroup.delete(":id", use: delete)
+        rolesGroup
+            .grouped(EventHandlerMiddleware(.rolesCreate))
+            .post(use: create)
+        
+        rolesGroup
+            .grouped(EventHandlerMiddleware(.rolesList))
+            .get(use: list)
+        
+        rolesGroup
+            .grouped(EventHandlerMiddleware(.rolesRead))
+            .get(":id", use: read)
+        
+        rolesGroup
+            .grouped(EventHandlerMiddleware(.rolesUpdate))
+            .put(":id", use: update)
+        
+        rolesGroup
+            .grouped(EventHandlerMiddleware(.rolesDelete))
+            .delete(":id", use: delete)
     }
 
     /// Create new role.
