@@ -9,8 +9,8 @@ final class UserRolesDisconnectActionTests: XCTestCase {
 
         // Arrange.
         let user = try User.create(userName: "nickviolet")
-        try user.attach(role: "Administrator")
-        let role = try Role.create(name: "Accountant", code: "accountant", description: "Accountant")
+        try user.attach(role: "administrator")
+        let role = try Role.create(code: "accountant")
         try user.$roles.attach(role, on: SharedApplication.application().db).wait()
         
         let userRoleDto = UserRoleDto(userId: user.id!, roleId: role.id!)
@@ -33,8 +33,8 @@ final class UserRolesDisconnectActionTests: XCTestCase {
 
         // Arrange.
         let user = try User.create(userName: "alanviolet")
-        try user.attach(role: "Administrator")
-        let role = try Role.create(name: "Teacher", code: "teacher", description: "Teacher")
+        try user.attach(role: "administrator")
+        let role = try Role.create(code: "teacher")
         let userRoleDto = UserRoleDto(userId: user.id!, roleId: role.id!)
 
         // Act.
@@ -55,7 +55,7 @@ final class UserRolesDisconnectActionTests: XCTestCase {
 
         // Arrange.
         let user = try User.create(userName: "ronaldviolet")
-        let role = try Role.create(name: "Junior accountant", code: "junior-consultant", description: "Junior accountant")
+        let role = try Role.create(code: "junior-consultant")
         try user.$roles.attach(role, on: SharedApplication.application().db).wait()
         let userRoleDto = UserRoleDto(userId: user.id!, roleId: role.id!)
 
@@ -75,8 +75,8 @@ final class UserRolesDisconnectActionTests: XCTestCase {
 
         // Arrange.
         let user = try User.create(userName: "wikiviolet")
-        try user.attach(role: "Administrator")
-        let role = try Role.create(name: "Senior accountant", code: "senior-consultant", description: "Senior accountant")
+        try user.attach(role: "administrator")
+        let role = try Role.create(code: "senior-consultant")
         try user.$roles.attach(role, on: SharedApplication.application().db).wait()
         let userRoleDto = UserRoleDto(userId: UUID(), roleId: role.id!)
 
@@ -96,7 +96,7 @@ final class UserRolesDisconnectActionTests: XCTestCase {
 
         // Arrange.
         let user = try User.create(userName: "danviolet")
-        try user.attach(role: "Administrator")
+        try user.attach(role: "administrator")
         let userRoleDto = UserRoleDto(userId: UUID(), roleId: UUID())
 
         // Act.

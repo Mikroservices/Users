@@ -64,7 +64,7 @@ final class LoginActionTests: XCTestCase {
 
         // Arrange.
         let user = try User.create(userName: "yokofury")
-        try user.attach(role: "Administrator")
+        try user.attach(role: "administrator")
         let loginRequestDto = LoginRequestDto(userNameOrEmail: "yokofury@testemail.com", password: "p@ssword")
 
         // Act.

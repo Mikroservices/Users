@@ -2,8 +2,8 @@ import Vapor
 
 struct RoleDto {
     var id: UUID?
-    var title: String
     var code: String
+    var title: String
     var description: String?
     var hasSuperPrivileges: Bool = false
     var isDefault: Bool = false
@@ -13,8 +13,8 @@ extension RoleDto {
     init(from role: Role) {
         self.init(
             id: role.id,
-            title: role.title,
             code: role.code,
+            title: role.title,
             description: role.description,
             hasSuperPrivileges: role.hasSuperPrivileges,
             isDefault: role.isDefault

@@ -8,7 +8,7 @@ final class RolesListActionTests: XCTestCase {
 
         // Arrange.
         let user = try User.create(userName: "robinorange")
-        try user.attach(role: "Administrator")
+        try user.attach(role: "administrator")
 
         // Act.
         let roles = try SharedApplication.application().getResponse(

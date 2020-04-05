@@ -38,15 +38,15 @@ final class Role: Model {
     init() { }
     
     init(id: UUID? = nil,
-         role: String,
          code: String,
+         title: String,
          description: String?,
          hasSuperPrivileges: Bool,
          isDefault: Bool
     ) {
         self.id = id
-        self.title = role
         self.code = code
+        self.title = title
         self.description = description
         self.hasSuperPrivileges = hasSuperPrivileges
         self.isDefault = isDefault
@@ -58,8 +58,8 @@ extension Role: Content { }
 
 extension Role {
     convenience init(from roleDto: RoleDto) {
-        self.init(role: roleDto.title,
-                  code: roleDto.code,
+        self.init(code: roleDto.code,
+                  title: roleDto.title,
                   description: roleDto.description,
                   hasSuperPrivileges: roleDto.hasSuperPrivileges,
                   isDefault: roleDto.isDefault

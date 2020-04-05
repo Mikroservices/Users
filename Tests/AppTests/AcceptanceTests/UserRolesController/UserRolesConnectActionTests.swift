@@ -9,8 +9,8 @@ final class UserRolesConnectActionTests: XCTestCase {
 
         // Arrange.
         let user = try User.create(userName: "nickford")
-        try user.attach(role: "Administrator")
-        let role = try Role.create(name: "Consultant", code: "consultant", description: "Consultant")
+        try user.attach(role: "administrator")
+        let role = try Role.create(code: "consultant")
         let userRoleDto = UserRoleDto(userId: user.id!, roleId: role.id!)
 
         // Act.
@@ -31,8 +31,8 @@ final class UserRolesConnectActionTests: XCTestCase {
 
         // Arrange.
         let user = try User.create(userName: "alanford")
-        try user.attach(role: "Administrator")
-        let role = try Role.create(name: "Policeman", code: "policeman", description: "Policeman")
+        try user.attach(role: "administrator")
+        let role = try Role.create(code: "policeman")
         try user.$roles.attach(role, on: SharedApplication.application().db).wait()
         
         let userRoleDto = UserRoleDto(userId: user.id!, roleId: role.id!)
@@ -55,7 +55,7 @@ final class UserRolesConnectActionTests: XCTestCase {
 
         // Arrange.
         let user = try User.create(userName: "wandaford")
-        let role = try Role.create(name: "Senior consultant", code: "senior-consultant", description: "Senior consultant")
+        let role = try Role.create(code: "senior-consultant")
         let userRoleDto = UserRoleDto(userId: user.id!, roleId: role.id!)
 
         // Act.
@@ -74,8 +74,8 @@ final class UserRolesConnectActionTests: XCTestCase {
 
         // Arrange.
         let user = try User.create(userName: "henryford")
-        try user.attach(role: "Administrator")
-        let role = try Role.create(name: "Junior consultant", code: "junior-consultant", description: "Junior consultant")
+        try user.attach(role: "administrator")
+        let role = try Role.create(code: "junior-consultant")
         let userRoleDto = UserRoleDto(userId: UUID(), roleId: role.id!)
 
         // Act.
@@ -94,7 +94,7 @@ final class UserRolesConnectActionTests: XCTestCase {
 
         // Arrange.
         let user = try User.create(userName: "erikford")
-        try user.attach(role: "Administrator")
+        try user.attach(role: "administrator")
         let userRoleDto = UserRoleDto(userId: user.id!, roleId: UUID())
 
         // Act.

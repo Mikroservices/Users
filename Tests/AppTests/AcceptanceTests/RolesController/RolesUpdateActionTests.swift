@@ -9,9 +9,9 @@ final class RolesUpdateActionTests: XCTestCase {
 
         // Arrange.
         let user = try User.create(userName: "brucelee")
-        try user.attach(role: "Administrator")
-        let role = try Role.create(name: "Seller", code: "seller", description: "Seller")
-        let roleToUpdate = RoleDto(id: role.id, title: "Junior serller", code: "junior-seller", description: "Junior seller")
+        try user.attach(role: "administrator")
+        let role = try Role.create(code: "seller")
+        let roleToUpdate = RoleDto(id: role.id, code: "junior-seller", title: "Junior serller", description: "Junior seller")
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
@@ -23,7 +23,7 @@ final class RolesUpdateActionTests: XCTestCase {
 
         // Assert.
         XCTAssertEqual(response.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
-        guard let updatedRole = try? Role.get(role: "Junior serller") else {
+        guard let updatedRole = try? Role.get(code: "junior-seller") else {
             XCTAssert(true, "Role was not found")
             return
         }
@@ -40,8 +40,8 @@ final class RolesUpdateActionTests: XCTestCase {
 
         // Arrange.
         _ = try User.create(userName: "georgelee")
-        let role = try Role.create(name: "Senior seller", code: "senior-seller", description: "Senior seller")
-        let roleToUpdate = RoleDto(id: role.id, title: "Junior serller", code: "junior-seller", description: "Junior seller")
+        let role = try Role.create(code: "senior-seller")
+        let roleToUpdate = RoleDto(id: role.id, code: "junior-seller", title: "Junior serller", description: "Junior seller")
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
@@ -59,9 +59,9 @@ final class RolesUpdateActionTests: XCTestCase {
 
         // Arrange.
         let user = try User.create(userName: "samlee")
-        try user.attach(role: "Administrator")
-        let role = try Role.create(name: "Marketer", code: "marketer", description: "marketer")
-        let roleToUpdate = RoleDto(id: role.id, title: "Administrator", code: "administrator", description: "Administrator")
+        try user.attach(role: "administrator")
+        let role = try Role.create(code: "marketer")
+        let roleToUpdate = RoleDto(id: role.id, code: "administrator", title: "Administrator", description: "Administrator")
 
         // Act.
         let errorResponse = try SharedApplication.application().getErrorResponse(
@@ -80,9 +80,9 @@ final class RolesUpdateActionTests: XCTestCase {
 
         // Arrange.
         let user = try User.create(userName: "wandalee")
-        try user.attach(role: "Administrator")
-        let role = try Role.create(name: "Manager1", code: "manager1", description: "Manager")
-        let roleToUpdate = RoleDto(id: role.id, title: "Senior manager", code: "123456789012345678901", description: "Senior manager")
+        try user.attach(role: "administrator")
+        let role = try Role.create(code: "manager1")
+        let roleToUpdate = RoleDto(id: role.id, code: "123456789012345678901", title: "Senior manager", description: "Senior manager")
 
         // Act.
         let errorResponse = try SharedApplication.application().getErrorResponse(
@@ -103,11 +103,11 @@ final class RolesUpdateActionTests: XCTestCase {
 
         // Arrange.
         let user = try User.create(userName: "monikalee")
-        try user.attach(role: "Administrator")
-        let role = try Role.create(name: "Manager2", code: "manager2", description: "Manager")
+        try user.attach(role: "administrator")
+        let role = try Role.create(code: "manager2")
         let roleToUpdate = RoleDto(id: role.id,
-                                   title: "123456789012345678901234567890123456789012345678901",
                                    code: "senior-manager",
+                                   title: "123456789012345678901234567890123456789012345678901",
                                    description: "Senior manager",
                                    hasSuperPrivileges: false,
                                    isDefault: true)
@@ -131,11 +131,11 @@ final class RolesUpdateActionTests: XCTestCase {
 
         // Arrange.
         let user = try User.create(userName: "annalee")
-        try user.attach(role: "Administrator")
-        let role = try Role.create(name: "Manager3", code: "manager3", description: "Manager")
+        try user.attach(role: "administrator")
+        let role = try Role.create(code: "manager3")
         let roleToUpdate = RoleDto(id: role.id,
-                                   title: "Senior manager",
                                    code: "senior-manager",
+                                   title: "Senior manager",
                                    description: "12345678901234567890123456789012345678901234567890" +
                                                 "12345678901234567890123456789012345678901234567890" +
                                                 "12345678901234567890123456789012345678901234567890" +

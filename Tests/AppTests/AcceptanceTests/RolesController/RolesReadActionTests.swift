@@ -8,10 +8,8 @@ final class RolesReadActionTests: XCTestCase {
 
         // Arrange.
         let user = try User.create(userName: "robinyellow")
-        try user.attach(role: "Administrator")
-        let role = try Role.create(name: "Senior architect",
-                                   code: "senior-architect",
-                                   description: "Senior architect")
+        try user.attach(role: "administrator")
+        let role = try Role.create(code: "senior-architect")
 
         // Act.
         let roleDto = try SharedApplication.application().getResponse(
@@ -34,9 +32,7 @@ final class RolesReadActionTests: XCTestCase {
 
         // Arrange.
         _ = try User.create(userName: "hulkyellow")
-        let role = try Role.create(name: "Senior developer",
-                                   code: "senior-developer",
-                                   description: "Senior developer")
+        let role = try Role.create(code: "senior-developer")
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
@@ -53,7 +49,7 @@ final class RolesReadActionTests: XCTestCase {
 
         // Arrange.
         let user = try User.create(userName: "tedyellow")
-        try user.attach(role: "Administrator")
+        try user.attach(role: "administrator")
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
