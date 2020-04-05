@@ -83,7 +83,7 @@ $ swift build
 Now you can run the application:
 
 ```bash
-$ .build/debug/Run --port 8001
+$ .build/debug/Run serve --port 8000
 ```
 
 If application starts open following link in your browser: [http://localhost:8001](http://localhost:8001).
