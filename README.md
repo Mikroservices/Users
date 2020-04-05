@@ -42,6 +42,7 @@ User account management:
 - [`POST /account/login`](Docs/account/login.md) - login user into system (returns JWT access token)
 - [`POST /account/refresh`](Docs/account/refresh.md) - refresh JWT access token
 - [`POST /account/change-password`](Docs/account/change-password.md) - change user password
+- [`POST /account/revoke/@{username}`](Docs/account/revoke.md) - revoke all refresh tokens for user
 
 Forgot password actions:
 

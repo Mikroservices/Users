@@ -13,6 +13,11 @@ final class AccountController: RouteCollection {
             .grouped(UserAuthenticator().middleware())
             .grouped(UserPayload.guardMiddleware())
             .post("change-password", use: changePassword)
+        accountGroup
+            .grouped(UserAuthenticator().middleware())
+            .grouped(UserPayload.guardMiddleware())
+            .grouped(UserPayload.guardIsSuperUserMiddleware())
+            .post("revoke", ":username", use: revoke)
     }
 
     /// Sign-in user.
@@ -26,8 +31,8 @@ final class AccountController: RouteCollection {
             let tokensService = request.application.services.tokensService
 
             do {
-                let accessTokenFuture = try tokensService.createAccessToken(request: request, forUser: user)
-                let refreshTokenFuture = try tokensService.createRefreshToken(request: request, forUser: user)
+                let accessTokenFuture = try tokensService.createAccessToken(on: request, forUser: user)
+                let refreshTokenFuture = try tokensService.createRefreshToken(on: request, forUser: user)
             
                 let combinedFuture = accessTokenFuture.and(refreshTokenFuture)
                 let resultAll = combinedFuture.map { (accessToken, refreshToken) in
@@ -56,8 +61,8 @@ final class AccountController: RouteCollection {
         
         return userAndTokenFuture.flatMap { (user: User, refreshToken: RefreshToken) -> EventLoopFuture<AccessTokenDto> in
             do {
-                 let accessTokenFuture = try tokensService.createAccessToken(request: request, forUser: user)
-                 let refreshTokenFuture = try tokensService.updateRefreshToken(request: request, forToken: refreshToken)
+                 let accessTokenFuture = try tokensService.createAccessToken(on: request, forUser: user)
+                 let refreshTokenFuture = try tokensService.updateRefreshToken(on: request, forToken: refreshToken)
              
                  let combinedFuture = accessTokenFuture.and(refreshTokenFuture)
                  let resultAll = combinedFuture.map { (accessToken, refreshToken) in
@@ -85,5 +90,26 @@ final class AccountController: RouteCollection {
             currentPassword: changePasswordRequestDto.currentPassword,
             newPassword: changePasswordRequestDto.newPassword
         ).transform(to: HTTPStatus.ok)
+    }
+    
+    /// Revoke refresh token
+    func revoke(request: Request) throws -> EventLoopFuture<HTTPStatus> {
+        guard let userName = request.parameters.get("username") else {
+            throw Abort(.badRequest)
+        }
+        
+        let usersService = request.application.services.usersService
+        let userNameNormalized = userName.replacingOccurrences(of: "@", with: "").uppercased()
+        let userFuture = usersService.get(on: request, userName: userNameNormalized)
+
+        return userFuture.flatMap { userFromDb in
+            guard let user = userFromDb else {
+                return request.fail(EntityNotFoundError.userNotFound)
+            }
+            
+            let tokensService = request.application.services.tokensService
+            return tokensService.revokeRefreshTokens(on: request, forUser: user)
+                .transform(to: HTTPStatus.ok)
+        }
     }
 }

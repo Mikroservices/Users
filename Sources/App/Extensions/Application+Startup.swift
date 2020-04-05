@@ -87,13 +87,13 @@ extension Application {
             
         // Configuration for Postgres.
         if connectionUrl.scheme?.hasPrefix("postgres") == true {
-            self.logger.info("Postgres database is configured in environment variable (host: \(connectionUrl.host ?? ""), db: \(connectionUrl.path)")
+            self.logger.info("Postgres database is configured in environment variable (host: \(connectionUrl.host ?? ""), db: \(connectionUrl.path))")
             try self.configurePostgres(connectionUrl: connectionUrl)
             return
         }
         
         // When we have environment variable but it's not Postgres we are trying to run SQLite in file.
-        self.logger.info("SQLite file database is configured in environment variable (file: \(connectionUrl.path)")
+        self.logger.info("SQLite file database is configured in environment variable (file: \(connectionUrl.path))")
         self.databases.use(.sqlite(.file(connectionUrl.path)), as: .sqlite)
     }
     

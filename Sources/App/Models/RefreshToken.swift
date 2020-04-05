@@ -38,7 +38,6 @@ final class RefreshToken: Model {
         self.token = token
         self.expiryDate = expiryDate
         self.revoked = revoked
-        
         self.$user.id = userId
     }
 }
