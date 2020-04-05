@@ -638,7 +638,7 @@
 											"top": 205,
 											"width": 180.9970703125,
 											"height": 13,
-											"text": "+name: String",
+											"text": "+title: String",
 											"horizontalAlignment": 0
 										},
 										{
@@ -1297,7 +1297,7 @@
 									"font": "Arial;13;0",
 									"left": 383,
 									"top": 329,
-									"width": 14.58056640625,
+									"width": 15.7548828125,
 									"height": 13,
 									"alpha": 1.5707963267948966,
 									"distance": 15,
@@ -2040,7 +2040,7 @@
 							"_parent": {
 								"$ref": "AAAAAAFp0pKwGC3uB4Q="
 							},
-							"name": "name",
+							"name": "title",
 							"type": "String"
 						},
 						{
