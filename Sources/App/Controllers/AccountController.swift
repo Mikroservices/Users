@@ -7,7 +7,10 @@ final class AccountController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let accountGroup = routes.grouped(AccountController.uri)
         
-        accountGroup.post("login", use: login)
+        accountGroup
+            .grouped(LoginHandlerMiddleware())
+            .post("login", use: login)
+        
         accountGroup.post("refresh", use: refresh)
         accountGroup
             .grouped(UserAuthenticator().middleware())
@@ -21,11 +24,14 @@ final class AccountController: RouteCollection {
     }
 
     /// Sign-in user.
-    func login(request: Request) throws -> EventLoopFuture<AccessTokenDto> {
+    func login(request: Request) throws -> EventLoopFuture<AccessTokenDto> {        
         let loginRequestDto = try request.content.decode(LoginRequestDto.self)
         let usersService = request.application.services.usersService
 
-        let loginFuture = try usersService.login(on: request, userNameOrEmail: loginRequestDto.userNameOrEmail, password: loginRequestDto.password)
+        let loginFuture = try usersService.login(on: request,
+                                                 userNameOrEmail: loginRequestDto.userNameOrEmail,
+                                                 password: loginRequestDto.password)
+
         return loginFuture.flatMap { user -> EventLoopFuture<AccessTokenDto> in
 
             let tokensService = request.application.services.tokensService
@@ -33,12 +39,12 @@ final class AccountController: RouteCollection {
             do {
                 let accessTokenFuture = try tokensService.createAccessToken(on: request, forUser: user)
                 let refreshTokenFuture = try tokensService.createRefreshToken(on: request, forUser: user)
-            
+
                 let combinedFuture = accessTokenFuture.and(refreshTokenFuture)
                 let resultAll = combinedFuture.map { (accessToken, refreshToken) in
-                    AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
+                    AccessTokenDto(userId: user.id, accessToken: accessToken, refreshToken: refreshToken)
                 }
-                
+
                 return resultAll
             } catch {
                 return request.fail(LoginError.invalidLoginCredentials)

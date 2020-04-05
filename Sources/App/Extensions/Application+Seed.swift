@@ -15,6 +15,10 @@ extension Application {
         try ensureSettingExists(on: database, existing: settings, key: .emailServiceAddress, value: "http://localhost:8002")
         try ensureSettingExists(on: database, existing: settings, key: .isRecaptchaEnabled, value: "0")
         try ensureSettingExists(on: database, existing: settings, key: .recaptchaKey, value: "")
+        try ensureSettingExists(on: database,
+                                existing: settings,
+                                key: .eventsToStore,
+                                value: "\(EventType.login.rawValue), \(EventType.changePassword.rawValue)")
         try ensureSettingExists(on: database, existing: settings, key: .jwtPrivateKey, value:
 """
 -----BEGIN RSA PRIVATE KEY-----

@@ -39,6 +39,7 @@ public enum SettingKey: String {
     case emailServiceAddress
     case isRecaptchaEnabled
     case recaptchaKey
+    case eventsToStore
 }
 
 extension Array where Element == Setting {

@@ -105,6 +105,7 @@ extension Application {
         self.migrations.add(CreateSettings())
         self.migrations.add(CreateRoles())
         self.migrations.add(CreateUserRoles())
+        self.migrations.add(CreateEvents())
         
         try self.autoMigrate().wait()
     }
@@ -123,7 +124,8 @@ extension Application {
             application: self,
             emailServiceAddress: settings.getString(.emailServiceAddress),
             isRecaptchaEnabled: settings.getBool(.isRecaptchaEnabled) ?? false,
-            recaptchaKey: settings.getString(.recaptchaKey) ?? ""
+            recaptchaKey: settings.getString(.recaptchaKey) ?? "",
+            eventsToStore: settings.getString(.eventsToStore) ?? ""
         )
     }
     
