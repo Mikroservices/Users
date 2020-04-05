@@ -1,35 +1,20 @@
 import Vapor
 
-final class RoleDto: Reflectable {
-
+struct RoleDto {
     var id: UUID?
-    var name: String
     var code: String
+    var title: String
     var description: String?
-    var hasSuperPrivileges: Bool
-    var isDefault: Bool
-
-    init(id: UUID? = nil,
-         name: String,
-         code: String,
-         description: String?,
-         hasSuperPrivileges: Bool = false,
-         isDefault: Bool = false) {
-        self.id = id
-        self.name = name
-        self.code = code
-        self.description = description
-        self.hasSuperPrivileges = hasSuperPrivileges
-        self.isDefault = isDefault
-    }
+    var hasSuperPrivileges: Bool = false
+    var isDefault: Bool = false
 }
 
 extension RoleDto {
-    convenience init(from role: Role) {
+    init(from role: Role) {
         self.init(
             id: role.id,
-            name: role.name,
             code: role.code,
+            title: role.title,
             description: role.description,
             hasSuperPrivileges: role.hasSuperPrivileges,
             isDefault: role.isDefault
@@ -40,15 +25,9 @@ extension RoleDto {
 extension RoleDto: Content { }
 
 extension RoleDto: Validatable {
-
-    /// See `Validatable`.
-    static func validations() throws -> Validations<RoleDto> {
-        var validations = Validations(RoleDto.self)
-
-        try validations.add(\.name, .count(...50))
-        try validations.add(\.code, .count(...20))
-        try validations.add(\.description, .count(...200) || .nil)
-
-        return validations
+    static func validations(_ validations: inout Validations) {
+        validations.add("title", as: String.self, is: .count(...50))
+        validations.add("code", as: String.self, is: .count(...20))
+        validations.add("description", as: String?.self, is: .count(...200) || .nil, required: false)
     }
 }

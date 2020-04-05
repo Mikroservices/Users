@@ -1,20 +1,16 @@
 @testable import App
 import XCTest
-import Vapor
-import XCTest
-import FluentPostgreSQL
+import XCTVapor
+
 
 final class RolesCreateActionTests: XCTestCase {
 
     func testRoleShouldBeCreatedBySuperUser() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "laracroft",
-                                   email: "laracroft@testemail.com",
-                                   name: "Lara Croft")
-        try user.attach(roleName: "Administrator", on: SharedApplication.application())
-        let roleDto = RoleDto(name: "Reviewer", code: "reviewer", description: "Code reviewers")
+        let user = try User.create(userName: "laracroft")
+        try user.attach(role: "administrator")
+        let roleDto = RoleDto(code: "reviewer", title: "Reviewer", description: "Code reviewers")
 
         // Act.
         let createdRoleDto = try SharedApplication.application().getResponse(
@@ -32,12 +28,9 @@ final class RolesCreateActionTests: XCTestCase {
     func testCreatedStatusCodeShouldBeReturnedAfterCreatingNewRole() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "martincroft",
-                                   email: "martincroft@testemail.com",
-                                   name: "Martin Croft")
-        try user.attach(roleName: "Administrator", on: SharedApplication.application())
-        let roleDto = RoleDto(name: "Technical writer", code: "tech-writer", description: "Technical writer")
+        let user = try User.create(userName: "martincroft")
+        try user.attach(role: "administrator")
+        let roleDto = RoleDto(code: "tech-writer", title: "Technical writer", description: "Technical writer")
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
@@ -48,18 +41,15 @@ final class RolesCreateActionTests: XCTestCase {
         )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.created, "Response http status code should be created (201).")
+        XCTAssertEqual(response.status, HTTPResponseStatus.created, "Response http status code should be created (201).")
     }
 
     func testHeaderLocationShouldBeReturnedAfterCreatingNewRole() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "victorcroft",
-                                   email: "victorcroft@testemail.com",
-                                   name: "Victor Croft")
-        try user.attach(roleName: "Administrator", on: SharedApplication.application())
-        let roleDto = RoleDto(name: "Business analyst", code: "business-analyst", description: "Business analyst")
+        let user = try User.create(userName: "victorcroft")
+        try user.attach(role: "administrator")
+        let roleDto = RoleDto(code: "business-analyst", title: "Business analyst", description: "Business analyst")
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
@@ -70,19 +60,16 @@ final class RolesCreateActionTests: XCTestCase {
         )
 
         // Assert.
-        let location = response.http.headers[.location][0]
-        let role = try response.content.decode(RoleDto.self).wait()
+        let location = response.headers.first(name: .location)
+        let role = try response.content.decode(RoleDto.self)
         XCTAssertEqual(location, "/roles/\(role.id?.uuidString ?? "")", "Location header should contains created role id.")
     }
 
     func testRoleShouldNotBeCreatedIfUserIsNotSuperUser() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "robincroft",
-                            email: "robincroft@testemail.com",
-                            name: "Robin Croft")
-        let roleDto = RoleDto(name: "Developer", code: "developer", description: "Developer")
+        _ = try User.create(userName: "robincroft")
+        let roleDto = RoleDto(code: "developer", title: "Developer", description: "Developer")
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
@@ -93,18 +80,15 @@ final class RolesCreateActionTests: XCTestCase {
         )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.forbidden, "Response http status code should be forbidden (403).")
+        XCTAssertEqual(response.status, HTTPResponseStatus.forbidden, "Response http status code should be forbidden (403).")
     }
 
     func testRoleShouldNotBeCreatedIfRoleWithSameCodeExists() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "erikcroft",
-                                   email: "erikcroft@testemail.com",
-                                   name: "Erik Croft")
-        try user.attach(roleName: "Administrator", on: SharedApplication.application())
-        let roleDto = RoleDto(name: "Administrator", code: "administrator", description: "Administrator")
+        let user = try User.create(userName: "erikcroft")
+        try user.attach(role: "administrator")
+        let roleDto = RoleDto(code: "administrator", title: "Administrator", description: "Administrator")
 
         // Act.
         let errorResponse = try SharedApplication.application().getErrorResponse(
@@ -122,12 +106,9 @@ final class RolesCreateActionTests: XCTestCase {
     func testRoleShouldNotBeCreatedIfCodeIsTooLong() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "tedcroft",
-                                   email: "tedcroft@testemail.com",
-                                   name: "Ted Croft")
-        try user.attach(roleName: "Administrator", on: SharedApplication.application())
-        let roleDto = RoleDto(name: "name", code: "123456789012345678901", description: "description")
+        let user = try User.create(userName: "tedcroft")
+        try user.attach(role: "administrator")
+        let roleDto = RoleDto(code: "123456789012345678901", title: "name", description: "description")
 
         // Act.
         let errorResponse = try SharedApplication.application().getErrorResponse(
@@ -140,18 +121,16 @@ final class RolesCreateActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
-        XCTAssertEqual(errorResponse.error.reason, "'code' is greater than required maximum of 20 characters", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("code"), "is greater than maximum of 20 character(s)")
     }
 
     func testRoleShouldNotBeCreatedIfNameIsTooLong() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "romancroft",
-                                   email: "romancroft@testemail.com",
-                                   name: "Roman Croft")
-        try user.attach(roleName: "Administrator", on: SharedApplication.application())
-        let roleDto = RoleDto(name: "123456789012345678901234567890123456789012345678901", code: "code", description: "description")
+        let user = try User.create(userName: "romancroft")
+        try user.attach(role: "administrator")
+        let roleDto = RoleDto( code: "code", title: "123456789012345678901234567890123456789012345678901",description: "description")
 
         // Act.
         let errorResponse = try SharedApplication.application().getErrorResponse(
@@ -164,24 +143,23 @@ final class RolesCreateActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
-        XCTAssertEqual(errorResponse.error.reason, "'name' is greater than required maximum of 50 characters", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("title"), "is greater than maximum of 50 character(s)")
     }
 
     func testRoleShouldNotBeCreatedIfDescriptionIsTooLong() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "samcroft",
-                                   email: "samcroft@testemail.com",
-                                   name: "Sam Croft")
-        try user.attach(roleName: "Administrator", on: SharedApplication.application())
-        let roleDto = RoleDto(name: "name",
-                              code: "code",
+        let user = try User.create(userName: "samcroft")
+        try user.attach(role: "administrator")
+        let roleDto = RoleDto(code: "code",
+                              title: "name",
                               description: "12345678901234567890123456789012345678901234567890" +
                                            "12345678901234567890123456789012345678901234567890" +
                                            "12345678901234567890123456789012345678901234567890" +
-                                           "123456789012345678901234567890123456789012345678901"
-        )
+                                           "123456789012345678901234567890123456789012345678901",
+                              hasSuperPrivileges: false,
+                              isDefault: true)
 
         // Act.
         let errorResponse = try SharedApplication.application().getErrorResponse(
@@ -194,15 +172,8 @@ final class RolesCreateActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
-        XCTAssertEqual(errorResponse.error.reason, "'description' is greater than required maximum of 200 characters and 'description' is not nil", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("description"), "is greater than maximum of 200 character(s) and is not null")
     }
-
-    static let allTests = [
-        ("testRoleShouldBeCreatedBySuperUser", testRoleShouldBeCreatedBySuperUser),
-        ("testRoleShouldNotBeCreatedIfUserIsNotSuperUser", testRoleShouldNotBeCreatedIfUserIsNotSuperUser),
-        ("testRoleShouldNotBeCreatedIfRoleWithSameCodeExists", testRoleShouldNotBeCreatedIfRoleWithSameCodeExists),
-        ("testRoleShouldNotBeCreatedIfCodeIsTooLong", testRoleShouldNotBeCreatedIfCodeIsTooLong),
-        ("testRoleShouldNotBeCreatedIfNameIsTooLong", testRoleShouldNotBeCreatedIfNameIsTooLong),
-        ("testRoleShouldNotBeCreatedIfDescriptionIsTooLong", testRoleShouldNotBeCreatedIfDescriptionIsTooLong)
-    ]
 }
+

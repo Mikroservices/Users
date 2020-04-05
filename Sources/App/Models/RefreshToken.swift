@@ -1,16 +1,33 @@
-import FluentPostgreSQL
+import Fluent
 import Vapor
-import Crypto
 
-/// A single entry of a Voice list.
-final class RefreshToken: PostgreSQLUUIDModel {
+final class RefreshToken: Model {
 
+    static let schema = "RefreshTokens"
+    
+    @ID(key: .id)
     var id: UUID?
-    var userId: UUID
+    
+    @Field(key: "token")
     var token: String
+    
+    @Field(key: "expiryDate")
     var expiryDate: Date
-    var revoked: Bool = false
+    
+    @Field(key: "revoked")
+    var revoked: Bool
+    
+    @Timestamp(key: "createdAt", on: .create)
+    var createdAt: Date?
 
+    @Timestamp(key: "updatedAt", on: .update)
+    var updatedAt: Date?
+
+    @Parent(key: "userId")
+    var user: User
+    
+    init() { }
+    
     init(id: UUID? = nil,
          userId: UUID,
          token: String,
@@ -18,25 +35,13 @@ final class RefreshToken: PostgreSQLUUIDModel {
          revoked: Bool = false
     ) {
         self.id = id
-        self.userId = userId
         self.token = token
         self.expiryDate = expiryDate
         self.revoked = revoked
+        
+        self.$user.id = userId
     }
 }
-
-/// User which generate refresh token.
-extension RefreshToken {
-    var user: Parent<RefreshToken, User> {
-        return parent(\.userId)
-    }
-}
-
-/// Allows `RefreshToken` to be used as a dynamic migration.
-extension RefreshToken: Migration { }
 
 /// Allows `RefreshToken` to be encoded to and decoded from HTTP messages.
 extension RefreshToken: Content { }
-
-/// Allows `RefreshToken` to be used as a dynamic parameter in route definitions.
-extension RefreshToken: Parameter { }

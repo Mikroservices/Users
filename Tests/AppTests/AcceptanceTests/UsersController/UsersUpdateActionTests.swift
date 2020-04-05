@@ -1,40 +1,22 @@
 @testable import App
 import XCTest
-import Vapor
-import XCTest
-import FluentPostgreSQL
+import XCTVapor
 
 final class UsersUpdateActionTests: XCTestCase {
     
     func testAccountShouldBeUpdatedForAuthorizedUser() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "nickperry",
-                                   email: "nickperry@testemail.com",
-                                   name: "Nick Perry",
-                                   password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                                   salt: "TNhZYL4F66KY7fUuqS/Juw==",
-                                   emailWasConfirmed: true,
-                                   isBlocked: false,
-                                   emailConfirmationGuid: "",
-                                   gravatarHash: "048a975025190efa55edb9948ae7ced5",
-                                   forgotPasswordGuid: "1234567890",
-                                   forgotPasswordDate: Date(),
-                                   bio: "Developer in most innovative company.",
-                                   location: "Cupertino",
-                                   website: "http://nickperry.com",
-                                   birthDate: Date())
-
+        let user = try User.create(userName: "nickperry")
         let userDto = UserDto(id: UUID(),
                               userName: "user name should not be changed",
                               email: "email should not be changed",
-                              gravatarHash: "gravatarHash should not be changed",
                               name: "Nick Perry-Fear",
                               bio: "Architect in most innovative company.",
                               location: "San Francisco",
                               website: "http://architect.com",
-                              birthDate: Date())
+                              birthDate: Date(),
+                              gravatarHash: "gravatarHash should not be changed")
 
         // Act.
         let updatedUserDto = try SharedApplication.application().getResponse(
@@ -60,100 +42,49 @@ final class UsersUpdateActionTests: XCTestCase {
     func testAccountShouldNotBeUpdatedIfUserIsNotAuthorized() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "josepfperry",
-                            email: "josepfperry@testemail.com",
-                            name: "Joseph Perry",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==",
-                            emailWasConfirmed: true,
-                            isBlocked: false,
-                            emailConfirmationGuid: "",
-                            gravatarHash: "048a975025190efa55edb9948ae7ced5",
-                            forgotPasswordGuid: "1234567890",
-                            forgotPasswordDate: Date(),
-                            bio: "Developer in most innovative company.",
-                            location: "Cupertino",
-                            website: "http://josepfperry.com",
-                            birthDate: Date())
+        _ = try User.create(userName: "josepfperry")
 
         let userDto = UserDto(id: UUID(),
                               userName: "user name should not be changed",
                               email: "email should not be changed",
-                              gravatarHash: "gravatarHash should not be changed",
                               name: "Nick Perry-Fear",
                               bio: "Architect in most innovative company.",
                               location: "San Francisco",
                               website: "http://architect.com",
-                              birthDate: Date())
+                              birthDate: Date(),
+                              gravatarHash: "gravatarHash should not be changed")
 
         // Act.
         let response = try SharedApplication.application()
             .sendRequest(to: "/users/@josepfperry", method: .PUT, body: userDto)
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.unauthorized, "Response http status code should be unauthorized (401).")
+        XCTAssertEqual(response.status, HTTPResponseStatus.unauthorized, "Response http status code should be unauthorized (401).")
     }
 
     func testAccountShouldNotUpdatedWhenUserTriesToUpdateNotHisAccount() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "annaperry",
-                            email: "annaperry@testemail.com",
-                            name: "Anna Perry",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==",
-                            emailWasConfirmed: true,
-                            isBlocked: false,
-                            emailConfirmationGuid: "",
-                            gravatarHash: "048a975025190efa55edb9948ae7ced5",
-                            forgotPasswordGuid: "1234567890",
-                            forgotPasswordDate: Date(),
-                            bio: "Developer in most innovative company.",
-                            location: "Cupertino",
-                            website: "http://annaperry.com",
-                            birthDate: Date())
-
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "chrisperry",
-                            email: "chrisperry@testemail.com",
-                            name: "Chris Perry",
-                            password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                            salt: "TNhZYL4F66KY7fUuqS/Juw==",
-                            emailWasConfirmed: true,
-                            isBlocked: false,
-                            emailConfirmationGuid: "",
-                            gravatarHash: "048a975025190efa55edb9948ae7ced5",
-                            forgotPasswordGuid: "1234567890",
-                            forgotPasswordDate: Date(),
-                            bio: "Developer in most innovative company.",
-                            location: "Cupertino",
-                            website: "http://chrisperry.com",
-                            birthDate: Date())
-
-        let userDto = UserDto(id: UUID(), userName: "chrisperry", email: "chrisperry@testemail.com", name: "Tiger Perry")
+        _ = try User.create(userName: "georgeperry")
+        _ = try User.create(userName: "xavierperry")
+        let userDto = UserDto(id: UUID(), userName: "xavierperry", email: "xavierperry@testemail.com", name: "Xavier Perry")
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
-            as: .user(userName: "annaperry", password: "p@ssword"),
-            to: "/users/@josepfperry",
+            as: .user(userName: "georgeperry", password: "p@ssword"),
+            to: "/users/@xavierperry",
             method: .PUT,
             body: userDto
         )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.forbidden, "Response http status code should be forbidden (403).")
+        XCTAssertEqual(response.status, HTTPResponseStatus.forbidden, "Response http status code should be forbidden (403).")
     }
 
     func testAccountShouldNotBeUpdatedIfNameIsTooLong() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "brianperry",
-                            email: "brianperry@testemail.com",
-                            name: "Brian Perry")
-
+        _ = try User.create(userName: "brianperry")
         let userDto = UserDto(userName: "brianperry",
                               email: "gregsmith@testemail.com",
                               name: "123456789012345678901234567890123456789012345678901")
@@ -169,17 +100,14 @@ final class UsersUpdateActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'userAccountIsBlocked'.")
-        XCTAssertEqual(errorResponse.error.reason, "'name' is greater than required maximum of 50 characters and 'name' is not nil", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("name"), "is greater than maximum of 50 character(s) and is not null")
     }
 
     func testAccountShouldNotBeUpdatedIfLocationIsTooLong() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "chrisperry",
-                            email: "chrisperry@testemail.com",
-                            name: "Chris Perry")
-
+        _ = try User.create(userName: "chrisperry")
         let userDto = UserDto(userName: "chrisperry",
                               email: "gregsmith@testemail.com",
                               name: "Chris Perry",
@@ -196,17 +124,14 @@ final class UsersUpdateActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'userAccountIsBlocked'.")
-        XCTAssertEqual(errorResponse.error.reason, "'location' is greater than required maximum of 50 characters and 'location' is not nil", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("location"), "is greater than maximum of 50 character(s) and is not null")
     }
 
     func testAccountShouldNotBeUpdatedIfWebsiteIsTooLong() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "lukeperry",
-                            email: "lukeperry@testemail.com",
-                            name: "Luke Perry")
-
+        _ = try User.create(userName: "lukeperry")
         let userDto = UserDto(userName: "lukeperry",
                               email: "gregsmith@testemail.com",
                               name: "Chris Perry",
@@ -223,17 +148,14 @@ final class UsersUpdateActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'userAccountIsBlocked'.")
-        XCTAssertEqual(errorResponse.error.reason, "'website' is greater than required maximum of 50 characters and 'website' is not nil", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("website"), "is greater than maximum of 50 character(s) and is not null")
     }
 
     func testAccountShouldNotBeUpdatedIfBioIsTooLong() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "francisperry",
-                            email: "francisperry@testemail.com",
-                            name: "Francis Perry")
-
+        _ = try User.create(userName: "francisperry")
         let userDto = UserDto(userName: "francisperry",
                               email: "gregsmith@testemail.com",
                               name: "Chris Perry",
@@ -253,16 +175,7 @@ final class UsersUpdateActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'userAccountIsBlocked'.")
-        XCTAssertEqual(errorResponse.error.reason, "'bio' is greater than required maximum of 200 characters and 'bio' is not nil", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("bio"), "is greater than maximum of 200 character(s) and is not null")
     }
-
-    static let allTests = [
-        ("testAccountShouldBeUpdatedForAuthorizedUser", testAccountShouldBeUpdatedForAuthorizedUser),
-        ("testAccountShouldNotBeUpdatedIfUserIsNotAuthorized", testAccountShouldNotBeUpdatedIfUserIsNotAuthorized),
-        ("testAccountShouldNotUpdatedWhenUserTriesToUpdateNotHisAccount", testAccountShouldNotUpdatedWhenUserTriesToUpdateNotHisAccount),
-        ("testAccountShouldNotBeUpdatedIfNameIsTooLong", testAccountShouldNotBeUpdatedIfNameIsTooLong),
-        ("testAccountShouldNotBeUpdatedIfLocationIsTooLong", testAccountShouldNotBeUpdatedIfLocationIsTooLong),
-        ("testAccountShouldNotBeUpdatedIfWebsiteIsTooLong", testAccountShouldNotBeUpdatedIfWebsiteIsTooLong),
-        ("testAccountShouldNotBeUpdatedIfBioIsTooLong", testAccountShouldNotBeUpdatedIfBioIsTooLong)
-    ]
 }

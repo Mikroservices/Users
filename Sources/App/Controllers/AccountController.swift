@@ -1,74 +1,89 @@
-import Foundation
 import Vapor
-import JWT
-import Crypto
-import Recaptcha
-import FluentPostgreSQL
 
 final class AccountController: RouteCollection {
 
-    public static let uri = "/account"
+    public static let uri: PathComponent = .constant("account")
 
-    func boot(router: Router) throws {
-        router.post(LoginRequestDto.self, at: "\(AccountController.uri)/login", use: login)
-        router.post(RefreshTokenDto.self, at: "\(AccountController.uri)/refresh", use: refresh)
-        router.post(ChangePasswordRequestDto.self, at: "\(AccountController.uri)/change-password", use: changePassword)
+    func boot(routes: RoutesBuilder) throws {
+        let accountGroup = routes.grouped(AccountController.uri)
+        
+        accountGroup.post("login", use: login)
+        accountGroup.post("refresh", use: refresh)
+        accountGroup
+            .grouped(UserAuthenticator().middleware())
+            .grouped(UserPayload.guardMiddleware())
+            .post("change-password", use: changePassword)
     }
 
     /// Sign-in user.
-    func login(request: Request, loginRequestDto: LoginRequestDto) throws -> Future<AccessTokenDto> {
-        let usersService = try request.make(UsersServiceType.self)
+    func login(request: Request) throws -> EventLoopFuture<AccessTokenDto> {
+        let loginRequestDto = try request.content.decode(LoginRequestDto.self)
+        let usersService = request.application.services.usersService
 
         let loginFuture = try usersService.login(on: request, userNameOrEmail: loginRequestDto.userNameOrEmail, password: loginRequestDto.password)
-        return loginFuture.flatMap { user in
+        return loginFuture.flatMap { user -> EventLoopFuture<AccessTokenDto> in
 
-            let authorizationService = try request.make(AuthorizationServiceType.self)
+            let tokensService = request.application.services.tokensService
 
-            let accessTokenFuture = try authorizationService.createAccessToken(request: request, forUser: user)
-            let refreshTokenFuture = try authorizationService.createRefreshToken(request: request, forUser: user)
-
-            return map(to: AccessTokenDto.self, accessTokenFuture, refreshTokenFuture) { accessToken, refreshToken in
-                return AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
+            do {
+                let accessTokenFuture = try tokensService.createAccessToken(request: request, forUser: user)
+                let refreshTokenFuture = try tokensService.createRefreshToken(request: request, forUser: user)
+            
+                let combinedFuture = accessTokenFuture.and(refreshTokenFuture)
+                let resultAll = combinedFuture.map { (accessToken, refreshToken) in
+                    AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
+                }
+                
+                return resultAll
+            } catch {
+                return request.fail(LoginError.invalidLoginCredentials)
             }
         }
     }
 
     /// Refresh token.
-    func refresh(request: Request, refreshTokenDto: RefreshTokenDto) throws -> Future<AccessTokenDto> {
-        let authorizationService = try request.make(AuthorizationServiceType.self)
+    func refresh(request: Request) throws -> EventLoopFuture<AccessTokenDto> {
+        let refreshTokenDto = try request.content.decode(RefreshTokenDto.self)
+        let tokensService = request.application.services.tokensService
 
-        let validateRefreshTokenFuture = try authorizationService.validateRefreshToken(on: request, refreshToken: refreshTokenDto.refreshToken)
-        return validateRefreshTokenFuture.flatMap { (user, refreshToken) in
-
-            let accessTokenFuture = try authorizationService.createAccessToken(request: request, forUser: user)
-            let refreshTokenFuture = try authorizationService.updateRefreshToken(request: request, forToken: refreshToken)
-
-            return map(to: AccessTokenDto.self, accessTokenFuture, refreshTokenFuture) { accessToken, refreshToken in
-                return AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
+        let validateRefreshTokenFuture = tokensService.validateRefreshToken(on: request, refreshToken: refreshTokenDto.refreshToken)
+        
+        let userAndTokenFuture = validateRefreshTokenFuture.map { refreshToken -> EventLoopFuture<(user: User, refreshToken: RefreshToken)> in
+            return tokensService.getUserByRefreshToken(on: request, refreshToken: refreshToken.token).map { user in
+                return (user, refreshToken)
             }
+        }.flatMap { wrappedFuture in wrappedFuture }
+        
+        return userAndTokenFuture.flatMap { (user: User, refreshToken: RefreshToken) -> EventLoopFuture<AccessTokenDto> in
+            do {
+                 let accessTokenFuture = try tokensService.createAccessToken(request: request, forUser: user)
+                 let refreshTokenFuture = try tokensService.updateRefreshToken(request: request, forToken: refreshToken)
+             
+                 let combinedFuture = accessTokenFuture.and(refreshTokenFuture)
+                 let resultAll = combinedFuture.map { (accessToken, refreshToken) in
+                     AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
+                 }
+                 
+                 return resultAll
+             } catch {
+                 return request.fail(LoginError.invalidLoginCredentials)
+             }
         }
     }
 
     /// Change password.
-    func changePassword(request: Request, changePasswordRequestDto: ChangePasswordRequestDto) throws -> Future<HTTPStatus> {
+    func changePassword(request: Request) throws -> EventLoopFuture<HTTPStatus> {
+        let authorizationPayload = try request.auth.require(UserPayload.self)
 
-        try changePasswordRequestDto.validate()
+        let changePasswordRequestDto = try request.content.decode(ChangePasswordRequestDto.self)
+        try ChangePasswordRequestDto.validate(request)
 
-        let authorizationService = try request.make(AuthorizationServiceType.self)
-        let userNameFuture = try authorizationService.getUserNameFromBearerToken(request: request)
-        return userNameFuture.flatMap { userNameFromToken in
-
-            guard let unwrapedUserNameFromToken = userNameFromToken else {
-                throw Abort(.unauthorized)
-            }
-
-            let usersService = try request.make(UsersServiceType.self)
-            return try usersService.changePassword(
-                on: request,
-                userName: unwrapedUserNameFromToken,
-                currentPassword: changePasswordRequestDto.currentPassword,
-                newPassword: changePasswordRequestDto.newPassword
-            ).transform(to: HTTPStatus.ok)
-        }
+        let usersService = request.application.services.usersService
+        return try usersService.changePassword(
+            on: request,
+            userId: authorizationPayload.id,
+            currentPassword: changePasswordRequestDto.currentPassword,
+            newPassword: changePasswordRequestDto.newPassword
+        ).transform(to: HTTPStatus.ok)
     }
 }

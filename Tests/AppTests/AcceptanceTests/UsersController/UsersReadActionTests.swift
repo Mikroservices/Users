@@ -1,30 +1,13 @@
 @testable import App
 import XCTest
-import Vapor
-import XCTest
-import FluentPostgreSQL
+import XCTVapor
 
 final class UsersReadActionTests: XCTestCase {
 
     func testUserProfileShouldBeReturnedForExistingUser() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "johnbush",
-                                   email: "johnbush@testemail.com",
-                                   name: "John Bush",
-                                   password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                                   salt: "TNhZYL4F66KY7fUuqS/Juw==",
-                                   emailWasConfirmed: true,
-                                   isBlocked: false,
-                                   emailConfirmationGuid: "",
-                                   gravatarHash: "048a975025190efa55edb9948ae7ced5",
-                                   forgotPasswordGuid: "1234567890",
-                                   forgotPasswordDate: Date(),
-                                   bio: "Developer in most innovative company.",
-                                   location: "Cupertino",
-                                   website: "http://johnbush.com",
-                                   birthDate: Date())
+        let user = try User.create(userName: "johnbush")
 
         // Act.
         let userDto = try SharedApplication.application().getResponse(
@@ -51,28 +34,13 @@ final class UsersReadActionTests: XCTestCase {
         let response = try SharedApplication.application().sendRequest(to: "/users/@not-exists", method: .GET)
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")
+        XCTAssertEqual(response.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")
     }
 
     func testPublicProfileShouldNotContainsSensitiveInformation() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "elizabush",
-                                   email: "elizabush@testemail.com",
-                                   name: "Eliza Bush",
-                                   password: "83427d87b9492b7e048a975025190efa55edb9948ae7ced5c6ccf1a553ce0e2b",
-                                   salt: "TNhZYL4F66KY7fUuqS/Juw==",
-                                   emailWasConfirmed: true,
-                                   isBlocked: false,
-                                   emailConfirmationGuid: "",
-                                   gravatarHash: "75025190efa55edb9948ae7ced5c6ccf1a553c",
-                                   forgotPasswordGuid: "1234567890",
-                                   forgotPasswordDate: Date(),
-                                   bio: "Tester in most innovative company.",
-                                   location: "Cupertino",
-                                   website: "http://elizabush.com",
-                                   birthDate: Date())
+        let user = try User.create(userName: "elizabush")
 
         // Act.
         let userDto = try SharedApplication.application()
@@ -89,10 +57,4 @@ final class UsersReadActionTests: XCTestCase {
         XCTAssert(userDto.email == nil, "Property 'email' must not be equal.")
         XCTAssert(userDto.birthDate == nil, "Property 'birthDate' must not be returned.")
     }
-
-    static let allTests = [
-        ("testUserProfileShouldBeReturnedForExistingUser", testUserProfileShouldBeReturnedForExistingUser),
-        ("testUserProfileShouldNotBeReturnedForNotExistingUser", testUserProfileShouldNotBeReturnedForNotExistingUser),
-        ("testPublicProfileShouldNotContainsSensitiveInformation", testPublicProfileShouldNotContainsSensitiveInformation)
-    ]
 }

@@ -1,22 +1,17 @@
 @testable import App
 import XCTest
-import Vapor
-import XCTest
-import FluentPostgreSQL
+import XCTVapor
 
 final class UserNameActionTests: XCTestCase {
 
     func testUserNameValidationShouldReturnTrueIfUserNameExists() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "johndoe",
-                            email: "johndoe@testemail.com",
-                            name: "John Doe")
+        _ = try User.create(userName: "johndoe")
 
         // Act.
         let booleanResponseDto = try SharedApplication.application()
-            .getResponse(to: "/register/userName/johndoe", decodeTo: BooleanResponseDto.self)
+            .getResponse(to: "/register/username/johndoe", decodeTo: BooleanResponseDto.self)
 
         // Assert.
         XCTAssert(booleanResponseDto.result, "Server should return true for username: johndoe.")
@@ -25,7 +20,7 @@ final class UserNameActionTests: XCTestCase {
     func testUserNameValidationShouldReturnFalseIfUserNameNotExists() throws {
 
         // Arrange.
-        let url = "/register/userName/notexists"
+        let url = "/register/username/notexists"
 
         // Act.
         let booleanResponseDto = try SharedApplication.application()
@@ -34,9 +29,4 @@ final class UserNameActionTests: XCTestCase {
         // Assert.
         XCTAssert(booleanResponseDto.result == false, "Server should return false for username: notexists.")
     }
-
-    static let allTests = [
-        ("testUserNameValidationShouldReturnTrueIfUserNameExists", testUserNameValidationShouldReturnTrueIfUserNameExists),
-        ("testUserNameValidationShouldReturnFalseIfUserNameNotExists", testUserNameValidationShouldReturnFalseIfUserNameNotExists)
-    ]
 }

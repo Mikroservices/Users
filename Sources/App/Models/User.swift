@@ -1,29 +1,81 @@
-import FluentPostgreSQL
+import Fluent
 import Vapor
 
-/// A single entry of a Voice list.
-final class User: PostgreSQLUUIDModel {
+final class User: Model {
 
+    static let schema = "Users"
+    
+    @ID(key: .id)
     var id: UUID?
+    
+    @Field(key: "userName")
     var userName: String
+    
+    @Field(key: "email")
     var email: String
+    
+    @Field(key: "name")
     var name: String?
+    
+    @Field(key: "password")
     var password: String
+    
+    @Field(key: "salt")
     var salt: String
+    
+    @Field(key: "emailWasConfirmed")
     var emailWasConfirmed: Bool
+    
+    @Field(key: "isBlocked")
     var isBlocked: Bool
+    
+    @Field(key: "emailConfirmationGuid")
     var emailConfirmationGuid: String
+    
+    @Field(key: "forgotPasswordGuid")
     var forgotPasswordGuid: String?
+    
+    @Field(key: "forgotPasswordDate")
     var forgotPasswordDate: Date?
+    
+    @Field(key: "bio")
     var bio: String?
+    
+    @Field(key: "location")
     var location: String?
+    
+    @Field(key: "website")
     var website: String?
+    
+    @Field(key: "birthDate")
     var birthDate: Date?
 
+    @Field(key: "userNameNormalized")
     var userNameNormalized: String
+    
+    @Field(key: "emailNormalized")
     var emailNormalized: String
+    
+    @Field(key: "gravatarHash")
     var gravatarHash: String
+    
+    @Timestamp(key: "createdAt", on: .create)
+    var createdAt: Date?
 
+    @Timestamp(key: "updatedAt", on: .update)
+    var updatedAt: Date?
+    
+    @Timestamp(key: "deletedAt", on: .delete)
+    var deletedAt: Date?
+    
+    @Children(for: \.$user)
+    var refreshTokens: [RefreshToken]
+    
+    @Siblings(through: UserRole.self, from: \.$user, to: \.$role)
+    var roles: [Role]
+
+    init() { }
+    
     init(id: UUID? = nil,
          userName: String,
          email: String,
@@ -60,32 +112,11 @@ final class User: PostgreSQLUUIDModel {
 
         self.userNameNormalized = userName.uppercased()
         self.emailNormalized = email.uppercased()
-        self.gravatarHash = gravatarHash
     }
 }
 
-/// Refresh tokens generated for user.
-extension User {
-    var refreshTokens: Children<User, RefreshToken> {
-        return children(\.id)
-    }
-}
-
-/// Roles connected to user.
-extension User {
-    var roles: Siblings<User, Role, UserRole> {
-        return siblings()
-    }
-}
-
-/// Allows `Voice` to be used as a dynamic migration.
-extension User: Migration { }
-
-/// Allows `Voice` to be encoded to and decoded from HTTP messages.
+/// Allows `User` to be encoded to and decoded from HTTP messages.
 extension User: Content { }
-
-/// Allows `Voice` to be used as a dynamic parameter in route definitions.
-extension User: Parameter { }
 
 extension User {
     convenience init(from registerUserDto: RegisterUserDto,

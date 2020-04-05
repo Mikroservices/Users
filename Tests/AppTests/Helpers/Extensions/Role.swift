@@ -1,31 +1,28 @@
 @testable import App
 import Vapor
-import FluentPostgreSQL
+import Fluent
 
 extension Role {
 
-    static func create(on application: Application,
-                       name: String,
-                       code: String,
-                       description: String,
+    static func create(code: String,
+                       title: String? = nil,
+                       description: String? = nil,
                        hasSuperPrivileges: Bool = false,
                        isDefault: Bool = false) throws -> Role {
 
-        let connection = try application.newConnection(to: .psql).wait()
-        let role = Role(name: name,
-                        code: code,
-                        description: description,
+        let role = Role(code: code,
+                        title: title ?? code,
+                        description: description ?? code,
                         hasSuperPrivileges: hasSuperPrivileges,
                         isDefault: isDefault)
 
-        _ = try role.save(on: connection).wait()
+        try role.save(on: SharedApplication.application().db).wait()
 
         return role
     }
 
-    static func get(on application: Application, name: String) throws -> Role {
-        let connection = try application.newConnection(to: .psql).wait()
-        guard let role = try Role.query(on: connection).filter(\.name == name).first().wait() else {
+    static func get(code: String) throws -> Role {
+        guard let role = try Role.query(on: SharedApplication.application().db).filter(\.$code == code).first().wait() else {
             throw SharedApplicationError.unwrap
         }
 

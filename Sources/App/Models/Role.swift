@@ -1,52 +1,65 @@
-import FluentPostgreSQL
+import Fluent
 import Vapor
 
-/// A single entry of a Role list.
-final class Role: PostgreSQLUUIDModel {
+final class Role: Model {
 
+    static let schema = "Roles"
+    
+    @ID(key: .id)
     var id: UUID?
-    var name: String
-    var code: String
-    var description: String?
-    var hasSuperPrivileges: Bool
-    var isDefault: Bool
+    
+    @Field(key: "title")
+    var title: String
 
+    @Field(key: "code")
+    var code: String
+    
+    @Field(key: "description")
+    var description: String?
+    
+    @Field(key: "hasSuperPrivileges")
+    var hasSuperPrivileges: Bool
+    
+    @Field(key: "isDefault")
+    var isDefault: Bool
+    
+    @Timestamp(key: "createdAt", on: .create)
+    var createdAt: Date?
+
+    @Timestamp(key: "updatedAt", on: .update)
+    var updatedAt: Date?
+    
+    @Timestamp(key: "deletedAt", on: .delete)
+    var deletedAt: Date?
+    
+    @Siblings(through: UserRole.self, from: \.$role, to: \.$user)
+    var users: [User]
+
+    init() { }
+    
     init(id: UUID? = nil,
-         name: String,
          code: String,
+         title: String,
          description: String?,
          hasSuperPrivileges: Bool,
          isDefault: Bool
     ) {
         self.id = id
-        self.name = name
         self.code = code
+        self.title = title
         self.description = description
         self.hasSuperPrivileges = hasSuperPrivileges
         self.isDefault = isDefault
     }
 }
 
-/// Users connected to role.
-extension Role {
-    var users: Siblings<Role, User, UserRole> {
-        return siblings()
-    }
-}
-
-/// Allows `Role` to be used as a dynamic migration.
-extension Role: Migration { }
-
 /// Allows `Role` to be encoded to and decoded from HTTP messages.
 extension Role: Content { }
 
-/// Allows `Role` to be used as a dynamic parameter in route definitions.
-extension Role: Parameter { }
-
 extension Role {
     convenience init(from roleDto: RoleDto) {
-        self.init(name: roleDto.name,
-                  code: roleDto.code,
+        self.init(code: roleDto.code,
+                  title: roleDto.title,
                   description: roleDto.description,
                   hasSuperPrivileges: roleDto.hasSuperPrivileges,
                   isDefault: roleDto.isDefault

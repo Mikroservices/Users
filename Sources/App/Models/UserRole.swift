@@ -1,29 +1,28 @@
-import FluentPostgreSQL
+import Fluent
 import Vapor
 
-/// Connection between users and roles.
-struct UserRole: ModifiablePivot, PostgreSQLUUIDModel {
-    typealias Left = User
-    typealias Right = Role
+final class UserRole: Model {
+    static let schema: String = "UserRoles"
 
-    static var leftIDKey: LeftIDKey = \.userId
-    static var rightIDKey: RightIDKey = \.roleId
-
+    @ID(key: .id)
     var id: UUID?
-    var userId: UUID
-    var roleId: UUID
 
-    init(_ user: User, _ role: Role) throws {
-        self.userId = try user.requireID()
-        self.roleId = try role.requireID()
+    @Timestamp(key: "createdAt", on: .create)
+    var createdAt: Date?
+    
+    @Parent(key: "userId")
+    var user: User
+
+    @Parent(key: "roleId")
+    var role: Role
+
+    init() {}
+
+    init(userId: UUID, roleId: UUID) {
+        self.$user.id = userId
+        self.$role.id = roleId
     }
 }
 
-/// Allows `UserRole` to be used as a dynamic migration.
-extension UserRole: Migration { }
-
 /// Allows `UserRole` to be encoded to and decoded from HTTP messages.
 extension UserRole: Content { }
-
-/// Allows `UserRole` to be used as a dynamic parameter in route definitions.
-extension UserRole: Parameter { }

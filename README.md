@@ -1,9 +1,14 @@
 # :couple: Mikroservices - Users
 
-[![Build Status](https://travis-ci.org/Mikroservices/Users.svg?branch=master)](https://travis-ci.org/Mikroservices/Users) [![Swift 4.0](https://img.shields.io/badge/Swift-4.0-orange.svg?style=flat)](ttps://developer.apple.com/swift/) [![Platforms OS X | Linux](https://img.shields.io/badge/Platforms-OS%20X%20%7C%20Linux%20-lightgray.svg?style=flat)](https://developer.apple.com/swift/)
+![Build Status](https://github.com/Mikroservices/Users/workflows/Build/badge.svg)
+[![Swift 5.2](https://img.shields.io/badge/Swift-5.2-orange.svg?style=flat)](ttps://developer.apple.com/swift/)
+[![Vapor 4](https://img.shields.io/badge/vapor-4.0-blue.svg?style=flat)](https://vapor.codes)
+[![Swift Package Manager](https://img.shields.io/badge/SPM-compatible-4BC51D.svg?style=flat)](https://swift.org/package-manager/)
+[![Platforms OS X | Linux](https://img.shields.io/badge/Platforms-OS%20X%20%7C%20Linux%20-lightgray.svg?style=flat)](https://developer.apple.com/swift/)
+
 
 Microservice which provides common features for managing users (only RESTful API).
-Application is written in [Swift](https://swift.org) and [Vapor 3](https://vapor.codes) and operates on PostgreSQL database.
+Application is written in [Swift](https://swift.org) and [Vapor 4](https://vapor.codes) and operates on PostgreSQL or SQLite databases.
 All functionalities are constantly verified by unit tests.
 
 ## Main features
@@ -64,7 +69,7 @@ Connect user to role:
 
 ## Getting started
 
-First you need to have [Swift](https://swift.org) installed on your computer and you have to create new database in PostgreSQL server.
+First you need to have [Swift](https://swift.org) installed on your computer.
 Next you should run following commands:
 
 ```bash
@@ -74,19 +79,6 @@ $ swift package update
 $ swift build
 ```
 
-If application successfully builds you need to set up connection string to the database. 
-Service supports only PostgreSQL database. 
-
-```
-Variable name:              MIKROSERVICE_USERS_CONNECTION_STRING
-Value (connection string):  postgresql://user:password@host:5432/database?sslmode=require
-```
-
-You can set up this variable as:
-
-1. environment variable in your system
-2. environment variable in XCode
-
 Now you can run the application:
 
 ```bash
@@ -95,6 +87,30 @@ $ .build/debug/Run --port 8001
 
 If application starts open following link in your browser: [http://localhost:8001](http://localhost:8001).
 You should see blank page with text: *Service is up and running!*. Now you can use API which is described above.
+
+## Database
+
+If you want to use persistent database you have to add system environment `MIKROSERVICE_USERS_CONNECTION_STRING` with connection string to the database.
+
+**Connection string for PostgreSQL:** 
+
+```
+Variable name:              MIKROSERVICE_USERS_CONNECTION_STRING
+Value (connection string):  postgresql://user:password@host:5432/database?sslmode=require
+```
+
+**Connection string for SQLite:** 
+
+```
+Variable name:              MIKROSERVICE_USERS_CONNECTION_STRING
+Value (connection string):  users.db
+```
+
+You can set up this variable as:
+
+1. environment variable in your system
+2. environment variable in XCode
+
 
 ## Configuration
 

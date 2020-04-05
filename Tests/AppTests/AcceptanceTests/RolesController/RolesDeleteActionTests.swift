@@ -1,20 +1,15 @@
 @testable import App
 import XCTest
-import Vapor
-import XCTest
-import FluentPostgreSQL
+import XCTVapor
 
 final class RolesDeleteActionTests: XCTestCase {
 
     func testRoleShouldBeDeletedIfRoleExistsAndUserIsSuperUser() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "alinahood",
-                                   email: "alinahood@testemail.com",
-                                   name: "Alina Hood")
-        try user.attach(roleName: "Administrator", on: SharedApplication.application())
-        let roleToDelete = try Role.create(on: SharedApplication.application(), name: "Tester analyst", code: "tester-analyst", description: "Tester analyst")
+        let user = try User.create(userName: "alinahood")
+        try user.attach(role: "administrator")
+        let roleToDelete = try Role.create(code: "tester-analyst")
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
@@ -24,19 +19,16 @@ final class RolesDeleteActionTests: XCTestCase {
         )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
-        let role = try? Role.get(on: SharedApplication.application(), name: "Tester analyst")
+        XCTAssertEqual(response.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
+        let role = try? Role.get(code: "tester-analyst")
         XCTAssert(role == nil, "Role should be deleted.")
     }
 
     func testRoleShouldNotBeDeletedIfRoleExistsButUserIsNotSuperUser() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "robinhood",
-                            email: "robinhood@testemail.com",
-                            name: "Robin Hood")
-        let roleToDelete = try Role.create(on: SharedApplication.application(), name: "Technican", code: "technican", description: "Technican")
+        _ = try User.create(userName: "robinhood")
+        let roleToDelete = try Role.create(code: "technican")
 
         // Act.
         let errorResponse = try SharedApplication.application().getErrorResponse(
@@ -52,11 +44,8 @@ final class RolesDeleteActionTests: XCTestCase {
     func testCorrectStatusCodeShouldBeReturnedIfRoleNotExists() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "wikihood",
-                                   email: "wikihood@testemail.com",
-                                   name: "Wiki Hood")
-        try user.attach(roleName: "Administrator", on: SharedApplication.application())
+        let user = try User.create(userName: "wikihood")
+        try user.attach(role: "administrator")
 
         // Act.
         let errorResponse = try SharedApplication.application().getErrorResponse(
@@ -68,10 +57,4 @@ final class RolesDeleteActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")
     }
-
-    static let allTests = [
-        ("testRoleShouldBeDeletedIfRoleExistsAndUserIsSuperUser", testRoleShouldBeDeletedIfRoleExistsAndUserIsSuperUser),
-        ("testRoleShouldNotBeDeletedIfRoleExistsButUserIsNotSuperUser", testRoleShouldNotBeDeletedIfRoleExistsButUserIsNotSuperUser),
-        ("testCorrectStatusCodeShouldBeReturnedIfRoleNotExists", testCorrectStatusCodeShouldBeReturnedIfRoleNotExists)
-    ]
 }

@@ -1,21 +1,17 @@
 @testable import App
 import XCTest
-import Vapor
-import XCTest
-import FluentPostgreSQL
+import XCTVapor
+
 
 final class RolesUpdateActionTests: XCTestCase {
 
     func testCorrectRoleShouldBeUpdatedBySuperUser() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "brucelee",
-                                   email: "brucelee@testemail.com",
-                                   name: "Bruce Lee")
-        try user.attach(roleName: "Administrator", on: SharedApplication.application())
-        let role = try Role.create(on: SharedApplication.application(), name: "Seller", code: "seller", description: "Seller")
-        let roleToUpdate = RoleDto(id: role.id, name: "Junior serller", code: "junior-seller", description: "Junior seller")
+        let user = try User.create(userName: "brucelee")
+        try user.attach(role: "administrator")
+        let role = try Role.create(code: "seller")
+        let roleToUpdate = RoleDto(id: role.id, code: "junior-seller", title: "Junior serller", description: "Junior seller")
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
@@ -26,14 +22,14 @@ final class RolesUpdateActionTests: XCTestCase {
         )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
-        guard let updatedRole = try? Role.get(on: SharedApplication.application(), name: "Junior serller") else {
+        XCTAssertEqual(response.status, HTTPResponseStatus.ok, "Response http status code should be ok (200).")
+        guard let updatedRole = try? Role.get(code: "junior-seller") else {
             XCTAssert(true, "Role was not found")
             return
         }
 
         XCTAssertEqual(updatedRole.id, roleToUpdate.id, "Role id should be correct.")
-        XCTAssertEqual(updatedRole.name, roleToUpdate.name, "Role name should be correct.")
+        XCTAssertEqual(updatedRole.title, roleToUpdate.title, "Role name should be correct.")
         XCTAssertEqual(updatedRole.code, roleToUpdate.code, "Role code should be correct.")
         XCTAssertEqual(updatedRole.description, roleToUpdate.description, "Role description should be correct.")
         XCTAssertEqual(updatedRole.hasSuperPrivileges, roleToUpdate.hasSuperPrivileges, "Role super privileges should be correct.")
@@ -43,12 +39,9 @@ final class RolesUpdateActionTests: XCTestCase {
     func testRoleShouldNotBeUpdatedIfUserIsNotSuperUser() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "georgelee",
-                            email: "georgelee@testemail.com",
-                            name: "Geaorge Lee")
-        let role = try Role.create(on: SharedApplication.application(), name: "Senior seller", code: "senior-seller", description: "Senior seller")
-        let roleToUpdate = RoleDto(id: role.id, name: "Junior serller", code: "junior-seller", description: "Junior seller")
+        _ = try User.create(userName: "georgelee")
+        let role = try Role.create(code: "senior-seller")
+        let roleToUpdate = RoleDto(id: role.id, code: "junior-seller", title: "Junior serller", description: "Junior seller")
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
@@ -59,19 +52,16 @@ final class RolesUpdateActionTests: XCTestCase {
         )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.forbidden, "Response http status code should be forbidden (403).")
+        XCTAssertEqual(response.status, HTTPResponseStatus.forbidden, "Response http status code should be forbidden (403).")
     }
 
     func testRoleShouldNotBeUpdatedIfRoleWithSameCodeExists() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "samlee",
-                                   email: "samlee@testemail.com",
-                                   name: "Sam Lee")
-        try user.attach(roleName: "Administrator", on: SharedApplication.application())
-        let role = try Role.create(on: SharedApplication.application(), name: "Marketer", code: "marketer", description: "marketer")
-        let roleToUpdate = RoleDto(id: role.id, name: "Administrator", code: "administrator", description: "Administrator")
+        let user = try User.create(userName: "samlee")
+        try user.attach(role: "administrator")
+        let role = try Role.create(code: "marketer")
+        let roleToUpdate = RoleDto(id: role.id, code: "administrator", title: "Administrator", description: "Administrator")
 
         // Act.
         let errorResponse = try SharedApplication.application().getErrorResponse(
@@ -89,13 +79,10 @@ final class RolesUpdateActionTests: XCTestCase {
     func testRoleShouldNotBeUpdatedIfCodeIsTooLong() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "wandalee",
-                                   email: "wandalee@testemail.com",
-                                   name: "Wanda Lee")
-        try user.attach(roleName: "Administrator", on: SharedApplication.application())
-        let role = try Role.create(on: SharedApplication.application(), name: "Manager1", code: "manager1", description: "Manager")
-        let roleToUpdate = RoleDto(id: role.id, name: "Senior manager", code: "123456789012345678901", description: "Senior manager")
+        let user = try User.create(userName: "wandalee")
+        try user.attach(role: "administrator")
+        let role = try Role.create(code: "manager1")
+        let roleToUpdate = RoleDto(id: role.id, code: "123456789012345678901", title: "Senior manager", description: "Senior manager")
 
         // Act.
         let errorResponse = try SharedApplication.application().getErrorResponse(
@@ -108,23 +95,22 @@ final class RolesUpdateActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
-        XCTAssertEqual(errorResponse.error.reason, "'code' is greater than required maximum of 20 characters", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("code"), "is greater than maximum of 20 character(s)")
     }
 
     func testRoleShouldNotBeUpdatedIfNameIsTooLong() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "monikalee",
-                                   email: "monikalee@testemail.com",
-                                   name: "Monika Lee")
-        try user.attach(roleName: "Administrator", on: SharedApplication.application())
-        let role = try Role.create(on: SharedApplication.application(), name: "Manager2", code: "manager2", description: "Manager")
+        let user = try User.create(userName: "monikalee")
+        try user.attach(role: "administrator")
+        let role = try Role.create(code: "manager2")
         let roleToUpdate = RoleDto(id: role.id,
-                                   name: "123456789012345678901234567890123456789012345678901",
                                    code: "senior-manager",
-                                   description: "Senior manager"
-        )
+                                   title: "123456789012345678901234567890123456789012345678901",
+                                   description: "Senior manager",
+                                   hasSuperPrivileges: false,
+                                   isDefault: true)
 
         // Act.
         let errorResponse = try SharedApplication.application().getErrorResponse(
@@ -137,26 +123,25 @@ final class RolesUpdateActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
-        XCTAssertEqual(errorResponse.error.reason, "'name' is greater than required maximum of 50 characters", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("title"), "is greater than maximum of 50 character(s)")
     }
 
     func testRoleShouldNotBeUpdatedIfDescriptionIsTooLong() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "annalee",
-                                   email: "annalee@testemail.com",
-                                   name: "Anna Lee")
-        try user.attach(roleName: "Administrator", on: SharedApplication.application())
-        let role = try Role.create(on: SharedApplication.application(), name: "Manager3", code: "manager3", description: "Manager")
+        let user = try User.create(userName: "annalee")
+        try user.attach(role: "administrator")
+        let role = try Role.create(code: "manager3")
         let roleToUpdate = RoleDto(id: role.id,
-                                   name: "Senior manager",
                                    code: "senior-manager",
+                                   title: "Senior manager",
                                    description: "12345678901234567890123456789012345678901234567890" +
                                                 "12345678901234567890123456789012345678901234567890" +
                                                 "12345678901234567890123456789012345678901234567890" +
-                                                "123456789012345678901234567890123456789012345678901"
-        )
+                                                "123456789012345678901234567890123456789012345678901",
+                                   hasSuperPrivileges: false,
+                                   isDefault: true)
 
         // Act.
         let errorResponse = try SharedApplication.application().getErrorResponse(
@@ -169,15 +154,8 @@ final class RolesUpdateActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "validationError", "Error code should be equal 'validationError'.")
-        XCTAssertEqual(errorResponse.error.reason, "'description' is greater than required maximum of 200 characters and 'description' is not nil", "Error reason should be correct.")
+        XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
+        XCTAssertEqual(errorResponse.error.failures?.getFailure("description"), "is greater than maximum of 200 character(s) and is not null")
     }
-
-    static let allTests = [
-        ("testCorrectRoleShouldBeUpdatedBySuperUser", testCorrectRoleShouldBeUpdatedBySuperUser),
-        ("testRoleShouldNotBeUpdatedIfUserIsNotSuperUser", testRoleShouldNotBeUpdatedIfUserIsNotSuperUser),
-        ("testRoleShouldNotBeUpdatedIfRoleWithSameCodeExists", testRoleShouldNotBeUpdatedIfRoleWithSameCodeExists),
-        ("testRoleShouldNotBeUpdatedIfCodeIsTooLong", testRoleShouldNotBeUpdatedIfCodeIsTooLong),
-        ("testRoleShouldNotBeUpdatedIfNameIsTooLong", testRoleShouldNotBeUpdatedIfNameIsTooLong),
-        ("testRoleShouldNotBeUpdatedIfDescriptionIsTooLong", testRoleShouldNotBeUpdatedIfDescriptionIsTooLong)
-    ]
 }
+

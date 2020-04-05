@@ -1,11 +1,6 @@
 import Vapor
 
-class ErrorResponse {
+struct ErrorResponse {
     var error: ErrorBody;
     var status: HTTPResponseStatus;
-
-    init(error: ErrorBody, status: HTTPResponseStatus) {
-        self.error = error
-        self.status = status
-    }
 }

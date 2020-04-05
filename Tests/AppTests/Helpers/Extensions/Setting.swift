@@ -1,11 +1,10 @@
 @testable import App
 import Vapor
-import FluentPostgreSQL
+import Fluent
 
 extension Setting {
-    static func get(on application: Application, key: SettingKey) throws -> Setting {
-        let connection = try application.newConnection(to: .psql).wait()
-        guard let setting = try Setting.query(on: connection).filter(\.key == key.rawValue).first().wait() else {
+    static func get(key: SettingKey) throws -> Setting {
+        guard let setting = try Setting.query(on: SharedApplication.application().db).filter(\.$key == key.rawValue).first().wait() else {
             throw SharedApplicationError.unwrap
         }
 

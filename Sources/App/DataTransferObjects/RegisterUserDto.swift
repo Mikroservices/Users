@@ -1,7 +1,6 @@
 import Vapor
 
-final class RegisterUserDto: Reflectable {
-
+struct RegisterUserDto {
     var userName: String
     var email: String
     var password: String
@@ -12,50 +11,21 @@ final class RegisterUserDto: Reflectable {
     var birthDate: Date?
     var gravatarHash: String?
     var securityToken: String?
-
-    init(userName: String,
-         email: String,
-         password: String,
-         gravatarHash: String? = nil,
-         name: String? = nil,
-         bio: String? = nil,
-         location: String? = nil,
-         website: String? = nil,
-         birthDate: Date? = nil,
-         securityToken: String? = nil
-    ) {
-        self.userName = userName
-        self.email = email
-        self.password = password
-        self.gravatarHash = gravatarHash
-        self.name = name
-        self.bio = bio
-        self.location = location
-        self.website = website
-        self.birthDate = birthDate
-        self.securityToken = securityToken
-    }
 }
 
 extension RegisterUserDto: Content { }
 
 extension RegisterUserDto: Validatable {
+    static func validations(_ validations: inout Validations) {
+        validations.add("userName", as: String.self, is: .count(1...50) && .alphanumeric)
+        validations.add("email", as: String.self, is: .email)
+        validations.add("password", as: String.self, is: .count(8...32) && .password)
 
-    /// See `Validatable`.
-    static func validations() throws -> Validations<RegisterUserDto> {
-        var validations = Validations(RegisterUserDto.self)
+        validations.add("name", as: String?.self, is: .nil || .count(...50), required: false)
+        validations.add("location", as: String?.self, is: .nil || .count(...50), required: false)
+        validations.add("website", as: String?.self, is: .nil || .count(...50), required: false)
+        validations.add("bio", as: String?.self, is: .nil || .count(...200), required: false)
 
-        try validations.add(\.userName, .count(1...50) && .alphanumeric)
-        try validations.add(\.email, .email)
-        try validations.add(\.password, .count(8...32) && .password)
-
-        try validations.add(\.name, .count(...50) || .nil)
-        try validations.add(\.location, .count(...50) || .nil)
-        try validations.add(\.website, .count(...50) || .nil)
-        try validations.add(\.bio, .count(...200) || .nil)
-
-        try validations.add(\.securityToken, !.nil)
-
-        return validations
+        validations.add("securityToken", as: String?.self, is: !.nil)
     }
 }

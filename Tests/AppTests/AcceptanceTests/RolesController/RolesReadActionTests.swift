@@ -1,23 +1,15 @@
 @testable import App
 import XCTest
-import Vapor
-import XCTest
-import FluentPostgreSQL
+import XCTVapor
 
 final class RolesReadActionTests: XCTestCase {
 
     func testRoleShouldBeReturnedForSuperUser() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "robinyellow",
-                                   email: "robinyellow@testemail.com",
-                                   name: "Robin Yellow")
-        try user.attach(roleName: "Administrator", on: SharedApplication.application())
-        let role = try Role.create(on: SharedApplication.application(),
-                                   name: "Senior architect",
-                                   code: "senior-architect",
-                                   description: "Senior architect")
+        let user = try User.create(userName: "robinyellow")
+        try user.attach(role: "administrator")
+        let role = try Role.create(code: "senior-architect")
 
         // Act.
         let roleDto = try SharedApplication.application().getResponse(
@@ -29,7 +21,7 @@ final class RolesReadActionTests: XCTestCase {
 
         // Assert.
         XCTAssertEqual(roleDto.id, role.id, "Role id should be correct.")
-        XCTAssertEqual(roleDto.name, role.name, "Role name should be correct.")
+        XCTAssertEqual(roleDto.title, role.title, "Role name should be correct.")
         XCTAssertEqual(roleDto.code, role.code, "Role code should be correct.")
         XCTAssertEqual(roleDto.description, role.description, "Role description should be correct.")
         XCTAssertEqual(roleDto.hasSuperPrivileges, role.hasSuperPrivileges, "Role super privileges should be correct.")
@@ -39,14 +31,8 @@ final class RolesReadActionTests: XCTestCase {
     func testRoleShouldNotBeReturnedIfUserIsNotSuperUser() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "hulkyellow",
-                            email: "hulkyellow@testemail.com",
-                            name: "Hulk Yellow")
-        let role = try Role.create(on: SharedApplication.application(),
-                                   name: "Senior developer",
-                                   code: "senior-developer",
-                                   description: "Senior developer")
+        _ = try User.create(userName: "hulkyellow")
+        let role = try Role.create(code: "senior-developer")
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
@@ -56,17 +42,14 @@ final class RolesReadActionTests: XCTestCase {
         )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.forbidden, "Response http status code should be bad request (400).")
+        XCTAssertEqual(response.status, HTTPResponseStatus.forbidden, "Response http status code should be bad request (400).")
     }
 
     func testCorrectStatusCodeShouldBeReturnedIdRoleNotExists() throws {
 
         // Arrange.
-        let user = try User.create(on: SharedApplication.application(),
-                                   userName: "tedyellow",
-                                   email: "tedyellow@testemail.com",
-                                   name: "Ted Yellow")
-        try user.attach(roleName: "Administrator", on: SharedApplication.application())
+        let user = try User.create(userName: "tedyellow")
+        try user.attach(role: "administrator")
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
@@ -76,12 +59,6 @@ final class RolesReadActionTests: XCTestCase {
         )
 
         // Assert.
-        XCTAssertEqual(response.http.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")
+        XCTAssertEqual(response.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")
     }
-
-    static let allTests = [
-        ("testRoleShouldBeReturnedForSuperUser", testRoleShouldBeReturnedForSuperUser),
-        ("testRoleShouldNotBeReturnedIfUserIsNotSuperUser", testRoleShouldNotBeReturnedIfUserIsNotSuperUser),
-        ("testCorrectStatusCodeShouldBeReturnedIdRoleNotExists", testCorrectStatusCodeShouldBeReturnedIdRoleNotExists)
-    ]
 }

@@ -1,36 +1,31 @@
 import Vapor
 import Recaptcha
 
-protocol CaptchaServiceType: Service {
-    func validate(on request: Request, captchaFormResponse: String) throws -> Future<Bool>
+extension Application.Services {
+    struct CaptchaServiceKey: StorageKey {
+        typealias Value = CaptchaServiceType
+    }
+
+    var captchaService: CaptchaServiceType {
+        get {
+            self.application.storage[CaptchaServiceKey.self] ?? CaptchaService()
+        }
+        nonmutating set {
+            self.application.storage[CaptchaServiceKey.self] = newValue
+        }
+    }
+}
+
+protocol CaptchaServiceType {
+    func validate(on request: Request, captchaFormResponse: String) throws -> EventLoopFuture<Bool>
 }
 
 final class CaptchaService: CaptchaServiceType {
 
-    public func validate(on request: Request, captchaFormResponse: String) throws -> Future<Bool> {
-
-        let settingsService = try request.make(SettingsServiceType.self)
-
-        return try settingsService.get(on: request).flatMap(to: Bool.self) { configuration in
-            guard let isRecaptchaEnabled = configuration.getBool(.isRecaptchaEnabled) else {
-                throw Abort(.internalServerError, reason: "Recaptcha enabled/disabled variable is not set in database.")
-            }
-
-            guard let recaptchaKey = configuration.getString(.recaptchaKey) else {
-                throw Abort(.internalServerError, reason: "Recaptcha key variable is not set in database.")
-            }
-
-            if isRecaptchaEnabled {
-                let captchaConfig = GoogleCaptchaConfig(secretKey: recaptchaKey)
-                let googleCaptcha = try GoogleCaptcha(config: captchaConfig, client: request.make(Client.self))
-
-                return try googleCaptcha.validate(captchaFormResponse: captchaFormResponse)
-            }
-
-            let logger = try request.make(Logger.self)
-            logger.info("Recaptcha is disabled all request are allowed.")
-
-            return Future.map(on: request) { return true }
+    public func validate(on request: Request, captchaFormResponse: String) throws -> EventLoopFuture<Bool> {
+        let validationFuture = request.validate(captchaFormResponse: captchaFormResponse)
+        return validationFuture.map { result -> Bool in
+            return result
         }
     }
 }

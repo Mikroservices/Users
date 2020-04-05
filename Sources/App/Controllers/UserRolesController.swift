@@ -1,50 +1,46 @@
 import Vapor
-import FluentPostgreSQL
-import ExtendedError
 
 /// Connect/disconnect user with role.
 final class UserRolesController: RouteCollection {
 
-    public static let uri = "/user-roles"
-
-    func boot(router: Router) throws {
-        router.post(UserRoleDto.self, at: "\(UserRolesController.uri)/connect", use: connect)
-        router.post(UserRoleDto.self, at: "\(UserRolesController.uri)/disconnect", use: disconnect)
+    public static let uri: PathComponent = .constant("user-roles")
+    
+    func boot(routes: RoutesBuilder) throws {
+        let userRolesGroup = routes
+            .grouped(UserRolesController.uri)
+            .grouped(UserAuthenticator().middleware())
+            .grouped(UserPayload.guardMiddleware())
+            .grouped(UserPayload.guardIsSuperUserMiddleware())
+        
+        userRolesGroup.post("connect", use: connect)
+        userRolesGroup.post("disconnect", use: disconnect)
     }
+    
+    /// Connect role to the user.
+    func connect(request: Request) throws -> EventLoopFuture<HTTPResponseStatus> {
+        let userRoleDto = try request.content.decode(UserRoleDto.self)
 
-    func connect(request: Request, userRoleDto: UserRoleDto) throws -> Future<HTTPResponseStatus> {
+        let userFuture = User.find(userRoleDto.userId, on: request.db).unwrap(or: EntityNotFoundError.userNotFound)
+        let roleFuture = Role.find(userRoleDto.roleId, on: request.db).unwrap(or: EntityNotFoundError.roleNotFound)
 
-        let authorizationService = try request.make(AuthorizationServiceType.self)
-        let verifySuperUserFuture = try authorizationService.verifySuperUser(request: request)
-
-
-        let attachFuture = verifySuperUserFuture.flatMap(to: Void.self) {
-            let userFuture = User.find(userRoleDto.userId, on: request).unwrap(or: EntityNotFoundError.userNotFound)
-            let roleFuture = Role.find(userRoleDto.roleId, on: request).unwrap(or: EntityNotFoundError.roleNotFound)
-
-            return map(to: Void.self, userFuture, roleFuture) { user, role in
-                _ = user.roles.attach(role, on: request)
-            }
+        let attachFuture = userFuture.and(roleFuture).map { (user, role) in
+            user.$roles.attach(role, on: request.db)
         }
 
         return attachFuture.transform(to: HTTPStatus.ok)
     }
 
-    func disconnect(request: Request, userRoleDto: UserRoleDto) throws -> Future<HTTPResponseStatus> {
+    /// Disconnects role and user.
+    func disconnect(request: Request) throws -> EventLoopFuture<HTTPResponseStatus> {
+        let userRoleDto = try request.content.decode(UserRoleDto.self)
 
-        let authorizationService = try request.make(AuthorizationServiceType.self)
-        let verifySuperUserFuture = try authorizationService.verifySuperUser(request: request)
+        let userFuture = User.find(userRoleDto.userId, on: request.db).unwrap(or: EntityNotFoundError.userNotFound)
+        let roleFuture = Role.find(userRoleDto.roleId, on: request.db).unwrap(or: EntityNotFoundError.roleNotFound)
 
-
-        let detachFuture = verifySuperUserFuture.flatMap(to: Void.self) {
-            let userFuture = User.find(userRoleDto.userId, on: request).unwrap(or: EntityNotFoundError.userNotFound)
-            let roleFuture = Role.find(userRoleDto.roleId, on: request).unwrap(or: EntityNotFoundError.roleNotFound)
-
-            return map(to: Void.self, userFuture, roleFuture) { user, role in
-                _ = user.roles.detach(role, on: request)
-            }
+        let attachFuture = userFuture.and(roleFuture).map { (user, role) in
+            user.$roles.detach(role, on: request.db)
         }
 
-        return detachFuture.transform(to: HTTPStatus.ok)
+        return attachFuture.transform(to: HTTPStatus.ok)
     }
 }

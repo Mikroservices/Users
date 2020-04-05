@@ -1,116 +1,105 @@
 import Vapor
-import FluentPostgreSQL
 
 /// Controls basic operations for User object.
 final class UsersController: RouteCollection {
 
-    public static let uri = "/users"
+    public static let uri: PathComponent = .constant("users")
+    
+    func boot(routes: RoutesBuilder) throws {
+        let usersGroup = routes
+            .grouped(UsersController.uri)
+            .grouped(UserAuthenticator().middleware())
+        
+        usersGroup.get(":name", use: read)
 
-    func boot(router: Router) throws {
-        router.get(UsersController.uri, String.parameter, use: read)
-        router.put(UserDto.self, at: UsersController.uri, String.parameter, use: update)
-        router.delete(UsersController.uri, String.parameter, use: delete)
+        usersGroup
+            .grouped(UserPayload.guardMiddleware())
+            .put(":name", use: update)
+        
+        usersGroup
+            .grouped(UserPayload.guardMiddleware())
+            .delete(":name", use: delete)
     }
 
     /// User profile.
-    func read(request: Request) throws -> Future<UserDto> {
+    func read(request: Request) throws -> EventLoopFuture<UserDto> {
 
-        let authorizationService = try request.make(AuthorizationServiceType.self)
-        let userNameNormalized = try request.parameters.next(String.self).replacingOccurrences(of: "@", with: "").uppercased()
+        guard let userName = request.parameters.get("name") else {
+            throw Abort(.badRequest)
+        }
+        
+        let usersService = request.application.services.usersService
+        let userNameNormalized = userName.replacingOccurrences(of: "@", with: "").uppercased()
+        let userFuture = usersService.get(on: request, userName: userNameNormalized)
 
-        let userFuture = User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first()
-        let userNameFromTokenFuture = try authorizationService.getUserNameFromBearerToken(request: request)
-
-        return map(to: UserDto.self, userFuture, userNameFromTokenFuture) { userFromDb, userNameFromToken in
-            try self.getUserProfile(on: request,
-                                    userFromDb: userFromDb,
-                                    userNameFromRequest: userNameNormalized,
-                                    userNameFromToken: userNameFromToken)
+        return userFuture.flatMap { userFromDb in
+            guard let user = userFromDb else {
+                return request.fail(EntityNotFoundError.userNotFound)
+            }
+            
+            let userProfile = self.cleanUserProfile(on: request,
+                                                    user: user,
+                                                    userNameFromRequest: userNameNormalized)
+            
+            return request.success(userProfile)
         }
     }
 
     /// Update user data.
-    func update(request: Request, userDto: UserDto) throws -> Future<UserDto> {
+    func update(request: Request) throws -> EventLoopFuture<UserDto> {
 
-        try userDto.validate()
+        guard let userName = request.parameters.get("name") else {
+            throw Abort(.badRequest)
+        }
 
-        let authorizationService = try request.make(AuthorizationServiceType.self)
-        let userNameFuture = try authorizationService.getUserNameFromBearerTokenOrAbort(on: request)
+        let userNameNormalized = userName.replacingOccurrences(of: "@", with: "").uppercased()
+        let userNameFromToken = request.auth.get(UserPayload.self)?.userName
 
-        return userNameFuture.flatMap(to: User.self) { userNameFromToken in
-            let userNameNormalized = try request.parameters.next(String.self).uppercased().replacingOccurrences(of: "@", with: "")
-
-            let isProfileOwner = userNameFromToken.uppercased() == userNameNormalized
-            guard isProfileOwner else {
-                throw EntityForbiddenError.userForbidden
-            }
-
-            return try self.updateUser(on: request, userDto: userDto, userNameNormalized: userNameNormalized)
-        }.map { user in
-            let userDto = UserDto(from: user)
-            return userDto
+        let isProfileOwner = userNameFromToken?.uppercased() == userNameNormalized
+        guard isProfileOwner else {
+            throw EntityForbiddenError.userForbidden
+        }
+        
+        let userDto = try request.content.decode(UserDto.self)
+        try UserDto.validate(request)
+        
+        let usersService = request.application.services.usersService
+        return usersService.updateUser(on: request, userDto: userDto, userNameNormalized: userNameNormalized).map { user in
+            UserDto(from: user)
         }
     }
 
     /// Delete user.
-    func delete(request: Request) throws -> Future<HTTPStatus> {
+    func delete(request: Request) throws -> EventLoopFuture<HTTPStatus> {
 
-        let authorizationService = try request.make(AuthorizationServiceType.self)
-        let userNameFuture = try authorizationService.getUserNameFromBearerTokenOrAbort(on: request)
+        guard let userName = request.parameters.get("name") else {
+            throw Abort(.badRequest)
+        }
+        
+        let userNameNormalized = userName.replacingOccurrences(of: "@", with: "").uppercased()
+        let userNameFromToken = request.auth.get(UserPayload.self)?.userName
 
-        return userNameFuture.flatMap(to: Void.self) { userNameFromToken in
-            let userNameNormalized = try request.parameters.next(String.self).uppercased().replacingOccurrences(of: "@", with: "")
-
-            return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().flatMap(to: Void.self) { userFromDb in
-
-                guard let user = userFromDb else {
-                    throw EntityNotFoundError.userNotFound
-                }
-
-                let isProfileOwner = userNameFromToken.uppercased() == userNameNormalized
-                guard isProfileOwner else {
-                    throw EntityForbiddenError.userForbidden
-                }
-
-                return user.delete(on: request)
-            }
-        }.transform(to: HTTPStatus.ok)
+        let isProfileOwner = userNameFromToken?.uppercased() == userNameNormalized
+        guard isProfileOwner else {
+            throw EntityForbiddenError.userForbidden
+        }
+        
+        let usersService = request.application.services.usersService
+        return usersService.deleteUser(on: request, userNameNormalized: userNameNormalized)
+            .transform(to: HTTPStatus.ok)
     }
 
-    private func getUserProfile(on request: Request,
-                                userFromDb: User?,
-                                userNameFromRequest: String,
-                                userNameFromToken: String?) throws -> UserDto {
-        guard let user = userFromDb else {
-            throw EntityNotFoundError.userNotFound
-        }
+    private func cleanUserProfile(on request: Request, user: User, userNameFromRequest: String) -> UserDto {
+        var userDto = UserDto(from: user)
 
-        let userDto = UserDto(from: user)
-
-        
+        let userNameFromToken = request.auth.get(UserPayload.self)?.userName
         let isProfileOwner = userNameFromToken?.uppercased() == userNameFromRequest
+
         if !isProfileOwner {
             userDto.email = nil
             userDto.birthDate = nil
         }
 
         return userDto
-    }
-
-    private func updateUser(on request: Request, userDto: UserDto, userNameNormalized: String) throws -> Future<User> {
-        return User.query(on: request).filter(\.userNameNormalized == userNameNormalized).first().flatMap(to: User.self) { userFromDb in
-
-            guard let user = userFromDb else {
-                throw EntityNotFoundError.userNotFound
-            }
-
-            user.name = userDto.name
-            user.bio = userDto.bio
-            user.birthDate = userDto.birthDate
-            user.location = userDto.location
-            user.website = userDto.website
-
-            return user.update(on: request)
-        }
     }
 }

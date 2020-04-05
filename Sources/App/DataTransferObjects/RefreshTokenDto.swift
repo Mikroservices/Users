@@ -1,12 +1,7 @@
 import Vapor
 
-final class RefreshTokenDto {
-
+struct RefreshTokenDto {
     var refreshToken: String
-
-    init(refreshToken: String) {
-        self.refreshToken = refreshToken
-    }
 }
 
 extension RefreshTokenDto: Content { }

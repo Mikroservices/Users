@@ -1,18 +1,14 @@
 @testable import App
 import XCTest
-import Vapor
-import XCTest
-import FluentPostgreSQL
+import XCTVapor
+
 
 final class EmailActionTests: XCTestCase {
 
     func testEmailValidationShouldReturnTrueIfEmailExists() throws {
 
         // Arrange.
-        _ = try User.create(on: SharedApplication.application(),
-                            userName: "tomsmith",
-                            email: "tomsmith@testemail.com",
-                            name: "Tom Smith")
+        _ = try User.create(userName: "tomsmith")
 
         // Act.
         let booleanResponseDto = try SharedApplication.application()
@@ -34,9 +30,4 @@ final class EmailActionTests: XCTestCase {
         // Assert.
         XCTAssert(booleanResponseDto.result == false, "Server should return false for email: notexists@testemail.com.")
     }
-
-    static let allTests = [
-        ("testEmailValidationShouldReturnTrueIfEmailExists", testEmailValidationShouldReturnTrueIfEmailExists),
-        ("testEmailValidationShouldReturnFalseIfEmailNotExists", testEmailValidationShouldReturnFalseIfEmailNotExists)
-    ]
 }
