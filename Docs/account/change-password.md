@@ -64,6 +64,12 @@ BODY:
 {
     "error": true,
     "code": "validationError",
-    "reason": "'newPassword' is less than required minimum of 8 characters and 'newPassword' is not a valid password"
+    "reason": "Validation errors occurs.",
+    "failures": [
+        {
+            "field": "[FIELD]",
+            "failure": "[VALIDATION MESSAGE]"
+        }
+    ]
 }
 ```

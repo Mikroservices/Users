@@ -7,6 +7,8 @@ Endpoint for revoking all refresh tokens which belows to specific user.
 ```
 METHOD: POST
 URL: /account/revoke/@{username}
+HEADERS:
+    "Authorization": "Bearer eyJhbGciOiJSUzUxMi.....Y1f05c9yvA;boundary="boundary"
 ```
 
 **Response**
