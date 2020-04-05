@@ -8,7 +8,7 @@
 
 
 Microservice which provides common features for managing users (only RESTful API).
-Application is written in [Swift](https://swift.org) and [Vapor 3](https://vapor.codes) and operates on PostgreSQL database.
+Application is written in [Swift](https://swift.org) and [Vapor 4](https://vapor.codes) and operates on PostgreSQL or SQLite databases.
 All functionalities are constantly verified by unit tests.
 
 ## Main features
@@ -69,7 +69,7 @@ Connect user to role:
 
 ## Getting started
 
-First you need to have [Swift](https://swift.org) installed on your computer and you have to create new database in PostgreSQL server.
+First you need to have [Swift](https://swift.org) installed on your computer.
 Next you should run following commands:
 
 ```bash
@@ -79,19 +79,6 @@ $ swift package update
 $ swift build
 ```
 
-If application successfully builds you need to set up connection string to the database. 
-Service supports only PostgreSQL database. 
-
-```
-Variable name:              MIKROSERVICE_USERS_CONNECTION_STRING
-Value (connection string):  postgresql://user:password@host:5432/database?sslmode=require
-```
-
-You can set up this variable as:
-
-1. environment variable in your system
-2. environment variable in XCode
-
 Now you can run the application:
 
 ```bash
@@ -100,6 +87,30 @@ $ .build/debug/Run --port 8001
 
 If application starts open following link in your browser: [http://localhost:8001](http://localhost:8001).
 You should see blank page with text: *Service is up and running!*. Now you can use API which is described above.
+
+## Database
+
+If you want to use persistent database you have to add system environment `MIKROSERVICE_USERS_CONNECTION_STRING` with connection string to the database.
+
+**Connection string for PostgreSQL:** 
+
+```
+Variable name:              MIKROSERVICE_USERS_CONNECTION_STRING
+Value (connection string):  postgresql://user:password@host:5432/database?sslmode=require
+```
+
+**Connection string for SQLite:** 
+
+```
+Variable name:              MIKROSERVICE_USERS_CONNECTION_STRING
+Value (connection string):  users.db
+```
+
+You can set up this variable as:
+
+1. environment variable in your system
+2. environment variable in XCode
+
 
 ## Configuration
 
