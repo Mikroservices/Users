@@ -122,6 +122,27 @@ We can find there following settings:
 - `recaptchaKey` - secret key for Google Recaptcha.
 - `jwtPrivateKey` - RSA512 key for generating JWT tokens (signing in). Private key should be entered only in that service. Other services should use only public key.
 - `emailServiceAddress` - address to service responsible for sending emails (confirmation email, forgot your password features).
+- `eventsToStore` - list of events which should be stored in events table. Possible values are (separated by comma):
+  - `accountLogin` - logins to the system,
+  - `accountRefresh` - refreshing access tokens,
+  - `accountChangePassword` - changing password,
+  - `accountRevoke` - revoking access tokens,
+  - `forgotToken` - forgot password,
+  - `forgotConfirm` - confirming changing password,
+  - `registerNewUser` - registering new user,
+  - `registerConfirm` - confirm new user registrations,
+  - `registerUserName` - user name verifying,
+  - `registerEmail` - email veryifying,
+  - `rolesCreate` - role creating,
+  - `rolesList` - list of roles,
+  - `rolesRead` - role details,
+  - `rolesUpdate` - role updating,
+  - `rolesDelete` - role deleting,
+  - `userRolesConnect` - connecting user to role,
+  - `userRolesDisconnect` - disconnecting role from user,
+  - `usersRead` - user details,
+  - `usersUpdate` - user updating,
+  - `usersDelete` - user deleting.
 
 In production environment you *MUST* change especially `jwtPrivateKey`.
 
