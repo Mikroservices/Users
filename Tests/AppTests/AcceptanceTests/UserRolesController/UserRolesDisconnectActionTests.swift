@@ -110,11 +110,4 @@ final class UserRolesDisconnectActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(response.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")
     }
-
-    static let allTests = [
-        ("testUserShouldBeDisconnectedWithRoleForSuperUser", testUserShouldBeDisconnectedWithRoleForSuperUser),
-        ("testUserShouldNotBeDisconnectedWithRoleIfUserIsNotSuperUser", testUserShouldNotBeDisconnectedWithRoleIfUserIsNotSuperUser),
-        ("testCorrectStatsCodeShouldBeReturnedIfUserNotExists", testCorrectStatsCodeShouldBeReturnedIfUserNotExists),
-        ("testCorrectStatusCodeShouldBeReturnedIfRoleNotExists", testCorrectStatusCodeShouldBeReturnedIfRoleNotExists)
-    ]
 }

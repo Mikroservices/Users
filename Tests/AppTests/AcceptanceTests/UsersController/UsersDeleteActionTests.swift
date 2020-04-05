@@ -71,12 +71,5 @@ final class UsersDeleteActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(response.status, HTTPResponseStatus.forbidden, "Response http status code should forbidden (403).")
     }
-
-    static let allTests = [
-        ("testAccountShouldBeDeletedForAuthorizedUser", testAccountShouldBeDeletedForAuthorizedUser),
-        ("testAccountShouldNotBeDeletedIfUserIsNotAuthorized", testAccountShouldNotBeDeletedIfUserIsNotAuthorized),
-        ("testAccountShouldNotDeletedWhenUserTriesToDeleteNotHisAccount", testAccountShouldNotDeletedWhenUserTriesToDeleteNotHisAccount),
-        ("testForbiddenShouldBeReturnedIfAccountNotExists", testForbiddenShouldBeReturnedIfAccountNotExists)
-    ]
 }
 

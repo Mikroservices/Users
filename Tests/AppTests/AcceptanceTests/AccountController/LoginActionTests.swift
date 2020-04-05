@@ -131,13 +131,5 @@ final class LoginActionTests: XCTestCase {
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "userAccountIsBlocked", "Error code should be equal 'userAccountIsBlocked'.")
     }
-
-    static let allTests = [
-        ("testUserWithCorrectCredentialsShouldBeSignedInByUsername", testUserWithCorrectCredentialsShouldBeSignedInByUsername),
-        ("testUserWithCorrectCredentialsShouldBeSignedInByEmail", testUserWithCorrectCredentialsShouldBeSignedInByEmail),
-        ("testUserWithIncorrectPasswordShouldNotBeSignedIn", testUserWithIncorrectPasswordShouldNotBeSignedIn),
-        ("testUserWithNotConfirmedAccountShouldNotBeSignedIn", testUserWithNotConfirmedAccountShouldNotBeSignedIn),
-        ("testUserWithBlockedAccountShouldNotBeSignedIn", testUserWithBlockedAccountShouldNotBeSignedIn)
-    ]
 }
 

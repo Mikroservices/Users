@@ -57,10 +57,4 @@ final class UsersReadActionTests: XCTestCase {
         XCTAssert(userDto.email == nil, "Property 'email' must not be equal.")
         XCTAssert(userDto.birthDate == nil, "Property 'birthDate' must not be returned.")
     }
-
-    static let allTests = [
-        ("testUserProfileShouldBeReturnedForExistingUser", testUserProfileShouldBeReturnedForExistingUser),
-        ("testUserProfileShouldNotBeReturnedForNotExistingUser", testUserProfileShouldNotBeReturnedForNotExistingUser),
-        ("testPublicProfileShouldNotContainsSensitiveInformation", testPublicProfileShouldNotContainsSensitiveInformation)
-    ]
 }

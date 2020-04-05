@@ -29,9 +29,4 @@ final class UserNameActionTests: XCTestCase {
         // Assert.
         XCTAssert(booleanResponseDto.result == false, "Server should return false for username: notexists.")
     }
-
-    static let allTests = [
-        ("testUserNameValidationShouldReturnTrueIfUserNameExists", testUserNameValidationShouldReturnTrueIfUserNameExists),
-        ("testUserNameValidationShouldReturnFalseIfUserNameNotExists", testUserNameValidationShouldReturnFalseIfUserNameNotExists)
-    ]
 }

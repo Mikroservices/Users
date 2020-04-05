@@ -113,12 +113,4 @@ final class RefreshActionTests: XCTestCase {
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "refreshTokenRevoked", "Error code should be equal 'refreshTokenRevoked'.")
     }
-
-    static let allTests = [
-        ("testNewTokensShouldBeReturnedWhenOldRefreshTokenIsValid", testNewTokensShouldBeReturnedWhenOldRefreshTokenIsValid),
-        ("testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsNotValid", testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsNotValid),
-        ("testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsValidButUserIsBlocked", testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsValidButUserIsBlocked),
-        ("testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsExpired", testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsExpired),
-        ("testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsRevoked", testNewTokensShouldNotBeReturnedWhenOldRefreshTokenIsRevoked)
-    ]
 }

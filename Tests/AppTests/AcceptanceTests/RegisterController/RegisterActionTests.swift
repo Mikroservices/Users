@@ -431,25 +431,4 @@ final class RegisterActionTests: XCTestCase {
         XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
         XCTAssertEqual(errorResponse.error.failures?.getFailure("securityToken"), "is required")
     }
-
-    static let allTests = [
-        ("testUserAccountShouldBeCreatedForValidUserData", testUserAccountShouldBeCreatedForValidUserData),
-        ("testCreatedStatusCodeShouldBeReturnedAfterCreatingNewUser", testCreatedStatusCodeShouldBeReturnedAfterCreatingNewUser),
-        ("testHeaderLocationShouldBeReturnedAfterCreatingNewUser", testHeaderLocationShouldBeReturnedAfterCreatingNewUser),
-        ("testCorrectUserDataShouldBeReturnedAfterCreatingNewUser", testCorrectUserDataShouldBeReturnedAfterCreatingNewUser),
-        ("testUserShouldNotBeCreatedIfUserWithTheSameEmailExists", testUserShouldNotBeCreatedIfUserWithTheSameEmailExists),
-        ("testUserShouldNotBeCreatedIfUserWithTheSameUserNameExists", testUserShouldNotBeCreatedIfUserWithTheSameUserNameExists),
-        ("testUserShouldNotBeCreatedIfUserNameWasNotSpecified", testUserShouldNotBeCreatedIfUserNameWasNotSpecified),
-        ("testUserShouldNotBeCreatedIfUserNameWasTooLong", testUserShouldNotBeCreatedIfUserNameWasTooLong),
-        ("testUserShouldNotBeCreatedIfEmailWasNotSpecified", testUserShouldNotBeCreatedIfEmailWasNotSpecified),
-        ("testUserShouldNotBeCreatedIfEmailHasWrongFormat", testUserShouldNotBeCreatedIfEmailHasWrongFormat),
-        ("testUserShouldNotBeCreatedIfPasswordWasNotSpecified", testUserShouldNotBeCreatedIfPasswordWasNotSpecified),
-        ("testUserShouldNotBeCreatedIfPasswordIsTooShort", testUserShouldNotBeCreatedIfPasswordIsTooShort),
-        ("testUserShouldNotBeCreatedIfPasswordIsTooLong", testUserShouldNotBeCreatedIfPasswordIsTooLong),
-        ("testUserShouldNotBeCreatedIfNameIsTooLong", testUserShouldNotBeCreatedIfNameIsTooLong),
-        ("testUserShouldNotBeCreatedIfLocationIsTooLong", testUserShouldNotBeCreatedIfLocationIsTooLong),
-        ("testUserShouldNotBeCreatedIfWebsiteIsTooLong", testUserShouldNotBeCreatedIfWebsiteIsTooLong),
-        ("testUserShouldNotBeCreatedIfBioIsTooLong", testUserShouldNotBeCreatedIfBioIsTooLong),
-        ("testUserShouldNotBeCreatedIfSecurityTokenWasNotSpecified", testUserShouldNotBeCreatedIfSecurityTokenWasNotSpecified)
-    ]
 }

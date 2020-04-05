@@ -175,14 +175,5 @@ final class RolesCreateActionTests: XCTestCase {
         XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
         XCTAssertEqual(errorResponse.error.failures?.getFailure("description"), "is greater than maximum of 200 character(s) and is not null")
     }
-
-    static let allTests = [
-        ("testRoleShouldBeCreatedBySuperUser", testRoleShouldBeCreatedBySuperUser),
-        ("testRoleShouldNotBeCreatedIfUserIsNotSuperUser", testRoleShouldNotBeCreatedIfUserIsNotSuperUser),
-        ("testRoleShouldNotBeCreatedIfRoleWithSameCodeExists", testRoleShouldNotBeCreatedIfRoleWithSameCodeExists),
-        ("testRoleShouldNotBeCreatedIfCodeIsTooLong", testRoleShouldNotBeCreatedIfCodeIsTooLong),
-        ("testRoleShouldNotBeCreatedIfNameIsTooLong", testRoleShouldNotBeCreatedIfNameIsTooLong),
-        ("testRoleShouldNotBeCreatedIfDescriptionIsTooLong", testRoleShouldNotBeCreatedIfDescriptionIsTooLong)
-    ]
 }
 

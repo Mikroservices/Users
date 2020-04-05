@@ -34,9 +34,4 @@ final class ConfirmActionTests: XCTestCase {
         XCTAssertEqual(response.status, HTTPResponseStatus.badRequest, "Response http status code should be ok (200).")
         XCTAssertEqual(userAfterRequest.emailWasConfirmed, false, "Email is confirmed.")
     }
-
-    static let allTests = [
-        ("testAccountShouldBeConfirmedWithCorrectConfirmationGuid", testAccountShouldBeConfirmedWithCorrectConfirmationGuid),
-        ("testAccountShouldNotBeConfirmedWithIncorrectConfirmationGuid", testAccountShouldNotBeConfirmedWithIncorrectConfirmationGuid)
-    ]
 }

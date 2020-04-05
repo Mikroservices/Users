@@ -107,7 +107,7 @@ final class UsersUpdateActionTests: XCTestCase {
     func testAccountShouldNotBeUpdatedIfLocationIsTooLong() throws {
 
         // Arrange.
-        let user = try User.create(userName: "chrisperry")
+        _ = try User.create(userName: "chrisperry")
         let userDto = UserDto(userName: "chrisperry",
                               email: "gregsmith@testemail.com",
                               name: "Chris Perry",
@@ -131,7 +131,7 @@ final class UsersUpdateActionTests: XCTestCase {
     func testAccountShouldNotBeUpdatedIfWebsiteIsTooLong() throws {
 
         // Arrange.
-        let user = try User.create(userName: "lukeperry")
+        _ = try User.create(userName: "lukeperry")
         let userDto = UserDto(userName: "lukeperry",
                               email: "gregsmith@testemail.com",
                               name: "Chris Perry",
@@ -155,7 +155,7 @@ final class UsersUpdateActionTests: XCTestCase {
     func testAccountShouldNotBeUpdatedIfBioIsTooLong() throws {
 
         // Arrange.
-        let user = try User.create(userName: "francisperry")
+        _ = try User.create(userName: "francisperry")
         let userDto = UserDto(userName: "francisperry",
                               email: "gregsmith@testemail.com",
                               name: "Chris Perry",
@@ -178,14 +178,4 @@ final class UsersUpdateActionTests: XCTestCase {
         XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
         XCTAssertEqual(errorResponse.error.failures?.getFailure("bio"), "is greater than maximum of 200 character(s) and is not null")
     }
-
-    static let allTests = [
-        ("testAccountShouldBeUpdatedForAuthorizedUser", testAccountShouldBeUpdatedForAuthorizedUser),
-        ("testAccountShouldNotBeUpdatedIfUserIsNotAuthorized", testAccountShouldNotBeUpdatedIfUserIsNotAuthorized),
-        ("testAccountShouldNotUpdatedWhenUserTriesToUpdateNotHisAccount", testAccountShouldNotUpdatedWhenUserTriesToUpdateNotHisAccount),
-        ("testAccountShouldNotBeUpdatedIfNameIsTooLong", testAccountShouldNotBeUpdatedIfNameIsTooLong),
-        ("testAccountShouldNotBeUpdatedIfLocationIsTooLong", testAccountShouldNotBeUpdatedIfLocationIsTooLong),
-        ("testAccountShouldNotBeUpdatedIfWebsiteIsTooLong", testAccountShouldNotBeUpdatedIfWebsiteIsTooLong),
-        ("testAccountShouldNotBeUpdatedIfBioIsTooLong", testAccountShouldNotBeUpdatedIfBioIsTooLong)
-    ]
 }

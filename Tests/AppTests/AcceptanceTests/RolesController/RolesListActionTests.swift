@@ -37,9 +37,4 @@ final class RolesListActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(response.status, HTTPResponseStatus.forbidden, "Response http status code should be bad request (400).")
     }
-
-    static let allTests = [
-        ("testListOfRolesShouldBeReturnedForSuperUser", testListOfRolesShouldBeReturnedForSuperUser),
-        ("testListOfRolesShouldNotBeReturnedForNotSuperUser", testListOfRolesShouldNotBeReturnedForNotSuperUser)
-    ]
 }

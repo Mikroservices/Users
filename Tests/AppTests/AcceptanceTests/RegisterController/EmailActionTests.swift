@@ -30,9 +30,4 @@ final class EmailActionTests: XCTestCase {
         // Assert.
         XCTAssert(booleanResponseDto.result == false, "Server should return false for email: notexists@testemail.com.")
     }
-
-    static let allTests = [
-        ("testEmailValidationShouldReturnTrueIfEmailExists", testEmailValidationShouldReturnTrueIfEmailExists),
-        ("testEmailValidationShouldReturnFalseIfEmailNotExists", testEmailValidationShouldReturnFalseIfEmailNotExists)
-    ]
 }

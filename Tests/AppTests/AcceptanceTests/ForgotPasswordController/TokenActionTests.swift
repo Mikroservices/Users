@@ -48,10 +48,4 @@ final class TokenActionTests: XCTestCase {
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.badRequest, "Response http status code should be bad request (400).")
         XCTAssertEqual(errorResponse.error.code, "userAccountIsBlocked", "Error code should be equal 'userAccountIsBlocked'.")
     }
-
-    static let allTests = [
-        ("testForgotPasswordTokenShouldBeGeneratedForActiveUser", testForgotPasswordTokenShouldBeGeneratedForActiveUser),
-        ("testForgotPasswordTokenShouldNotBeGeneratedIfEmailNotExists", testForgotPasswordTokenShouldNotBeGeneratedIfEmailNotExists),
-        ("testForgotPasswordTokenShouldNotBeGeneratedIfUserIsBlocked", testForgotPasswordTokenShouldNotBeGeneratedIfUserIsBlocked)
-    ]
 }

@@ -142,14 +142,4 @@ final class ForgotConfirmActionTests: XCTestCase {
         XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
         XCTAssertEqual(errorResponse.error.failures?.getFailure("password"), "is greater than maximum of 32 character(s) and is not a valid password")
     }
-
-    static let allTests = [
-        ("testPasswordShouldBeChangeForCorrectToken", testPasswordShouldBeChangeForCorrectToken),
-        ("testPasswordShouldNotBeChangedForIncorrectToken", testPasswordShouldNotBeChangedForIncorrectToken),
-        ("testPasswordShouldNotBeChangedForBlockedUser", testPasswordShouldNotBeChangedForBlockedUser),
-        ("testPasswordShouldNotBeChangeIfUserDidNotGenerateToken", testPasswordShouldNotBeChangeIfUserDidNotGenerateToken),
-        ("testPasswordShouldNotBeChangedForOverdueToken", testPasswordShouldNotBeChangedForOverdueToken),
-        ("testPasswordShouldNotBeChangedWhenNewPasswordIsTooShort", testPasswordShouldNotBeChangedWhenNewPasswordIsTooShort),
-        ("testPasswordShouldNotBeChangedWhenPasswordIsTooLong", testPasswordShouldNotBeChangedWhenPasswordIsTooLong)
-    ]
 }

@@ -61,10 +61,4 @@ final class RolesReadActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(response.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")
     }
-
-    static let allTests = [
-        ("testRoleShouldBeReturnedForSuperUser", testRoleShouldBeReturnedForSuperUser),
-        ("testRoleShouldNotBeReturnedIfUserIsNotSuperUser", testRoleShouldNotBeReturnedIfUserIsNotSuperUser),
-        ("testCorrectStatusCodeShouldBeReturnedIdRoleNotExists", testCorrectStatusCodeShouldBeReturnedIdRoleNotExists)
-    ]
 }

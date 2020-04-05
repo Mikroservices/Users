@@ -126,13 +126,4 @@ final class ChangePasswordActionTests: XCTestCase {
         XCTAssertEqual(errorResponse.error.reason, "Validation errors occurs.")
         XCTAssertEqual(errorResponse.error.failures?.getFailure("newPassword"), "is greater than maximum of 32 character(s) and is not a valid password")
     }
-
-    static let allTests = [
-        ("testPasswordShouldBeChangedWhenAuthorizedUserChangePassword", testPasswordShouldBeChangedWhenAuthorizedUserChangePassword),
-        ("testPasswordShouldNotBeChangedWhenNotAuthorizedUserTriesToChangePassword", testPasswordShouldNotBeChangedWhenNotAuthorizedUserTriesToChangePassword),
-        ("testPasswordShouldNotBeChangedWhenAuthorizedUserEntersWrongOldPassword", testPasswordShouldNotBeChangedWhenAuthorizedUserEntersWrongOldPassword),
-        ("testPasswordShouldNotBeChangedWhenUserAccountIsBlocked", testPasswordShouldNotBeChangedWhenUserAccountIsBlocked),
-        ("testValidationErrorShouldBeReturnedWhenPasswordIsTooShort", testValidationErrorShouldBeReturnedWhenPasswordIsTooShort),
-        ("testValidationErrorShouldBeReturnedWhenPasswordIsTooLong", testValidationErrorShouldBeReturnedWhenPasswordIsTooLong)
-    ]
 }

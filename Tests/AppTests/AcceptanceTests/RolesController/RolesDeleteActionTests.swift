@@ -57,10 +57,4 @@ final class RolesDeleteActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(errorResponse.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")
     }
-
-    static let allTests = [
-        ("testRoleShouldBeDeletedIfRoleExistsAndUserIsSuperUser", testRoleShouldBeDeletedIfRoleExistsAndUserIsSuperUser),
-        ("testRoleShouldNotBeDeletedIfRoleExistsButUserIsNotSuperUser", testRoleShouldNotBeDeletedIfRoleExistsButUserIsNotSuperUser),
-        ("testCorrectStatusCodeShouldBeReturnedIfRoleNotExists", testCorrectStatusCodeShouldBeReturnedIfRoleNotExists)
-    ]
 }

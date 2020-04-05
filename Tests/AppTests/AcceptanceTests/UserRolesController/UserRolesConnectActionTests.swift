@@ -108,11 +108,4 @@ final class UserRolesConnectActionTests: XCTestCase {
         // Assert.
         XCTAssertEqual(response.status, HTTPResponseStatus.notFound, "Response http status code should be not found (404).")
     }
-
-    static let allTests = [
-        ("testUserShouldBeConnectedToRoleForSuperUser", testUserShouldBeConnectedToRoleForSuperUser),
-        ("testUserShouldNotBeConnectedToRoleIfUserIsNotSuperUser", testUserShouldNotBeConnectedToRoleIfUserIsNotSuperUser),
-        ("testCorrectStatsCodeShouldBeReturnedIfUserNotExists", testCorrectStatsCodeShouldBeReturnedIfUserNotExists),
-        ("testCorrectStatusCodeShouldBeReturnedIfRoleNotExists", testCorrectStatusCodeShouldBeReturnedIfRoleNotExists)
-    ]
 }
