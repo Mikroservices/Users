@@ -54,14 +54,14 @@ final class UserRolesDisconnectActionTests: XCTestCase {
     func testUserShouldNotBeDisconnectedWithRoleIfUserIsNotSuperUser() throws {
 
         // Arrange.
-        let user = try User.create(userName: "ronaldviolet")
-        let role = try Role.create(code: "junior-consultant")
+        let user = try User.create(userName: "fennyviolet")
+        let role = try Role.create(code: "junior-specialist")
         try user.$roles.attach(role, on: SharedApplication.application().db).wait()
         let userRoleDto = UserRoleDto(userId: user.id!, roleId: role.id!)
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
-            as: .user(userName: "ronaldviolet", password: "p@ssword"),
+            as: .user(userName: "fennyviolet", password: "p@ssword"),
             to: "/user-roles/disconnect",
             method: .POST,
             body: userRoleDto
@@ -74,15 +74,15 @@ final class UserRolesDisconnectActionTests: XCTestCase {
     func testCorrectStatsCodeShouldBeReturnedIfUserNotExists() throws {
 
         // Arrange.
-        let user = try User.create(userName: "wikiviolet")
+        let user = try User.create(userName: "timviolet")
         try user.attach(role: "administrator")
-        let role = try Role.create(code: "senior-consultant")
+        let role = try Role.create(code: "senior-driver")
         try user.$roles.attach(role, on: SharedApplication.application().db).wait()
         let userRoleDto = UserRoleDto(userId: UUID(), roleId: role.id!)
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
-            as: .user(userName: "wikiviolet", password: "p@ssword"),
+            as: .user(userName: "timviolet", password: "p@ssword"),
             to: "/user-roles/disconnect",
             method: .POST,
             body: userRoleDto

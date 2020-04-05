@@ -27,6 +27,8 @@ struct CreateUsers: Migration {
             .field("createdAt", .datetime)
             .field("updatedAt", .datetime)
             .field("deletedAt", .datetime)
+            .unique(on: "userName")
+            .unique(on: "email")
             .create()
     }
 

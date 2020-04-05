@@ -65,14 +65,14 @@ final class UsersUpdateActionTests: XCTestCase {
     func testAccountShouldNotUpdatedWhenUserTriesToUpdateNotHisAccount() throws {
 
         // Arrange.
-        _ = try User.create(userName: "annaperry")
-        _ = try User.create(userName: "chrisperry")
-        let userDto = UserDto(id: UUID(), userName: "chrisperry", email: "chrisperry@testemail.com", name: "Tiger Perry")
+        _ = try User.create(userName: "georgeperry")
+        _ = try User.create(userName: "xavierperry")
+        let userDto = UserDto(id: UUID(), userName: "xavierperry", email: "xavierperry@testemail.com", name: "Xavier Perry")
 
         // Act.
         let response = try SharedApplication.application().sendRequest(
-            as: .user(userName: "annaperry", password: "p@ssword"),
-            to: "/users/@josepfperry",
+            as: .user(userName: "georgeperry", password: "p@ssword"),
+            to: "/users/@xavierperry",
             method: .PUT,
             body: userDto
         )

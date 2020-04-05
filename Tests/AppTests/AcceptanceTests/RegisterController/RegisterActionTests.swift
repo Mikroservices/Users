@@ -128,12 +128,9 @@ final class RegisterActionTests: XCTestCase {
     func testUserShouldNotBeCreatedIfUserWithTheSameUserNameExists() throws {
 
         // Arrange.
-        _ = try User.create(userName: "samanthasmith",
-                            email: "samanthasmith@testemail.com",
-                            name: "Samantha Smith")
-
-        let registerUserDto = RegisterUserDto(userName: "samanthasmith",
-                                              email: "samanthasmith-notexists@testemail.com",
+        _ = try User.create(userName: "teddysmith")
+        let registerUserDto = RegisterUserDto(userName: "teddysmith",
+                                              email: "teddysmith-notexists@testemail.com",
                                               password: "p@ssword",
                                               name: "Samantha Smith",
                                               securityToken: "123")

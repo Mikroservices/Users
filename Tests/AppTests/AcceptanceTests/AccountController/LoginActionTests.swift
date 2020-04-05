@@ -25,8 +25,8 @@ final class LoginActionTests: XCTestCase {
     func testUserWithCorrectCredentialsShouldBeSignedInByEmail() throws {
 
         // Arrange.
-        _ = try User.create(userName: "stevenfury")
-        let loginRequestDto = LoginRequestDto(userNameOrEmail: "stevenfury@testemail.com", password: "p@ssword")
+        _ = try User.create(userName: "rickfury")
+        let loginRequestDto = LoginRequestDto(userNameOrEmail: "rickfury@testemail.com", password: "p@ssword")
 
         // Act.
         let response = try SharedApplication.application()

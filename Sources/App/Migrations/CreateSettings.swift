@@ -10,6 +10,7 @@ struct CreateSettings: Migration {
             .field("value", .string, .required)
             .field("createdAt", .datetime)
             .field("updatedAt", .datetime)
+            .unique(on: "key")
             .create()
     }
 
