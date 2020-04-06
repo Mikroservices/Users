@@ -19,6 +19,7 @@ extension Application {
                                 existing: settings,
                                 key: .eventsToStore,
                                 value: EventType.allCases.map { item -> String in item.rawValue }.joined(separator: ","))
+        try ensureSettingExists(on: database, existing: settings, key: .corsOrigin, value: "")
         try ensureSettingExists(on: database, existing: settings, key: .jwtPrivateKey, value:
 """
 -----BEGIN RSA PRIVATE KEY-----

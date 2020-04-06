@@ -9,12 +9,8 @@ extension Application {
 
     /// Called before your application initializes.
     public func configure() throws {
-
         // Register routes to the router.
         try routes()
-
-        // Register middleware.
-        registerMiddlewares()
 
         // Configure database.
         try configureDatabase()
@@ -27,11 +23,13 @@ extension Application {
         
         // Read configuration from database.
         try loadConfiguration()
+        
+        // Register middleware.
+        registerMiddlewares()
     }
 
     /// Register your application's routes here.
     private func routes() throws {
-
         // Basic response.
         self.get { req in
             return "Service is up and running!"
@@ -47,12 +45,17 @@ extension Application {
     }
     
     private func registerMiddlewares() {
-
+        // Read CORS origin from settings table.
+        var corsOrigin = CORSMiddleware.AllowOriginSetting.all
+        if let corsOriginSettig = self.settings.configuration.corsOrigin, corsOriginSettig != "" {
+            corsOrigin = .custom(corsOriginSettig)
+        }
+        
         // Cors middleware.
         let corsConfiguration = CORSMiddleware.Configuration(
-            allowedOrigin: .all,
+            allowedOrigin: corsOrigin,
             allowedMethods: [.GET, .POST, .PUT, .OPTIONS, .DELETE, .PATCH],
-            allowedHeaders: [.accept, .authorization, .contentType, .origin, .xRequestedWith, .userAgent, .accessControlAllowOrigin]
+            allowedHeaders: [.accept, .authorization, .contentType, .origin, .xRequestedWith]
         )
         let corsMiddleware = CORSMiddleware(configuration: corsConfiguration)
         self.middleware.use(corsMiddleware)
@@ -63,7 +66,6 @@ extension Application {
     }
 
     private func configureDatabase(clearDatabase: Bool = false) throws {
-
         // In testing environmebt we are using in memory database.
         if self.environment == .testing {
             self.logger.info("In memory SQLite is used during testing")
@@ -98,7 +100,6 @@ extension Application {
     }
     
     private func migrateDatabase() throws {
-
         // Configure migrations
         self.migrations.add(CreateUsers())
         self.migrations.add(CreateRefreshTokens())

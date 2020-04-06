@@ -122,6 +122,7 @@ We can find there following settings:
 - `recaptchaKey` - secret key for Google Recaptcha.
 - `jwtPrivateKey` - RSA512 key for generating JWT tokens (signing in). Private key should be entered only in that service. Other services should use only public key.
 - `emailServiceAddress` - address to service responsible for sending emails (confirmation email, forgot your password features).
+- `corsOrigin` - CORS origin address. Example value: `http://origina.com/, http://originb.com/` (if empty all origins are accepted). 
 - `eventsToStore` - list of events which should be stored in events table. Possible values are (separated by comma):
   - `accountLogin` - logins to the system,
   - `accountRefresh` - refreshing access tokens,

@@ -5,16 +5,19 @@ public struct ApplicationSettings {
     public let isRecaptchaEnabled: Bool
     public let recaptchaKey: String
     public let eventsToStore: [EventType]
+    public let corsOrigin: String?
     
     init(application: Application,
          emailServiceAddress: String? = nil,
          isRecaptchaEnabled: Bool = false,
          recaptchaKey: String = "",
-         eventsToStore: String = ""
+         eventsToStore: String = "",
+         corsOrigin: String? = nil
     ) {
         self.emailServiceAddress = emailServiceAddress
         self.isRecaptchaEnabled = isRecaptchaEnabled
         self.recaptchaKey = recaptchaKey
+        self.corsOrigin = corsOrigin
         
         var eventsArray: [EventType] = []
         EventType.allCases.forEach {
