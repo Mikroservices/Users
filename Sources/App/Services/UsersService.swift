@@ -19,6 +19,7 @@ extension Application.Services {
 protocol UsersServiceType {
     func get(on request: Request, userName: String) -> EventLoopFuture<User?>
     func login(on request: Request, userNameOrEmail: String, password: String) throws -> EventLoopFuture<User>
+    func login(on request: Request, authenticateToken: String) throws -> EventLoopFuture<User>
     func forgotPassword(on request: Request, email: String) -> EventLoopFuture<User>
     func confirmForgotPassword(on request: Request, forgotPasswordGuid: String, password: String) -> EventLoopFuture<User>
     func changePassword(on request: Request, userId: UUID, currentPassword: String, newPassword: String) throws -> EventLoopFuture<User>
@@ -66,6 +67,33 @@ final class UsersService: UsersServiceType {
             }
 
             return user
+        }
+    }
+    
+    func login(on request: Request, authenticateToken: String) throws -> EventLoopFuture<User> {
+        return ExternalUser.query(on: request.db).with(\.$user)
+        .filter(\.$authenticationToken == authenticateToken).first().flatMapThrowing { externalUser in
+            guard let externalUser = externalUser else {
+                throw LoginError.invalidLoginCredentials
+            }
+            
+            guard let tokenCreatedAt = externalUser.tokenCreatedAt else {
+                throw LoginError.tokenExpirationDateWasNotFound
+            }
+            
+            if tokenCreatedAt.addingTimeInterval(60) > Date() {
+                throw LoginError.tokenExpired
+            }
+
+            if !externalUser.user.emailWasConfirmed {
+                throw LoginError.emailNotConfirmed
+            }
+
+            if externalUser.user.isBlocked {
+                throw LoginError.userAccountIsBlocked
+            }
+
+            return externalUser.user
         }
     }
 

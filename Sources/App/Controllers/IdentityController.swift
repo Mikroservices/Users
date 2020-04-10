@@ -11,9 +11,10 @@ final class IdentityController: RouteCollection {
 
         identityGroup.get("authenticate", ":uri", use: authenticate)
         identityGroup.get("callback", ":uri", use: callback)
+        identityGroup.post("login", use: login)
     }
     
-    // Redirect to external authentication provider.
+    /// Redirect to external authentication provider.
     func authenticate(request: Request) throws -> EventLoopFuture<Response> {
         guard let uri = request.parameters.get("uri") else {
             throw Abort(.badRequest)
@@ -31,7 +32,7 @@ final class IdentityController: RouteCollection {
         }
     }
     
-    // Callback from external authentication provider.
+    /// Callback from external authentication provider.
     func callback(request: Request) throws -> EventLoopFuture<Response> {
         guard let uri = request.parameters.get("uri") else {
             throw Abort(.badRequest)
@@ -99,6 +100,18 @@ final class IdentityController: RouteCollection {
             return externalUser.save(on: request.db).map {
                 request.redirect(to: "\(authClient.callbackUrl)?authToken=\(authenticationToken)", type: .permanent)
             }
+        }
+    }
+    
+    /// Sign-in user based on authenticate token.
+    func login(request: Request) throws -> EventLoopFuture<AccessTokenDto> {
+        let loginRequestDto = try request.content.decode(ExternalLoginRequestDto.self)
+        let usersService = request.application.services.usersService
+
+        let loginFuture = try usersService.login(on: request, authenticateToken: loginRequestDto.authenticateToken)
+        return loginFuture.flatMap { user -> EventLoopFuture<AccessTokenDto> in
+            let tokensService = request.application.services.tokensService
+            return tokensService.createAccessTokens(on: request, forUser: user)
         }
     }
     
