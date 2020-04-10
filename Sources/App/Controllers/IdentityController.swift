@@ -2,53 +2,6 @@ import Vapor
 import Fluent
 import JWTKit
 
-struct OAuthCallback: Content {
-    var code: String?
-    var state: String?
-    var scope: String?
-    var authuser: String?
-    var prompt: String?
-}
-
-struct OAuthResponse: Content {
-    enum CodingKeys: String, CodingKey {
-        case scope
-        case idToken = "id_token"
-        case tokenType = "token_type"
-        case refreshToken = "refresh_token"
-    }
-
-    var idToken: String?
-    var scope: String?
-    var tokenType: String?
-    var refreshToken: String?
-}
-
-struct OAuthRequest: Content {
-    enum CodingKeys: String, CodingKey {
-        case url, code
-        case clientId = "client_id"
-        case clientSecret = "client_secret"
-        case redirectUri = "redirect_uri"
-        case grantType = "grant_type"
-    }
-    
-    var url: String
-    var code: String
-    var clientId: String
-    var clientSecret: String
-    var redirectUri: String
-    var grantType: String
-}
-
-struct OAuthUser {
-    let uniqueId: String
-    let email: String
-    let familyName: String?
-    let givenName: String?
-    let name: String?
-}
-
 final class IdentityController: RouteCollection {
 
     public static let uri: PathComponent = .constant("identity")
