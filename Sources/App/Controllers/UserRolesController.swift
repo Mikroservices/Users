@@ -8,7 +8,7 @@ final class UserRolesController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let userRolesGroup = routes
             .grouped(UserRolesController.uri)
-            .grouped(UserAuthenticator().middleware())
+            .grouped(UserAuthenticator())
             .grouped(UserPayload.guardMiddleware())
             .grouped(UserPayload.guardIsSuperUserMiddleware())
         

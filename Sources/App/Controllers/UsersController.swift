@@ -8,7 +8,7 @@ final class UsersController: RouteCollection {
     func boot(routes: RoutesBuilder) throws {
         let usersGroup = routes
             .grouped(UsersController.uri)
-            .grouped(UserAuthenticator().middleware())
+            .grouped(UserAuthenticator())
         
         usersGroup
             .grouped(EventHandlerMiddleware(.usersRead))

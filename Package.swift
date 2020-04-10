@@ -12,10 +12,10 @@ let package = Package(
     ],
     dependencies: [
         // 💧 A server-side Swift web framework.
-        .package(url: "https://github.com/vapor/vapor.git", from: "4.0.0-rc.3.12"),
+        .package(url: "https://github.com/vapor/vapor.git", from: "4.0.1"),
 
         // 🖋 Non-blocking, event-driven Swift client for PostgreSQL.
-        .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0-rc.1"),
+        .package(url: "https://github.com/vapor/fluent.git", from: "4.0.0-rc.2"),
 
         // 🐘 Swift ORM (queries, models, relations, etc) built on PostgreSQL.
         .package(url: "https://github.com/vapor/fluent-postgres-driver.git", from: "2.0.0-rc.1.1"),
@@ -24,13 +24,13 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent-sqlite-driver.git", from: "4.0.0-rc.1.1"),
 
         // 🔏 JSON Web Token signing and verification (HMAC, RSA).
-        .package(url: "https://github.com/vapor/jwt.git", from: "4.0.0-rc.1.1"),
+        .package(url: "https://github.com/vapor/jwt.git", from: "4.0.0-rc.2"),
 
         // 🔑 Google Recaptcha for securing anonymous endpoints.
-        .package(url: "https://github.com/Mikroservices/Recaptcha.git", from: "2.0.0-rc.2"),
+        .package(url: "https://github.com/Mikroservices/Recaptcha.git", from: "2.0.0"),
 
         // 🐞 Custom error middleware for Vapor.
-        .package(url: "https://github.com/Mikroservices/ExtendedError.git", from: "2.0.0-rc.2")
+        .package(url: "https://github.com/Mikroservices/ExtendedError.git", from: "2.0.0")
     ],
     targets: [
         .target(name: "App", dependencies: [

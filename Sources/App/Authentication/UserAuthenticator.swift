@@ -3,12 +3,13 @@ import Vapor
 struct UserAuthenticator: BearerAuthenticator {
     typealias User = UserPayload
     
-    func authenticate(bearer: BearerAuthorization, for request: Request) -> EventLoopFuture<User?> {
+    func authenticate(bearer: BearerAuthorization, for request: Request) -> EventLoopFuture<Void> {
         do {
             let authorizationPayload = try request.jwt.verify(bearer.token, as: UserPayload.self)
-            return request.success(authorizationPayload)
+            request.auth.login(authorizationPayload)
+            return request.success()
         } catch {
-            return request.success(nil)
+            return request.success()
         }
    }
 }

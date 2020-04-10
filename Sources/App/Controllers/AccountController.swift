@@ -16,13 +16,13 @@ final class AccountController: RouteCollection {
             .post("refresh", use: refresh)
 
         accountGroup
-            .grouped(UserAuthenticator().middleware())
+            .grouped(UserAuthenticator())
             .grouped(UserPayload.guardMiddleware())
             .grouped(EventHandlerMiddleware(.accountChangePassword, storeRequest: false))
             .post("change-password", use: changePassword)
 
         accountGroup
-            .grouped(UserAuthenticator().middleware())
+            .grouped(UserAuthenticator())
             .grouped(UserPayload.guardMiddleware())
             .grouped(UserPayload.guardIsSuperUserMiddleware())
             .grouped(EventHandlerMiddleware(.accountRevoke))
