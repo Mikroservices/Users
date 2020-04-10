@@ -29,6 +29,7 @@ protocol UsersServiceType {
     func validateEmail(on request: Request, email: String?) -> EventLoopFuture<Void>
     func updateUser(on request: Request, userDto: UserDto, userNameNormalized: String) -> EventLoopFuture<User>
     func deleteUser(on request: Request, userNameNormalized: String) -> EventLoopFuture<Void>
+    func createGravatarHash(from email: String) -> String
 }
 
 final class UsersService: UsersServiceType {
@@ -251,5 +252,15 @@ final class UsersService: UsersServiceType {
             
             return user.delete(on: request.db)
         }
+    }
+    
+    func createGravatarHash(from email: String) -> String {
+        let gravatarEmail = email.lowercased().trimmingCharacters(in: [" "])
+
+        if let gravatarEmailData = gravatarEmail.data(using: .utf8) {
+            return Insecure.MD5.hash(data: gravatarEmailData).hexEncodedString()
+        }
+        
+        return ""
     }
 }

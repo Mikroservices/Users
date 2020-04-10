@@ -3,7 +3,6 @@ import Foundation
 import XCTest
 import XCTVapor
 
-
 enum AuthorizationType {
     case anonymous
     case user(userName: String, password: String)

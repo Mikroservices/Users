@@ -30,7 +30,7 @@ final class AccountController: RouteCollection {
     }
 
     /// Sign-in user.
-    func login(request: Request) throws -> EventLoopFuture<AccessTokenDto> {        
+    func login(request: Request) throws -> EventLoopFuture<AccessTokenDto> {
         let loginRequestDto = try request.content.decode(LoginRequestDto.self)
         let usersService = request.application.services.usersService
 
@@ -39,22 +39,8 @@ final class AccountController: RouteCollection {
                                                  password: loginRequestDto.password)
 
         return loginFuture.flatMap { user -> EventLoopFuture<AccessTokenDto> in
-
             let tokensService = request.application.services.tokensService
-
-            do {
-                let accessTokenFuture = try tokensService.createAccessToken(on: request, forUser: user)
-                let refreshTokenFuture = try tokensService.createRefreshToken(on: request, forUser: user)
-
-                let combinedFuture = accessTokenFuture.and(refreshTokenFuture)
-                let resultAll = combinedFuture.map { (accessToken, refreshToken) in
-                    AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
-                }
-
-                return resultAll
-            } catch {
-                return request.fail(LoginError.invalidLoginCredentials)
-            }
+            return tokensService.createAccessTokens(on: request, forUser: user)
         }
     }
 
@@ -72,19 +58,7 @@ final class AccountController: RouteCollection {
         }.flatMap { wrappedFuture in wrappedFuture }
         
         return userAndTokenFuture.flatMap { (user: User, refreshToken: RefreshToken) -> EventLoopFuture<AccessTokenDto> in
-            do {
-                 let accessTokenFuture = try tokensService.createAccessToken(on: request, forUser: user)
-                 let refreshTokenFuture = try tokensService.updateRefreshToken(on: request, forToken: refreshToken)
-             
-                 let combinedFuture = accessTokenFuture.and(refreshTokenFuture)
-                 let resultAll = combinedFuture.map { (accessToken, refreshToken) in
-                     AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
-                 }
-                 
-                 return resultAll
-             } catch {
-                 return request.fail(LoginError.invalidLoginCredentials)
-             }
+            tokensService.updateAccessTokens(on: request, forUser: user, andRefreshToken: refreshToken)
         }
     }
 

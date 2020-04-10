@@ -140,6 +140,23 @@ extension User {
             birthDate: registerUserDto.birthDate
         )
     }
+    
+    convenience init(fromOAuth oauthUser: OAuthUser,
+                     withPassword password: String,
+                     salt: String,
+                     gravatarHash: String) {
+        self.init(
+            userName: oauthUser.email,
+            email: oauthUser.email,
+            name: oauthUser.name,
+            password: password,
+            salt: salt,
+            emailWasConfirmed: true,
+            isBlocked: false,
+            emailConfirmationGuid: UUID.init().uuidString,
+            gravatarHash: gravatarHash
+        )
+    }
 
     func getUserName() -> String {
         guard let userName = self.name else {

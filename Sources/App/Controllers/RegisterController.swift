@@ -112,10 +112,12 @@ final class RegisterController: RouteCollection {
     private func createUser(on request: Request, registerUserDto: RegisterUserDto) throws -> EventLoopFuture<User> {
 
         let rolesService = request.application.services.rolesService
+        let usersService = request.application.services.usersService
+        
         let salt = Password.generateSalt()
         let passwordHash = try Password.hash(registerUserDto.password, withSalt: salt)
         let emailConfirmationGuid = UUID.init().uuidString
-        let gravatarHash = self.getGravatarHash(email: registerUserDto.email)
+        let gravatarHash = usersService.createGravatarHash(from: registerUserDto.email)
         
         let user = User(from: registerUserDto,
                         withPassword: passwordHash,
@@ -159,16 +161,6 @@ final class RegisterController: RouteCollection {
         headers.replaceOrAdd(name: .location, value: "/\(UsersController.uri)/@\(user.userName)")
         
         return createdUserDto.encodeResponse(status: .created, headers: headers, for: request)
-    }
-    
-    private func getGravatarHash(email: String) -> String {
-        let gravatarEmail = email.lowercased().trimmingCharacters(in: [" "])
-
-        if let gravatarEmailData = gravatarEmail.data(using: .utf8) {
-            return Insecure.MD5.hash(data: gravatarEmailData).hexEncodedString()
-        }
-        
-        return ""
     }
 }
 
