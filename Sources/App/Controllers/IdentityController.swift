@@ -17,14 +17,14 @@ final class IdentityController: RouteCollection {
     /// Redirect to external authentication provider.
     func authenticate(request: Request) throws -> EventLoopFuture<Response> {
         guard let uri = request.parameters.get("uri") else {
-            throw Abort(.badRequest)
+            throw OpenIdConnectError.invalidClientName
         }
         
         let externalUsersService = request.application.services.externalUsersService
         let authClientFuture = AuthClient.query(on: request.db).filter(\.$uri == uri).first()
         return authClientFuture.flatMapThrowing { authClient in
             guard let authClient = authClient else {
-                throw Abort(.notFound)
+                throw OpenIdConnectError.clientNotFound
             }
             
             let location = try externalUsersService.getRedirectLocation(authClient: authClient)
@@ -35,12 +35,12 @@ final class IdentityController: RouteCollection {
     /// Callback from external authentication provider.
     func callback(request: Request) throws -> EventLoopFuture<Response> {
         guard let uri = request.parameters.get("uri") else {
-            throw Abort(.badRequest)
+            throw OpenIdConnectError.invalidClientName
         }
         
         let callbackResponse = try request.query.decode(OAuthCallback.self)
         guard let code = callbackResponse.code else {
-            throw Abort(.internalServerError)
+            throw OpenIdConnectError.codeTokenNotFound
         }
         
         let externalUsersService = request.application.services.externalUsersService
@@ -50,7 +50,7 @@ final class IdentityController: RouteCollection {
         // Get AuthClient object.
         let authClientFuture = AuthClient.query(on: request.db).filter(\.$uri == uri).first().flatMap { authClientFromDb -> EventLoopFuture<AuthClient> in
             guard let authClientFromDb = authClientFromDb else {
-                return request.fail(Abort(.badRequest))
+                return request.fail(OpenIdConnectError.clientNotFound)
             }
             
             authClient = authClientFromDb
@@ -98,7 +98,7 @@ final class IdentityController: RouteCollection {
             externalUser.tokenCreatedAt = Date()
             
             return externalUser.save(on: request.db).map {
-                request.redirect(to: "\(authClient.callbackUrl)?authToken=\(authenticationToken)", type: .permanent)
+                request.redirect(to: "\(authClient.callbackUrl)?authenticateToken=\(authenticationToken)", type: .permanent)
             }
         }
     }

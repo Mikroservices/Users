@@ -74,23 +74,19 @@ final class UsersService: UsersServiceType {
         return ExternalUser.query(on: request.db).with(\.$user)
         .filter(\.$authenticationToken == authenticateToken).first().flatMapThrowing { externalUser in
             guard let externalUser = externalUser else {
-                throw LoginError.invalidLoginCredentials
+                throw OpenIdConnectError.invalidAuthenticateToken
             }
             
             guard let tokenCreatedAt = externalUser.tokenCreatedAt else {
-                throw LoginError.tokenExpirationDateWasNotFound
+                throw OpenIdConnectError.authenticateTokenExpirationDateNotFound
             }
             
             if tokenCreatedAt.addingTimeInterval(60) > Date() {
-                throw LoginError.tokenExpired
-            }
-
-            if !externalUser.user.emailWasConfirmed {
-                throw LoginError.emailNotConfirmed
+                throw OpenIdConnectError.autheticateTokenExpired
             }
 
             if externalUser.user.isBlocked {
-                throw LoginError.userAccountIsBlocked
+                throw OpenIdConnectError.userAccountIsBlocked
             }
 
             return externalUser.user
