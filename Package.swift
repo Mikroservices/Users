@@ -24,7 +24,8 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent-sqlite-driver.git", from: "4.0.0-rc.1.1"),
 
         // 🔏 JSON Web Token signing and verification (HMAC, RSA).
-        .package(url: "https://github.com/vapor/jwt.git", from: "4.0.0-rc.2"),
+        .package(url: "https://github.com/mczachurski/jwt-kit.git", .branch("feature/microsoft-jwks")),
+        .package(url: "https://github.com/mczachurski/jwt.git", .branch("feature/microsoft-jwks")),
 
         // 🔑 Google Recaptcha for securing anonymous endpoints.
         .package(url: "https://github.com/Mikroservices/Recaptcha.git", from: "2.0.0"),
@@ -39,6 +40,7 @@ let package = Package(
             .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"),
             .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver"),
             .product(name: "JWT", package: "jwt"),
+            .product(name: "JWTKit", package: "jwt-kit"),
             .product(name: "ExtendedError", package: "ExtendedError"),
             .product(name: "Recaptcha", package: "Recaptcha")
         ]),
