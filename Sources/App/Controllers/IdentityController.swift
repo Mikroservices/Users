@@ -145,11 +145,11 @@ final class IdentityController: RouteCollection {
                                  name: jwt.name)
             }
         case .microsoft:
-            return request.jwt.google.verify(accessTokenResponse.idToken!).map { jwt in
+            return request.jwt.microsoft.verify(accessTokenResponse.idToken!).map { jwt in
                 return OAuthUser(uniqueId: jwt.subject.value,
                                  email: jwt.email!,
-                                 familyName: jwt.familyName,
-                                 givenName: jwt.givenName,
+                                 familyName: "",
+                                 givenName: "",
                                  name: jwt.name)
             }
         }

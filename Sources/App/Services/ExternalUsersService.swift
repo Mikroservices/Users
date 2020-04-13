@@ -122,7 +122,7 @@ final class ExternalUsersService: ExternalUsersServiceType {
         let host = "https://login.microsoftonline.com/\(tenantId ?? "unknown")/oauth2/v2.0/authorize"
         
         let urlEncoder = URLEncodedFormEncoder()
-        let scope = try urlEncoder.encode("openid%20profile%20email")
+        let scope = try urlEncoder.encode("openid profile email")
         let responseType = try urlEncoder.encode("code")
         let clientId = try urlEncoder.encode(clientId)
         let redirectUri = try urlEncoder.encode("http://localhost:8080/identity/callback/\(uri)")

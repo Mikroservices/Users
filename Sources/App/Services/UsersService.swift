@@ -81,7 +81,7 @@ final class UsersService: UsersServiceType {
                 throw OpenIdConnectError.authenticateTokenExpirationDateNotFound
             }
             
-            if tokenCreatedAt.addingTimeInterval(60) > Date() {
+            if tokenCreatedAt.addingTimeInterval(60) < Date() {
                 throw OpenIdConnectError.autheticateTokenExpired
             }
 
