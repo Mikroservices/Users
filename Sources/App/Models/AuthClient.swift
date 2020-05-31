@@ -35,6 +35,9 @@ final class AuthClient: Model {
     @Field(key: "callbackUrl")
     var callbackUrl: String
     
+    @Field(key: "svgIcon")
+    var svgIcon: String?
+    
     @Timestamp(key: "createdAt", on: .create)
     var createdAt: Date?
 
@@ -43,4 +46,42 @@ final class AuthClient: Model {
     
     @Timestamp(key: "deletedAt", on: .delete)
     var deletedAt: Date?
+    
+    init() { }
+    
+    init(id: UUID?,
+         type: AuthClientType,
+         name: String,
+         uri: String,
+         tenantId: String?,
+         clientId: String,
+         clientSecret: String,
+         callbackUrl: String,
+         svgIcon: String?
+    ) {
+        self.id = id
+        self.type = type
+        self.name = name
+        self.uri = uri
+        self.tenantId = tenantId
+        self.clientId = clientId
+        self.clientSecret = clientSecret
+        self.callbackUrl = callbackUrl
+        self.svgIcon = svgIcon
+    }
+}
+
+extension AuthClient {
+    convenience init(from authClientDto: AuthClientDto) {
+        self.init(id: authClientDto.id,
+                  type: authClientDto.type,
+                  name: authClientDto.name,
+                  uri: authClientDto.uri,
+                  tenantId: authClientDto.tenantId,
+                  clientId: authClientDto.clientId,
+                  clientSecret: authClientDto.clientSecret,
+                  callbackUrl: authClientDto.callbackUrl,
+                  svgIcon: authClientDto.svgIcon
+        )
+    }
 }

@@ -1,8 +1,26 @@
-//
-//  File.swift
-//  
-//
-//  Created by Marcin Czachurski on 31/05/2020.
-//
+import Vapor
+import ExtendedError
 
-import Foundation
+enum AuthClientError: String, Error {
+    case incorrectAuthClientId
+}
+
+extension AuthClientError: TerminateError {
+    var status: HTTPResponseStatus {
+        return .badRequest
+    }
+
+    var reason: String {
+        switch self {
+        case .incorrectAuthClientId: return "Authentication client id is incorrect."
+        }
+    }
+
+    var identifier: String {
+        return "auth-client"
+    }
+
+    var code: String {
+        return self.rawValue
+    }
+}

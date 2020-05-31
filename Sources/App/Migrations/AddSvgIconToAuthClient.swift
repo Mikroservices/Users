@@ -1,8 +1,15 @@
-//
-//  File.swift
-//  
-//
-//  Created by Marcin Czachurski on 31/05/2020.
-//
+import Vapor
+import Fluent
 
-import Foundation
+struct AddSvgIconToAuthClient: Migration {
+    func prepare(on database: Database) -> EventLoopFuture<Void> {
+        database
+            .schema(AuthClient.schema)
+            .field("svgIcon", .string)
+            .update()
+    }
+
+    func revert(on database: Database) -> EventLoopFuture<Void> {
+        database.schema(AuthClient.schema).deleteField("svgIcon").update()
+    }
+}

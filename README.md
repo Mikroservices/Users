@@ -74,6 +74,10 @@ Connect user to role:
 - [`POST /user-roles/connect`](Docs/user-roles/connect.md) - connect role to user
 - [`POST /user-roles/disconnect`](Docs/user-roles/disconnect.md) - disconnect user from role
 
+Auhentication clients:
+
+- [`GET /auth-clients`](Docs/auth-clients/list.md) - list of external authenticators
+
 ## Getting started
 
 First you need to have [Swift](https://swift.org) installed on your computer.

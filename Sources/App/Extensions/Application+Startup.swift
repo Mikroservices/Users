@@ -43,6 +43,7 @@ extension Application {
         try self.register(collection: RolesController())
         try self.register(collection: UserRolesController())
         try self.register(collection: IdentityController())
+        try self.register(collection: AuthenticationClientsController())
     }
     
     private func registerMiddlewares() {
@@ -110,6 +111,7 @@ extension Application {
         self.migrations.add(CreateEvents())
         self.migrations.add(CreateAuthClients())
         self.migrations.add(CreateExternalUsers())
+        self.migrations.add(AddSvgIconToAuthClient())
         
         try self.autoMigrate().wait()
     }

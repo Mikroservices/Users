@@ -63,7 +63,7 @@ final class RolesController: RouteCollection {
     func read(request: Request) throws -> EventLoopFuture<RoleDto> {
         
         guard let roleId = request.parameters.get("id", as: UUID.self) else {
-            throw Abort(.badRequest)
+            throw RoleError.incorrectRoleId
         }
 
         return self.getRoleById(on: request, roleId: roleId).map { role in
@@ -76,7 +76,7 @@ final class RolesController: RouteCollection {
         let rolesService = request.application.services.rolesService
 
         guard let roleId = request.parameters.get("id", as: UUID.self) else {
-            throw Abort(.badRequest)
+            throw RoleError.incorrectRoleId
         }
         
         let roleDto = try request.content.decode(RoleDto.self)
@@ -99,7 +99,7 @@ final class RolesController: RouteCollection {
     /// Delete specific role.
     func delete(request: Request) throws -> EventLoopFuture<HTTPStatus> {
         guard let roleId = request.parameters.get("id", as: UUID.self) else {
-            throw Abort(.badRequest)
+            throw RoleError.incorrectRoleId
         }
 
         let roleFuture = self.getRoleById(on: request, roleId: roleId)

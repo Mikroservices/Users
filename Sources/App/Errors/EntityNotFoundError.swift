@@ -5,6 +5,7 @@ enum EntityNotFoundError: String, Error {
     case userNotFound
     case refreshTokenNotFound
     case roleNotFound
+    case authClientNotFound
 }
 
 extension EntityNotFoundError: TerminateError {
@@ -17,6 +18,7 @@ extension EntityNotFoundError: TerminateError {
         case .userNotFound: return "User not exists."
         case .refreshTokenNotFound: return "Refresh token not exists."
         case .roleNotFound: return "Role not exists."
+        case .authClientNotFound: return "Authentication client not exists."
         }
     }
 

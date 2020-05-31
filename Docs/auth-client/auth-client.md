@@ -1,12 +1,10 @@
-#### Get specific role
+#### Get specific authentication client
 
-Endpoint for downloading specific role data.
+Endpoint for downloading specific authentication client data.
 
 ```
 METHOD: GET
-URL: /roles/{id}
-HEADERS:
-    "Authorization": "Bearer eyJhbGciOiJSUzUxMi.....Y1f05c9yvA;boundary="boundary"
+URL: /auth-client/{id}
 ```
 
 **Response**
@@ -15,32 +13,28 @@ HEADERS:
 STATUS: 200 (Ok)
 BODY:
 {
-    "id": "jt7390gt-63kt-09fw-b70a-c1b442e2fc1b",
-    "name": "Administrator",
-    "code": "administrator",
-    "description": "This is role for people with high privileges.",
-    "hasSuperPrivileges": true,
-    "isDefault": false
+    "uri": "microsoft",
+    "id": "51BA689F-1787-49EA-8311-23EFAD6C1852",
+    "callbackUrl": "http://localhost:4200/login-callback",
+    "tenantId": "432523-3432-43cf-9da5-f75728b8d21f",
+    "clientId": "731f2cab-2658-4c3e-9340-9461e3c6388c",
+    "type": "microsoft",
+    "clientSecret": "",
+    "name": "Microsoft",
+    "svgIcon": "<svg></svg>"
 }
 ```
 
 **Errors**
 
-```
-STATUS: 401 (Unauthorized)
-```
-
-```
-STATUS: 403 (Forbidden)
-```
 
 ```
 STATUS: 400 (BadRequest)
 BODY:
 {
     "error": true,
-    "code": "incorrectRoleId",
-    "reason": "Role id is incorrect."
+    "code": "incorrectAuthClientId",
+    "reason": "Authentication client id is incorrect."
 }
 ```
 
@@ -49,8 +43,8 @@ STATUS: 404 (NotFound)
 BODY:
 {
     "error": true,
-    "code": "roleNotFound",
-    "reason": "Role not exists."
+    "code": "authClientNotFound",
+    "reason": "Authentication client not exists."
 }
 ```
 
