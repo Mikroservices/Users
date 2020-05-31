@@ -77,6 +77,10 @@ Connect user to role:
 Auhentication clients:
 
 - [`GET /auth-clients`](Docs/auth-clients/list.md) - list of external authenticators
+- [`GET /auth-clients/{id}`](Docs/auth-clients/auth-client.md) - specific auth client
+- [`POST /auth-clients`](Docs/auth-clients/create.md) - new auth client
+- [`PUT /auth-clients/{id}`](Docs/auth-clients/update.md) - update auth client data
+- [`DELETE /auth-clients/{id}`](Docs/auth-clients/delete.md) - delete auth client
 
 ## Getting started
 
