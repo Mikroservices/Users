@@ -4,7 +4,7 @@ Endpoint for downloading user roles.
 
 ```
 METHOD: GET
-URL: /auth-client
+URL: /auth-clients
 ```
 
 **Response**

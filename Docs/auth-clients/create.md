@@ -4,7 +4,7 @@ Endpoint for creating new authentication client.
 
 ```
 METHOD: POST
-URL: /auth-client
+URL: /auth-clients
 HEADERS:
     "Authorization": "Bearer eyJhbGciOiJSUzUxMi.....Y1f05c9yvA;boundary="boundary"
 BODY:

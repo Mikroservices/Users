@@ -4,7 +4,7 @@ Endpoint for downloading specific authentication client data.
 
 ```
 METHOD: GET
-URL: /auth-client/{id}
+URL: /auth-clients/{id}
 ```
 
 **Response**

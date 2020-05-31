@@ -4,7 +4,7 @@ Endpoint for deleting authentication client.
 
 ```
 METHOD: DELETE
-URL: /auth-client/{id}
+URL: /auth-clients/{id}
 HEADERS:
     "Authorization": "Bearer eyJhbGciOiJSUzUxMi.....Y1f05c9yvA;boundary="boundary"
 ```
