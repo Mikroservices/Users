@@ -49,7 +49,7 @@ final class AuthClient: Model {
     
     init() { }
     
-    init(id: UUID?,
+    init(id: UUID? = nil,
          type: AuthClientType,
          name: String,
          uri: String,

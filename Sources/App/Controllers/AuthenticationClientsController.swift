@@ -40,10 +40,16 @@ final class AuthenticationClientsController: RouteCollection {
 
     /// Create new authentication client.
     func create(request: Request) throws -> EventLoopFuture<Response> {
+        let authClientsService = request.application.services.authenticationClientsService
         let authClientDto = try request.content.decode(AuthClientDto.self)
         try AuthClientDto.validate(request)
 
-        let createAuthClientFuture = self.createAuthClient(on: request, authClientDto: authClientDto)
+        let validateUriFuture = authClientsService.validateUri(on: request, uri: authClientDto.uri, authClientId: nil)
+        let createAuthClientFuture = validateUriFuture.map { _ in
+            self.createAuthClient(on: request, authClientDto: authClientDto)
+        }.flatMap { roleFuture in
+            return roleFuture
+        }
         
         return createAuthClientFuture.flatMapThrowing { authClient -> EventLoopFuture<Response> in
             try self.createNewAuthClientResponse(on: request, authClient: authClient)
@@ -78,12 +84,16 @@ final class AuthenticationClientsController: RouteCollection {
             throw AuthClientError.incorrectAuthClientId
         }
         
+        let authClientsService = request.application.services.authenticationClientsService
         let authClientDto = try request.content.decode(AuthClientDto.self)
         try AuthClientDto.validate(request)
-
+        
         let authClientFuture = self.getAuthClientById(on: request, authClientId: authClientId)
+        let validateUriFuture = authClientFuture.flatMap { authClient in
+            authClientsService.validateUri(on: request, uri: authClientDto.uri, authClientId: authClient.id).transform(to: authClient)
+        }
 
-        let updateFuture = authClientFuture.flatMap { authClient in
+        let updateFuture = validateUriFuture.flatMap { authClient in
             self.updateAuthClient(on: request, from: authClientDto, to: authClient).transform(to: authClient)
         }
 

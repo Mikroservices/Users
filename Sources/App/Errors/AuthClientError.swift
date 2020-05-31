@@ -2,6 +2,7 @@ import Vapor
 import ExtendedError
 
 enum AuthClientError: String, Error {
+    case authClientWithUriExists
     case incorrectAuthClientId
 }
 
@@ -12,6 +13,7 @@ extension AuthClientError: TerminateError {
 
     var reason: String {
         switch self {
+        case .authClientWithUriExists: return "Authentication client with specified uri already exists."
         case .incorrectAuthClientId: return "Authentication client id is incorrect."
         }
     }
