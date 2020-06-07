@@ -11,7 +11,7 @@ extension Application {
     public func configure() throws {
         // Register routes to the router.
         try routes()
-
+        
         // Configure database.
         try configureDatabase()
         

@@ -31,7 +31,10 @@ let package = Package(
         .package(url: "https://github.com/Mikroservices/Recaptcha.git", from: "2.0.0"),
 
         // 🐞 Custom error middleware for Vapor.
-        .package(url: "https://github.com/Mikroservices/ExtendedError.git", from: "2.0.0")
+        .package(url: "https://github.com/Mikroservices/ExtendedError.git", from: "2.0.0"),
+        
+        // 📖 Apple logger hander.
+        .package(url: "https://github.com/apple/swift-log.git", from: "1.0.0"),
     ],
     targets: [
         .target(name: "App", dependencies: [
@@ -41,6 +44,7 @@ let package = Package(
             .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver"),
             .product(name: "JWT", package: "jwt"),
             .product(name: "JWTKit", package: "jwt-kit"),
+            .product(name: "Logging", package: "swift-log"),
             .product(name: "ExtendedError", package: "ExtendedError"),
             .product(name: "Recaptcha", package: "Recaptcha")
         ]),
