@@ -37,7 +37,7 @@ public class JsonFormatter: LogFormatter {
             : self.prettify(self.metadata.merging(metadata!, uniquingKeysWith: { _, new in new }))
         
         let entry = LogEntry(timestamp: Date(),
-                             level: level.rawValue,
+                             level: level.name,
                              label: label,
                              metadata: prettyMetadata.map { " \($0)" } ?? "",
                              message: message.description)

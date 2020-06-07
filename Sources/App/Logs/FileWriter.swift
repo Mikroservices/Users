@@ -4,11 +4,12 @@ internal class FileWriter {
     private let path: String;
     private let fileSizeLimitBytes: Int
     private let rollingInterval: RollingInteval
+    private let fileQueue = DispatchQueue.init(label: "FileWriter", qos: .utility)
     
-    private var filePath: URL? = nil
+    private var filePath: URL = URL(fileURLWithPath: "output.log")
     private var nextFilePathGenerationDate: Date? = nil
     private var fileHandle: FileHandle? = nil
-    private var fileSize: UInt64 = 0
+    private var fileSize: Int = 0
     
     init(path: String, rollingInterval: RollingInteval = .day, fileSizeLimitBytes: Int = 10485760) {
         self.path = path
@@ -16,38 +17,44 @@ internal class FileWriter {
         self.fileSizeLimitBytes = fileSizeLimitBytes
     }
     
+    deinit {
+        if let file = self.fileHandle {
+            try? file.close()
+            self.fileHandle = nil
+        }
+    }
+    
     func write(message: Data?) {
-        
         guard let data = message else {
+            print("[FileWriter] Logged message cannot be nil.")
             return
         }
         
-        do {
-            if self.shouldCreateNewFile() {
-                self.filePath = self.getFilePathWithDateStamp()
-                self.nextFilePathGenerationDate = self.getNextFilePathGenerationDate()
-                self.fileSize = 0
-                
+        if self.shouldCreateNewFile() {
+            self.setNewFile()
+        }
+        
+        self.saveToFile(data: data)
+    }
+    
+    private func saveToFile(data: Data) {
+        fileQueue.async {
+            do {
                 if let file = self.fileHandle {
-                    try file.close()
-                    self.fileHandle = nil
-                }
-            }
-            
-            if let file = self.fileHandle {
-                file.write(data)
-                fileSize += UInt64(data.count)
-            } else if let file = try? FileHandle(forWritingTo: self.filePath!) {
-                file.seekToEndOfFile()
-                file.write(data)
+                    file.write(data)
+                    self.fileSize += data.count
+                } else if let file = try? FileHandle(forWritingTo: self.filePath) {
+                    file.seekToEndOfFile()
+                    file.write(data)
 
-                self.fileHandle = file
-                self.fileSize = self.getFileSize()
-            } else {
-                try data.write(to: self.filePath!, options: .atomic)
+                    self.fileHandle = file
+                    self.fileSize = self.getFileSize()
+                } else {
+                    try data.write(to: self.filePath, options: .atomic)
+                }
+            } catch(let error) {
+                print("[FileWriter] Could not write to file: \(self.filePath), error: \(error).")
             }
-        } catch {
-            self.fileHandle = nil
         }
     }
     
@@ -55,6 +62,18 @@ internal class FileWriter {
         return self.nextFilePathGenerationDate == nil
             || self.nextFilePathGenerationDate! < Date()
             || self.fileSize > self.fileSizeLimitBytes
+    }
+    
+    private func setNewFile() {
+        if let file = self.fileHandle {
+            try? file.close()
+            self.fileHandle = nil
+        }
+
+        self.filePath = self.getFilePathWithDateStamp()
+        self.nextFilePathGenerationDate = self.getNextFilePathGenerationDate()
+        self.fileSize = 0
+        self.createDirectories()
     }
     
     private func getFilePathWithDateStamp() -> URL {
@@ -118,17 +137,26 @@ internal class FileWriter {
         return URL(fileURLWithPath: workingDirectory)
     }
     
-    private func getFileSize() -> UInt64 {
+    private func getFileSize() -> Int {
         do {
-            if let filePath = self.filePath {
-                let attr = try FileManager.default.attributesOfItem(atPath: filePath.absoluteString)
-                fileSize = attr[FileAttributeKey.size] as! UInt64
-                return fileSize
+            let values = try self.filePath.resourceValues(forKeys: [URLResourceKey.fileSizeKey])
+            if let fileSize = values.fileSize {
+                 return fileSize
             }
-        } catch {
-            // failed to read file size
+        } catch (let error) {
+            print("[FileWriter] Cannot read file size: \(self.filePath.absoluteString), error: \(error).")
         }
         
         return 0
+    }
+    
+    private func createDirectories() {
+        do {
+            try FileManager.default.createDirectory(at: self.filePath.deletingLastPathComponent(),
+                                                    withIntermediateDirectories: true,
+                                                    attributes: nil)
+        } catch (let error) {
+            print("[FileWriter] Could not create directory for file: \(self.filePath), error: \(error).")
+        }
     }
 }

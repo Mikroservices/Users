@@ -23,7 +23,7 @@ public class SingleLineFormatter: LogFormatter {
             ? self.prettyMetadata
             : self.prettify(self.metadata.merging(metadata!, uniquingKeysWith: { _, new in new }))
 
-        let message = "\(self.timestamp()) \(level) \(label) :\(prettyMetadata.map { " \($0)" } ?? "") \(message)\n"
+        let message = "\(self.timestamp()) [\(level.name)] (\(label)\(prettyMetadata.map { ", \($0)" } ?? "")): \(message)\n"
         return message.data(using: .utf8)
     }
     
