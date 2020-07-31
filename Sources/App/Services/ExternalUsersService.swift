@@ -18,8 +18,8 @@ extension Application.Services {
 
 protocol ExternalUsersServiceType {
     func getRegisteredExternalUser(on request: Request, user: OAuthUser) -> EventLoopFuture<(User?, ExternalUser?)>
-    func getRedirectLocation(authClient: AuthClient) throws -> String
-    func getOauthRequest(authClient: AuthClient, code: String) -> OAuthRequest
+    func getRedirectLocation(authClient: AuthClient, baseAddress: String) throws -> String
+    func getOauthRequest(authClient: AuthClient, baseAddress: String, code: String) -> OAuthRequest
 }
 
 final class ExternalUsersService: ExternalUsersServiceType {
@@ -42,31 +42,37 @@ final class ExternalUsersService: ExternalUsersServiceType {
         }
     }
     
-    public func getRedirectLocation(authClient: AuthClient) throws -> String {
+    public func getRedirectLocation(authClient: AuthClient, baseAddress: String) throws -> String {
         switch authClient.type {
         case .apple:
-            return try self.createAppleUrl(uri: authClient.uri, clientId: authClient.clientId)
+            return try self.createAppleUrl(baseAddress: baseAddress, uri: authClient.uri, clientId: authClient.clientId)
         case .google:
-            return try self.createGoogleUrl(uri: authClient.uri, clientId: authClient.clientId)
+            return try self.createGoogleUrl(baseAddress: baseAddress, uri: authClient.uri, clientId: authClient.clientId)
         case .microsoft:
-            return try self.createMicrosoftUrl(uri: authClient.uri, tenantId: authClient.tenantId, clientId: authClient.clientId)
+            return try self.createMicrosoftUrl(baseAddress: baseAddress,
+                                               uri: authClient.uri,
+                                               tenantId: authClient.tenantId,
+                                               clientId: authClient.clientId)
         }
     }
     
-    public func getOauthRequest(authClient: AuthClient, code: String) -> OAuthRequest {
+    public func getOauthRequest(authClient: AuthClient, baseAddress: String, code: String) -> OAuthRequest {
         switch authClient.type {
         case .apple:
-            return self.getAppleOauthRequest(uri: authClient.uri,
+            return self.getAppleOauthRequest(baseAddress: baseAddress,
+                                             uri: authClient.uri,
                                              clientId: authClient.clientId,
                                              clientSecret: authClient.clientSecret,
                                              code: code)
         case .google:
-            return self.getGoogleOauthRequest(uri: authClient.uri,
+            return self.getGoogleOauthRequest(baseAddress: baseAddress,
+                                              uri: authClient.uri,
                                               clientId: authClient.clientId,
                                               clientSecret: authClient.clientSecret,
                                               code: code)
         case .microsoft:
-            return self.getMicrosoftOauthRequest(uri: authClient.uri,
+            return self.getMicrosoftOauthRequest(baseAddress: baseAddress,
+                                                 uri: authClient.uri,
                                                  tenantId: authClient.tenantId ?? "",
                                                  clientId: authClient.clientId,
                                                  clientSecret: authClient.clientSecret,
@@ -74,16 +80,16 @@ final class ExternalUsersService: ExternalUsersServiceType {
         }
     }
     
-    private func createAppleUrl(uri: String, clientId: String) throws -> String {
+    private func createAppleUrl(baseAddress: String, uri: String, clientId: String) throws -> String {
         let host = "https://accounts.google.com/o/oauth2/v2/auth"
         
         let urlEncoder = URLEncodedFormEncoder()
         let scope = try urlEncoder.encode("openid profile email")
         let responseType = try urlEncoder.encode("code")
         let clientId = try urlEncoder.encode(clientId)
-        let redirectUri = try urlEncoder.encode("http://localhost:8080/identity/callback/\(uri)")
-        let state = try urlEncoder.encode("abcd")
-        let nonce = try urlEncoder.encode("asd23sad")
+        let redirectUri = try urlEncoder.encode("\(baseAddress)identity/callback/\(uri)")
+        let state = try urlEncoder.encode(self.generateState())
+        let nonce = try urlEncoder.encode(self.generateNonce())
         
         let location = "\(host)?" +
             "scope=\(scope)" +
@@ -96,16 +102,16 @@ final class ExternalUsersService: ExternalUsersServiceType {
         return location
     }
         
-    private func createGoogleUrl(uri: String, clientId: String) throws -> String {
+    private func createGoogleUrl(baseAddress: String, uri: String, clientId: String) throws -> String {
         let host = "https://accounts.google.com/o/oauth2/v2/auth"
         
         let urlEncoder = URLEncodedFormEncoder()
         let scope = try urlEncoder.encode("openid profile email")
         let responseType = try urlEncoder.encode("code")
         let clientId = try urlEncoder.encode(clientId)
-        let redirectUri = try urlEncoder.encode("http://localhost:8080/identity/callback/\(uri)")
-        let state = try urlEncoder.encode("abcd")
-        let nonce = try urlEncoder.encode("asd23sad")
+        let redirectUri = try urlEncoder.encode("\(baseAddress)identity/callback/\(uri)")
+        let state = try urlEncoder.encode(self.generateState())
+        let nonce = try urlEncoder.encode(self.generateNonce())
         
         let location = "\(host)?" +
             "scope=\(scope)" +
@@ -118,16 +124,16 @@ final class ExternalUsersService: ExternalUsersServiceType {
         return location
     }
 
-    private func createMicrosoftUrl(uri: String, tenantId: String?, clientId: String) throws -> String {
+    private func createMicrosoftUrl(baseAddress: String, uri: String, tenantId: String?, clientId: String) throws -> String {
         let host = "https://login.microsoftonline.com/\(tenantId ?? "unknown")/oauth2/v2.0/authorize"
         
         let urlEncoder = URLEncodedFormEncoder()
         let scope = try urlEncoder.encode("openid profile email")
         let responseType = try urlEncoder.encode("code")
         let clientId = try urlEncoder.encode(clientId)
-        let redirectUri = try urlEncoder.encode("http://localhost:8080/identity/callback/\(uri)")
-        let state = try urlEncoder.encode("abcd")
-        let nonce = try urlEncoder.encode("asd23sad")
+        let redirectUri = try urlEncoder.encode("\(baseAddress)identity/callback/\(uri)")
+        let state = try urlEncoder.encode(self.generateState())
+        let nonce = try urlEncoder.encode(self.generateNonce())
         
         let location = "\(host)?" +
             "scope=\(scope)" +
@@ -140,36 +146,59 @@ final class ExternalUsersService: ExternalUsersServiceType {
         return location
     }
     
-    private func getAppleOauthRequest(uri: String, clientId: String, clientSecret: String, code: String) -> OAuthRequest {
+    private func getAppleOauthRequest(baseAddress: String,
+                                      uri: String,
+                                      clientId: String,
+                                      clientSecret: String,
+                                      code: String) -> OAuthRequest {
         let oauthRequest = OAuthRequest(url: "https://oauth2.googleapis.com/token",
                                         code: code,
                                         clientId: clientId,
                                         clientSecret: clientSecret,
-                                        redirectUri: "http://localhost:8080/identity/callback/\(uri)",
+                                        redirectUri: "\(baseAddress)identity/callback/\(uri)",
                                         grantType: "authorization_code")
         
         return oauthRequest
     }
 
-    private func getGoogleOauthRequest(uri: String, clientId: String, clientSecret: String, code: String) -> OAuthRequest {
+    private func getGoogleOauthRequest(baseAddress: String,
+                                       uri: String,
+                                       clientId: String,
+                                       clientSecret: String,
+                                       code: String) -> OAuthRequest {
         let oauthRequest = OAuthRequest(url: "https://oauth2.googleapis.com/token",
                                         code: code,
                                         clientId: clientId,
                                         clientSecret: clientSecret,
-                                        redirectUri: "http://localhost:8080/identity/callback/\(uri)",
+                                        redirectUri: "\(baseAddress)identity/callback/\(uri)",
                                         grantType: "authorization_code")
         
         return oauthRequest
     }
 
-    private func getMicrosoftOauthRequest(uri: String, tenantId: String, clientId: String, clientSecret: String, code: String) -> OAuthRequest {
+    private func getMicrosoftOauthRequest(baseAddress: String,
+                                          uri: String,
+                                          tenantId: String,
+                                          clientId: String,
+                                          clientSecret: String,
+                                          code: String) -> OAuthRequest {
         let oauthRequest = OAuthRequest(url: "https://login.microsoftonline.com/\(tenantId)/oauth2/v2.0/token",
                                         code: code,
                                         clientId: clientId,
                                         clientSecret: clientSecret,
-                                        redirectUri: "http://localhost:8080/identity/callback/\(uri)",
+                                        redirectUri: "\(baseAddress)identity/callback/\(uri)",
                                         grantType: "authorization_code")
         
         return oauthRequest
+    }
+    
+    private func generateState() -> String {
+        let uuid = UUID().uuidString.lowercased()
+        return Data(uuid.utf8).base64EncodedString()
+    }
+    
+    private func generateNonce() -> String {
+        let uuid = UUID().uuidString.lowercased()
+        return Data(uuid.utf8).base64EncodedString()
     }
 }

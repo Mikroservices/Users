@@ -35,6 +35,7 @@ final class Setting: Model {
 extension Setting: Content { }
 
 public enum SettingKey: String {
+    case baseAddress
     case jwtPrivateKey
     case emailServiceAddress
     case isRecaptchaEnabled

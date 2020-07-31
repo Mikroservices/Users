@@ -1,6 +1,7 @@
 import Vapor
 
 public struct ApplicationSettings {
+    public let baseAddress: String
     public let emailServiceAddress: String?
     public let isRecaptchaEnabled: Bool
     public let recaptchaKey: String
@@ -8,12 +9,14 @@ public struct ApplicationSettings {
     public let corsOrigin: String?
     
     init(application: Application,
+         baseAddress: String = "",
          emailServiceAddress: String? = nil,
          isRecaptchaEnabled: Bool = false,
          recaptchaKey: String = "",
          eventsToStore: String = "",
          corsOrigin: String? = nil
     ) {
+        self.baseAddress = baseAddress
         self.emailServiceAddress = emailServiceAddress
         self.isRecaptchaEnabled = isRecaptchaEnabled
         self.recaptchaKey = recaptchaKey

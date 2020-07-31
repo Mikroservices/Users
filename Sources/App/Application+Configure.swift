@@ -128,6 +128,7 @@ extension Application {
         
         self.settings.configuration = ApplicationSettings(
             application: self,
+            baseAddress: settings.getString(.baseAddress) ?? "http://localhost:8080/",
             emailServiceAddress: settings.getString(.emailServiceAddress),
             isRecaptchaEnabled: settings.getBool(.isRecaptchaEnabled) ?? false,
             recaptchaKey: settings.getString(.recaptchaKey) ?? "",
