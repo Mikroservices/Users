@@ -70,14 +70,14 @@ extension Application {
     private func configureDatabase(clearDatabase: Bool = false) throws {
         // In testing environmebt we are using in memory database.
         if self.environment == .testing {
-            self.logger.info("In memory SQLite is used during testing")
+            self.logger.info("In memory SQLite is used during testing (testing environment is set)")
             self.databases.use(.sqlite(.memory), as: .sqlite)
             return
         }
         
         // Retrieve connection string from Env variables.
         guard let connectionString = Environment.get("MIKROSERVICE_USERS_CONNECTION_STRING") else {
-            self.logger.info("In memory SQLite is used during testing")
+            self.logger.info("In memory SQLite is used during testing (connection string is not set)")
             self.databases.use(.sqlite(.memory), as: .sqlite)
             return
         }
