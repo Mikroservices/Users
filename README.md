@@ -187,3 +187,21 @@ From Web application (client) perspective there are two important things:
 2. After successfull authentication Web application should be opened with `authenticateToken` variable in query string. That variable can be exchanged for `accessToken` via `/identity/login` endpoint (`authenticateToken` is valid 60 seconds). 
 
 If user is signing in for a first time a new account will be created. 
+
+## Deployment
+
+You can deploy application as service in the Kubernates cluster or as a single service in Linux.
+
+### Users service in Linux
+
+You must modify and copy file `users.service` to your Linux server (folder `/lib/systemd/system`). Then you can start service using below command:
+
+```bash
+$ systemctl start users.service
+```
+
+If you want start service at system boot you must run following command:
+
+```bash
+$ systemctl enable users.service
+```

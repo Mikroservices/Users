@@ -1,0 +1,21 @@
+# Systemd service file for a Vapor app
+# Put this file in /lib/systemd/system
+# Usage: systemctl clean stop/start/reload/restart/status users.service
+
+[Unit]
+Description=Users Microservice
+After=syslog.target
+
+[Service]
+User=ubuntu
+WorkingDirectory=/home/ubuntu/wwwroot/Users
+ExecStart=/home/ubuntu/wwwroot/Users/.build/debug/Run serve --hostname 192.168.0.71 --port 8080
+Restart=on-abort
+
+#Type=idle
+#Environment=statedir=/var/cache/foo
+#ExecStartPre=/usr/bin/mkdir -p ${statedir}
+#ExecStart=/usr/local/bin/vapor run serve --env=production
+
+[Install]
+WantedBy=multi-user.target
