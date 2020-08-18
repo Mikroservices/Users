@@ -137,9 +137,6 @@ extension Application {
     }
     
     private func configurePostgres(connectionUrl: URL) throws {
-        var tlsConfiguration = TLSConfiguration.forClient()
-        tlsConfiguration.certificateVerification = .none
-        
         guard let username = connectionUrl.user else {
             throw DatabaseConnectionError.userNameNotSpecified
         }
@@ -155,7 +152,14 @@ extension Application {
         guard let database = connectionUrl.path.split(separator: "/").last.flatMap(String.init) else {
             throw DatabaseConnectionError.databaseNotSpecified
         }
-        
+
+        var tlsConfiguration: TLSConfiguration? = nil
+        let certificateVerification = connectionUrl.valueOf("certificateVerification")
+        if let certificateVerification = certificateVerification, certificateVerification == "none" {
+            tlsConfiguration = TLSConfiguration.forClient()
+            tlsConfiguration?.certificateVerification = .none
+        }
+
         self.databases.use(.postgres(
             hostname: hostname,
             port: port,
