@@ -28,6 +28,9 @@ let package = Package(
         // 📘 Custom logger handlers.
         .package(url: "https://github.com/Mikroservices/ExtendedLogging.git", from: "1.0.0"),
         
+        // 📒 Library provides mechanism for reading configuration files.
+        .package(url: "https://github.com/Mikroservices/ExtendedConfiguration.git", from: "1.0.0"),
+        
         // 🐞 Custom error middleware for Vapor.
         .package(url: "https://github.com/Mikroservices/ExtendedError.git", from: "2.0.0"),
         
@@ -46,6 +49,7 @@ let package = Package(
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "ExtendedLogging", package: "ExtendedLogging"),
                 .product(name: "ExtendedError", package: "ExtendedError"),
+                .product(name: "ExtendedConfiguration", package: "ExtendedConfiguration"),
                 .product(name: "Recaptcha", package: "Recaptcha")
             ],
             swiftSettings: [

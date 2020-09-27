@@ -10,8 +10,9 @@ struct EventHandlerMiddleware: Middleware {
     }
     
     func respond(to request: Request, chainingTo next: Responder) -> EventLoopFuture<Response> {
-            
-        if request.application.settings.configuration.eventsToStore.contains(self.eventType) == false {
+        
+        let appplicationSettings = request.application.settings.get(ApplicationSettings.self)
+        if appplicationSettings?.eventsToStore.contains(self.eventType) == false {
             return next.respond(to: request)
         }
         

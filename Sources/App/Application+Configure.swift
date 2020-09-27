@@ -3,6 +3,7 @@ import Fluent
 import FluentPostgresDriver
 import FluentSQLiteDriver
 import ExtendedError
+import ExtendedConfiguration
 import JWT
 
 extension Application {
@@ -11,6 +12,9 @@ extension Application {
     public func configure() throws {
         // Register routes to the router.
         try routes()
+        
+        // Initialize configuration from file.
+        try initConfiguration()
         
         // Configure database.
         try configureDatabase()
@@ -49,7 +53,9 @@ extension Application {
     private func registerMiddlewares() {
         // Read CORS origin from settings table.
         var corsOrigin = CORSMiddleware.AllowOriginSetting.all
-        if let corsOriginSettig = self.settings.configuration.corsOrigin, corsOriginSettig != "" {
+        
+        let appplicationSettings = self.settings.get(ApplicationSettings.self)
+        if let corsOriginSettig = appplicationSettings?.corsOrigin, corsOriginSettig != "" {
             corsOrigin = .custom(corsOriginSettig)
         }
         
@@ -66,6 +72,21 @@ extension Application {
         let errorMiddleware = CustomErrorMiddleware()
         self.middleware.use(errorMiddleware)
     }
+    
+    private func initConfiguration() throws {
+        self.logger.info("Init configuration for environment: \(self.environment.name)")
+        
+        try self.settings.load([
+            .jsonFile("appsettings.json", optional: false),
+            .jsonFile("appsettings.\(self.environment.name).json", optional: true),
+            .jsonFile("appsettings.local.json", optional: true),
+            .environmentVariables(.withPrefix("users."))
+        ])
+                
+        self.settings.configuration.all().forEach { (key: String, value: Any) in
+            self.logger.info("Configuration: \(key), value: \(value)")
+        }
+    }
 
     private func configureDatabase(clearDatabase: Bool = false) throws {
         // In testing environmebt we are using in memory database.
@@ -75,16 +96,16 @@ extension Application {
             return
         }
         
-        // Retrieve connection string from Env variables.
-        guard let connectionString = Environment.get("MIKROSERVICE_USERS_CONNECTION_STRING") else {
-            self.logger.info("In memory SQLite is used during testing (connection string is not set)")
+        // Retrieve connection string from configuration settings.
+        guard let connectionString = self.settings.getString(for: "users.connectionString") else {
+            self.logger.info("In memory SQLite has been used (connection string is not set)")
             self.databases.use(.sqlite(.memory), as: .sqlite)
             return
         }
         
         // When environment variable is not configured we are using in memory database.
         guard let connectionUrl = URL(string: connectionString) else {
-            self.logger.warning("No 'MIKROSERVICE_USERS_CONNECTION_STRING' environment variable configured. In memory SQLite is used.")
+            self.logger.warning("In memory SQLite has been used (incorrect URL is set: \(connectionString)).")
             self.databases.use(.sqlite(.memory), as: .sqlite)
             return
         }
@@ -126,14 +147,15 @@ extension Application {
         let rsaKey: RSAKey = try .private(pem: privateKey)
         self.jwt.signers.use(.rs512(key: rsaKey))
         
-        self.settings.configuration = ApplicationSettings(
-            application: self,
+        let applicationSettings = ApplicationSettings(
             baseAddress: settings.getString(.baseAddress) ?? "http://localhost:8080/",
             emailServiceAddress: settings.getString(.emailServiceAddress),
             isRecaptchaEnabled: settings.getBool(.isRecaptchaEnabled) ?? false,
             recaptchaKey: settings.getString(.recaptchaKey) ?? "",
             eventsToStore: settings.getString(.eventsToStore) ?? ""
         )
+        
+        self.settings.set(applicationSettings, for: ApplicationSettings.self)
     }
     
     private func configurePostgres(connectionUrl: URL) throws {

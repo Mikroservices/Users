@@ -5,6 +5,7 @@
 ### SQlite databas ###
 mikroservice.db
 users.db
+appsettings.local.json
 
 ### Linux ###
 *~

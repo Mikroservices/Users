@@ -3,7 +3,8 @@ import Vapor
 struct LoginHandlerMiddleware: Middleware {
     func respond(to request: Request, chainingTo next: Responder) -> EventLoopFuture<Response> {
         
-        if request.application.settings.configuration.eventsToStore.contains(.accountLogin) == false {
+        let appplicationSettings = request.application.settings.get(ApplicationSettings.self)
+        if appplicationSettings?.eventsToStore.contains(.accountLogin) == false {
             return next.respond(to: request)
         }
         

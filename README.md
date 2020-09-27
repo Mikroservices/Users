@@ -105,27 +105,27 @@ You should see blank page with text: *Service is up and running!*. Now you can u
 
 ## Database
 
-If you want to use persistent database you have to add system environment `MIKROSERVICE_USERS_CONNECTION_STRING` with connection string to the database.
+If you want to use persistent database you have to set application setting in configuration file or in environment variable with connection string to the database.
 
 **Connection string for PostgreSQL:** 
 
 ```
-Variable name:              MIKROSERVICE_USERS_CONNECTION_STRING
+Variable name:              users.connectionString
 Value (connection string):  postgresql://user:password@host:5432/database?sslmode=require
 ```
 
 **Connection string for SQLite:** 
 
 ```
-Variable name:              MIKROSERVICE_USERS_CONNECTION_STRING
+Variable name:              users.connectionString
 Value (connection string):  users.db
 ```
 
 You can set up this variable as:
 
-1. environment variable in your system
-2. environment variable in XCode
-
+1. setting in `appsettings.json` (or in `appsettings.local.json` if you don't want to commit file)
+2. environment variable in your system
+3. environment variable in XCode
 
 ## Configuration
 

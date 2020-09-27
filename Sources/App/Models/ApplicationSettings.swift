@@ -1,5 +1,3 @@
-import Vapor
-
 public struct ApplicationSettings {
     public let baseAddress: String
     public let emailServiceAddress: String?
@@ -8,8 +6,7 @@ public struct ApplicationSettings {
     public let eventsToStore: [EventType]
     public let corsOrigin: String?
     
-    init(application: Application,
-         baseAddress: String = "",
+    init(baseAddress: String = "",
          emailServiceAddress: String? = nil,
          isRecaptchaEnabled: Bool = false,
          recaptchaKey: String = "",
@@ -30,29 +27,5 @@ public struct ApplicationSettings {
         }
         
         self.eventsToStore = eventsArray
-    }
-}
-
-
-extension Application {
-    public var settings: Settings {
-        .init(application: self)
-    }
-
-    public struct Settings {
-        let application: Application
-
-        struct ConfigurationKey: StorageKey {
-            typealias Value = ApplicationSettings
-        }
-
-        public var configuration: ApplicationSettings {
-            get {
-                self.application.storage[ConfigurationKey.self] ?? .init(application: application)
-            }
-            nonmutating set {
-                self.application.storage[ConfigurationKey.self] = newValue
-            }
-        }
     }
 }

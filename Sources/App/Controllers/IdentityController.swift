@@ -27,7 +27,8 @@ final class IdentityController: RouteCollection {
                 throw OpenIdConnectError.clientNotFound
             }
             
-            let baseAddress = request.application.settings.configuration.baseAddress
+            let appplicationSettings = request.application.settings.get(ApplicationSettings.self)
+            let baseAddress = appplicationSettings?.baseAddress ?? ""
             let location = try externalUsersService.getRedirectLocation(authClient: authClient, baseAddress: baseAddress)
             return request.redirect(to: location, type: .permanent)
         }
@@ -118,7 +119,9 @@ final class IdentityController: RouteCollection {
     
     private func postOAuthRequest(on request: Request, for authClient: AuthClient, code: String) -> EventLoopFuture<ClientResponse> {
         let externalUsersService = request.application.services.externalUsersService
-        let baseAddress = request.application.settings.configuration.baseAddress
+        
+        let appplicationSettings = request.application.settings.get(ApplicationSettings.self)
+        let baseAddress = appplicationSettings?.baseAddress ?? ""
         
         let oauthRequest = externalUsersService.getOauthRequest(authClient: authClient, baseAddress: baseAddress, code: code)
         return request.client.post(URI(string: oauthRequest.url), headers: HTTPHeaders()) { clientRequest in
