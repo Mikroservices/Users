@@ -42,7 +42,7 @@ final class AuthenticationClientsController: RouteCollection {
     func create(request: Request) throws -> EventLoopFuture<Response> {
         let authClientsService = request.application.services.authenticationClientsService
         let authClientDto = try request.content.decode(AuthClientDto.self)
-        try AuthClientDto.validate(request)
+        try AuthClientDto.validate(content: request)
 
         let validateUriFuture = authClientsService.validateUri(on: request, uri: authClientDto.uri, authClientId: nil)
         let createAuthClientFuture = validateUriFuture.map { _ in
@@ -86,7 +86,7 @@ final class AuthenticationClientsController: RouteCollection {
         
         let authClientsService = request.application.services.authenticationClientsService
         let authClientDto = try request.content.decode(AuthClientDto.self)
-        try AuthClientDto.validate(request)
+        try AuthClientDto.validate(content: request)
         
         let authClientFuture = self.getAuthClientById(on: request, authClientId: authClientId)
         let validateUriFuture = authClientFuture.flatMap { authClient in

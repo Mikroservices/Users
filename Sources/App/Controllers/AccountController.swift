@@ -67,7 +67,7 @@ final class AccountController: RouteCollection {
         let authorizationPayload = try request.auth.require(UserPayload.self)
 
         let changePasswordRequestDto = try request.content.decode(ChangePasswordRequestDto.self)
-        try ChangePasswordRequestDto.validate(request)
+        try ChangePasswordRequestDto.validate(content: request)
 
         let usersService = request.application.services.usersService
         return try usersService.changePassword(

@@ -35,7 +35,7 @@ final class ForgotPasswordController: RouteCollection {
     /// Changing password.
     func forgotPasswordConfirm(request: Request) throws -> EventLoopFuture<HTTPResponseStatus> {
         let confirmationDto = try request.content.decode(ForgotPasswordConfirmationRequestDto.self)
-        try ForgotPasswordConfirmationRequestDto.validate(request)
+        try ForgotPasswordConfirmationRequestDto.validate(content: request)
 
         let usersService = request.application.services.usersService
         let confirmForgotPasswordFuture = usersService.confirmForgotPassword(

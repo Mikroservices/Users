@@ -27,7 +27,7 @@ final class RegisterController: RouteCollection {
     /// Register new user.
     func newUser(request: Request) throws -> EventLoopFuture<Response> {
         let registerUserDto = try request.content.decode(RegisterUserDto.self)
-        try RegisterUserDto.validate(request)
+        try RegisterUserDto.validate(content: request)
 
         guard let captchaToken = registerUserDto.securityToken else {
             throw RegisterError.securityTokenIsMandatory

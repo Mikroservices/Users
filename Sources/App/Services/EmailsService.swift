@@ -35,12 +35,12 @@ final class EmailsService: EmailsServiceType {
 
         let userName = user.getUserName()
 
-        let emailServiceUri = URI(string: "\(emailServiceAddress)/emails")
+        let emailServiceUri = URI(string: "\(emailServiceAddress)/emails/send")
         let requestFuture = request.client.post(emailServiceUri) { httpRequest in
             let emailAddress = EmailAddressDto(address: user.email, name: user.name)
             let email = EmailDto(to: emailAddress,
-                                title: "Letterer - Forgot password",
-                                body: "<html><body><div>Hi \(userName),</div><div>You can reset your password by clicking following <a href='https://letterer.me/reset-password?token=\(forgotPasswordGuid)'>link</a>.</div></body></html>")
+                                 subject: "Mikroservices - Forgot password",
+                                 body: "<html><body><div>Hi \(userName),</div><div>You can reset your password by clicking following <a href='\(request.application.settings.configuration.baseAddress)/reset-password?token=\(forgotPasswordGuid)'>link</a>.</div></body></html>")
 
             try httpRequest.content.encode(email)
         }
@@ -62,12 +62,12 @@ final class EmailsService: EmailsServiceType {
 
         let userName = user.getUserName()
 
-        let emailServiceUri = URI(string: "\(emailServiceAddress)/emails")
+        let emailServiceUri = URI(string: "\(emailServiceAddress)/emails/send")
         let requestFuture = request.client.post(emailServiceUri) { httpRequest in
             let emailAddress = EmailAddressDto(address: user.email, name: user.name)
             let email = EmailDto(to: emailAddress,
-                                title: "Letterer - Confirm email",
-                                body: "<html><body><div>Hi \(userName),</div><div>Please confirm your account by clicking following <a href='https://letterer.me/confirm-email?token=\(user.emailConfirmationGuid)&user=\(userId)'>link</a>.</div></body></html>")
+                                 subject: "Mikroservices - Confirm email",
+                                 body: "<html><body><div>Hi \(userName),</div><div>Please confirm your account by clicking following <a href='\(request.application.settings.configuration.baseAddress)/confirm-email?token=\(user.emailConfirmationGuid)&user=\(userId)'>link</a>.</div></body></html>")
 
             try httpRequest.content.encode(email)
         }

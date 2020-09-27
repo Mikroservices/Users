@@ -65,7 +65,7 @@ final class UsersController: RouteCollection {
         }
         
         let userDto = try request.content.decode(UserDto.self)
-        try UserDto.validate(request)
+        try UserDto.validate(content: request)
         
         let usersService = request.application.services.usersService
         return usersService.updateUser(on: request, userDto: userDto, userNameNormalized: userNameNormalized).map { user in

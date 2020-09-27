@@ -36,7 +36,7 @@ final class RolesController: RouteCollection {
     func create(request: Request) throws -> EventLoopFuture<Response> {
         let rolesService = request.application.services.rolesService
         let roleDto = try request.content.decode(RoleDto.self)
-        try RoleDto.validate(request)
+        try RoleDto.validate(content: request)
 
         let validateCodeFuture = rolesService.validateCode(on: request, code: roleDto.code, roleId: nil)
         let createRoleFuture = validateCodeFuture.map { _ in
@@ -80,7 +80,7 @@ final class RolesController: RouteCollection {
         }
         
         let roleDto = try request.content.decode(RoleDto.self)
-        try RoleDto.validate(request)
+        try RoleDto.validate(content: request)
 
         let roleFuture = self.getRoleById(on: request, roleId: roleId)
         let validateCodeFuture = roleFuture.flatMap { role in

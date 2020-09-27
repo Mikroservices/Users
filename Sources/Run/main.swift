@@ -1,5 +1,6 @@
 import App
 import Vapor
+import ExtendedLogging
 
 var env = try Environment.detect()
 let level = try LoggingSystem.logLevel(from: &env)
