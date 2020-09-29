@@ -11,6 +11,7 @@ final class RegisterActionTests: XCTestCase {
         let registerUserDto = RegisterUserDto(userName: "annasmith",
                                               email: "annasmith@testemail.com",
                                               password: "p@ssword",
+                                              redirectBaseUrl: "http://localhost:4200",
                                               name: "Anna Smith",
                                               securityToken: "123")
 
@@ -28,6 +29,7 @@ final class RegisterActionTests: XCTestCase {
         let registerUserDto = RegisterUserDto(userName: "martinsmith",
                                               email: "martinsmith@testemail.com",
                                               password: "p@ssword",
+                                              redirectBaseUrl: "http://localhost:4200",
                                               name: "Martin Smith",
                                               securityToken: "123")
 
@@ -44,6 +46,7 @@ final class RegisterActionTests: XCTestCase {
         let registerUserDto = RegisterUserDto(userName: "victoriasmith",
                                               email: "victoriasmith@testemail.com",
                                               password: "p@ssword",
+                                              redirectBaseUrl: "http://localhost:4200",
                                               name: "Victoria Smith",
                                               securityToken: "123")
 
@@ -62,6 +65,7 @@ final class RegisterActionTests: XCTestCase {
         let registerUserDto = RegisterUserDto(userName: "dansmith",
                                               email: "dansmith@testemail.com",
                                               password: "p@ssword",
+                                              redirectBaseUrl: "http://localhost:4200",
                                               name: "Dan Smith",
                                               bio: "User biography",
                                               location: "London",
@@ -89,6 +93,7 @@ final class RegisterActionTests: XCTestCase {
         let registerUserDto = RegisterUserDto(userName: "briansmith",
                                               email: "briansmith@testemail.com",
                                               password: "p@ssword",
+                                              redirectBaseUrl: "http://localhost:4200",
                                               name: "Brian Smith",
                                               securityToken: "123")
 
@@ -110,6 +115,7 @@ final class RegisterActionTests: XCTestCase {
         let registerUserDto = RegisterUserDto(userName: "notexists",
                                               email: "jurgensmith@testemail.com",
                                               password: "p@ssword",
+                                              redirectBaseUrl: "http://localhost:4200",
                                               name: "Jurgen Smith",
                                               securityToken: "123")
 
@@ -132,6 +138,7 @@ final class RegisterActionTests: XCTestCase {
         let registerUserDto = RegisterUserDto(userName: "teddysmith",
                                               email: "teddysmith-notexists@testemail.com",
                                               password: "p@ssword",
+                                              redirectBaseUrl: "http://localhost:4200",
                                               name: "Samantha Smith",
                                               securityToken: "123")
 
@@ -153,6 +160,7 @@ final class RegisterActionTests: XCTestCase {
         let registerUserDto = RegisterUserDto(userName: "",
                                               email: "gregsmith@testemail.com",
                                               password: "p@ssword",
+                                              redirectBaseUrl: "http://localhost:4200",
                                               name: "Greg Smith",
                                               securityToken: "123")
 
@@ -176,6 +184,7 @@ final class RegisterActionTests: XCTestCase {
         let registerUserDto = RegisterUserDto(userName: "123456789012345678901234567890123456789012345678901",
                                               email: "gregsmith@testemail.com",
                                               password: "p@ssword",
+                                              redirectBaseUrl: "http://localhost:4200",
                                               name: "Greg Smith",
                                               securityToken: "123")
 
@@ -199,6 +208,7 @@ final class RegisterActionTests: XCTestCase {
         let registerUserDto = RegisterUserDto(userName: "gregsmith",
                                               email: "",
                                               password: "p@ssword",
+                                              redirectBaseUrl: "http://localhost:4200",
                                               name: "Greg Smith",
                                               securityToken: "123")
 
@@ -222,6 +232,7 @@ final class RegisterActionTests: XCTestCase {
         let registerUserDto = RegisterUserDto(userName: "gregsmith",
                                               email: "gregsmithtestemail.com",
                                               password: "p@ssword",
+                                              redirectBaseUrl: "http://localhost:4200",
                                               name: "Greg Smith",
                                               securityToken: "123")
 
@@ -245,6 +256,7 @@ final class RegisterActionTests: XCTestCase {
         let registerUserDto = RegisterUserDto(userName: "gregsmith",
                                               email: "gregsmith@testemail.com",
                                               password: "",
+                                              redirectBaseUrl: "http://localhost:4200",
                                               name: "Greg Smith",
                                               securityToken: "123")
 
@@ -268,6 +280,7 @@ final class RegisterActionTests: XCTestCase {
         let registerUserDto = RegisterUserDto(userName: "gregsmith",
                                               email: "gregsmith@testemail.com",
                                               password: "1234567",
+                                              redirectBaseUrl: "http://localhost:4200",
                                               name: "Greg Smith",
                                               securityToken: "123")
 
@@ -291,6 +304,7 @@ final class RegisterActionTests: XCTestCase {
         let registerUserDto = RegisterUserDto(userName: "gregsmith",
                                               email: "gregsmith@testemail.com",
                                               password: "123456789012345678901234567890123",
+                                              redirectBaseUrl: "http://localhost:4200",
                                               name: "Greg Smith",
                                               securityToken: "123")
 
@@ -314,6 +328,7 @@ final class RegisterActionTests: XCTestCase {
         let registerUserDto = RegisterUserDto(userName: "gregsmith",
                                               email: "gregsmith@testemail.com",
                                               password: "p@ssword",
+                                              redirectBaseUrl: "http://localhost:4200",
                                               name: "123456789012345678901234567890123456789012345678901",
                                               securityToken: "123")
 
@@ -337,6 +352,7 @@ final class RegisterActionTests: XCTestCase {
         let registerUserDto = RegisterUserDto(userName: "gregsmith",
                                               email: "gregsmith@testemail.com",
                                               password: "p@ssword",
+                                              redirectBaseUrl: "http://localhost:4200",
                                               name: "Greg Smith",
                                               location: "123456789012345678901234567890123456789012345678901",
                                               securityToken: "123")
@@ -361,6 +377,7 @@ final class RegisterActionTests: XCTestCase {
         let registerUserDto = RegisterUserDto(userName: "gregsmith",
                                               email: "gregsmith@testemail.com",
                                               password: "p@ssword",
+                                              redirectBaseUrl: "http://localhost:4200",
                                               name: "Greg Smith",
                                               website: "123456789012345678901234567890123456789012345678901",
                                               securityToken: "123")
@@ -385,6 +402,7 @@ final class RegisterActionTests: XCTestCase {
         let registerUserDto = RegisterUserDto(userName: "gregsmith",
                                               email: "gregsmith@testemail.com",
                                               password: "p@ssword",
+                                              redirectBaseUrl: "http://localhost:4200",
                                               name: "Greg Smith",
                                               bio: "12345678901234567890123456789012345678901234567890" +
                                                    "12345678901234567890123456789012345678901234567890" +
@@ -412,6 +430,7 @@ final class RegisterActionTests: XCTestCase {
         let registerUserDto = RegisterUserDto(userName: "gregsmith",
                                               email: "gregsmith@testemail.com",
                                               password: "p@ssword",
+                                              redirectBaseUrl: "http://localhost:4200",
                                               name: "Greg Smith",
                                               securityToken: nil)
 

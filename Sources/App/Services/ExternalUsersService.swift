@@ -87,7 +87,7 @@ final class ExternalUsersService: ExternalUsersServiceType {
         let scope = try urlEncoder.encode("openid profile email")
         let responseType = try urlEncoder.encode("code")
         let clientId = try urlEncoder.encode(clientId)
-        let redirectUri = try urlEncoder.encode("\(baseAddress)identity/callback/\(uri)")
+        let redirectUri = try urlEncoder.encode("\(baseAddress)/identity/callback/\(uri)")
         let state = try urlEncoder.encode(self.generateState())
         let nonce = try urlEncoder.encode(self.generateNonce())
         
@@ -109,7 +109,7 @@ final class ExternalUsersService: ExternalUsersServiceType {
         let scope = try urlEncoder.encode("openid profile email")
         let responseType = try urlEncoder.encode("code")
         let clientId = try urlEncoder.encode(clientId)
-        let redirectUri = try urlEncoder.encode("\(baseAddress)identity/callback/\(uri)")
+        let redirectUri = try urlEncoder.encode("\(baseAddress)/identity/callback/\(uri)")
         let state = try urlEncoder.encode(self.generateState())
         let nonce = try urlEncoder.encode(self.generateNonce())
         
@@ -131,7 +131,7 @@ final class ExternalUsersService: ExternalUsersServiceType {
         let scope = try urlEncoder.encode("openid profile email")
         let responseType = try urlEncoder.encode("code")
         let clientId = try urlEncoder.encode(clientId)
-        let redirectUri = try urlEncoder.encode("\(baseAddress)identity/callback/\(uri)")
+        let redirectUri = try urlEncoder.encode("\(baseAddress)/identity/callback/\(uri)")
         let state = try urlEncoder.encode(self.generateState())
         let nonce = try urlEncoder.encode(self.generateNonce())
         
@@ -155,7 +155,7 @@ final class ExternalUsersService: ExternalUsersServiceType {
                                         code: code,
                                         clientId: clientId,
                                         clientSecret: clientSecret,
-                                        redirectUri: "\(baseAddress)identity/callback/\(uri)",
+                                        redirectUri: "\(baseAddress)/identity/callback/\(uri)",
                                         grantType: "authorization_code")
         
         return oauthRequest
@@ -170,7 +170,7 @@ final class ExternalUsersService: ExternalUsersServiceType {
                                         code: code,
                                         clientId: clientId,
                                         clientSecret: clientSecret,
-                                        redirectUri: "\(baseAddress)identity/callback/\(uri)",
+                                        redirectUri: "\(baseAddress)/identity/callback/\(uri)",
                                         grantType: "authorization_code")
         
         return oauthRequest
@@ -186,7 +186,7 @@ final class ExternalUsersService: ExternalUsersServiceType {
                                         code: code,
                                         clientId: clientId,
                                         clientSecret: clientSecret,
-                                        redirectUri: "\(baseAddress)identity/callback/\(uri)",
+                                        redirectUri: "\(baseAddress)/identity/callback/\(uri)",
                                         grantType: "authorization_code")
         
         return oauthRequest

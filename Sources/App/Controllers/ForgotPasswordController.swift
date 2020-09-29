@@ -26,7 +26,9 @@ final class ForgotPasswordController: RouteCollection {
         let updateUserFuture = usersService.forgotPassword(on: request, email: forgotPasswordRequestDto.email)
 
         let sendEmailFuture = updateUserFuture.flatMapThrowing { user in
-            try emailsService.sendForgotPasswordEmail(on: request, user: user)
+            try emailsService.sendForgotPasswordEmail(on: request,
+                                                      user: user,
+                                                      redirectBaseUrl: forgotPasswordRequestDto.redirectBaseUrl)
         }
 
         return sendEmailFuture.transform(to: HTTPStatus.ok)

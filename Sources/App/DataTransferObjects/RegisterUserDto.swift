@@ -4,6 +4,7 @@ struct RegisterUserDto {
     var userName: String
     var email: String
     var password: String
+    var redirectBaseUrl: String
     var name: String?
     var bio: String?
     var location: String?

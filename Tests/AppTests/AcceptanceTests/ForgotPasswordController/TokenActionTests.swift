@@ -8,7 +8,7 @@ final class TokenActionTests: XCTestCase {
 
         // Arrange.
         _ = try User.create(userName: "johnred")
-        let forgotPasswordRequestDto = ForgotPasswordRequestDto(email: "johnred@testemail.com")
+        let forgotPasswordRequestDto = ForgotPasswordRequestDto(email: "johnred@testemail.com", redirectBaseUrl: "http://localhost:4200")
 
         // Act.
         let response = try SharedApplication.application()
@@ -21,7 +21,7 @@ final class TokenActionTests: XCTestCase {
     func testForgotPasswordTokenShouldNotBeGeneratedIfEmailNotExists() throws {
 
         // Arrange.
-        let forgotPasswordRequestDto = ForgotPasswordRequestDto(email: "not-exists@testemail.com")
+        let forgotPasswordRequestDto = ForgotPasswordRequestDto(email: "not-exists@testemail.com", redirectBaseUrl: "http://localhost:4200")
 
         // Act.
         let response = try SharedApplication.application()
@@ -35,7 +35,7 @@ final class TokenActionTests: XCTestCase {
 
         // Arrange.
         _ = try User.create(userName: "wikired", isBlocked: true)
-        let forgotPasswordRequestDto = ForgotPasswordRequestDto(email: "wikired@testemail.com")
+        let forgotPasswordRequestDto = ForgotPasswordRequestDto(email: "wikired@testemail.com", redirectBaseUrl: "http://localhost:4200")
 
         // Act.
         let errorResponse = try SharedApplication.application().getErrorResponse(

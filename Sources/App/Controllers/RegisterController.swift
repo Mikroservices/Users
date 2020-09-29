@@ -50,7 +50,7 @@ final class RegisterController: RouteCollection {
         }.flatMap { user in user }
 
         let sendEmailFuture = createUserFuture.flatMapThrowing { user in
-            try self.sendNewUserEmail(on: request, user: user)
+            try self.sendNewUserEmail(on: request, user: user, redirectBaseUrl: registerUserDto.redirectBaseUrl)
         }.flatMap { user in user }
 
         return sendEmailFuture.flatMap { user in
@@ -148,9 +148,9 @@ final class RegisterController: RouteCollection {
         }
     }
 
-    private func sendNewUserEmail(on request: Request, user: User) throws -> EventLoopFuture<User> {
+    private func sendNewUserEmail(on request: Request, user: User, redirectBaseUrl: String) throws -> EventLoopFuture<User> {
         let emailsService = request.application.services.emailsService
-        let sendEmailFuture = try emailsService.sendConfirmAccountEmail(on: request, user: user)
+        let sendEmailFuture = try emailsService.sendConfirmAccountEmail(on: request, user: user, redirectBaseUrl: redirectBaseUrl)
         return sendEmailFuture.transform(to: user)
     }
 
