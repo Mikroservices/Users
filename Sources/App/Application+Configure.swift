@@ -178,7 +178,7 @@ extension Application {
         var tlsConfiguration: TLSConfiguration? = nil
         let certificateVerification = connectionUrl.valueOf("certificateVerification")
         if let certificateVerification = certificateVerification, certificateVerification == "none" {
-            tlsConfiguration = TLSConfiguration.forClient()
+            tlsConfiguration = TLSConfiguration.makeClientConfiguration()
             tlsConfiguration?.certificateVerification = .none
         }
 

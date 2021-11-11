@@ -22,30 +22,40 @@ final class UserRolesController: RouteCollection {
     }
     
     /// Connect role to the user.
-    func connect(request: Request) throws -> EventLoopFuture<HTTPResponseStatus> {
+    func connect(request: Request) async throws -> HTTPResponseStatus {
         let userRoleDto = try request.content.decode(UserRoleDto.self)
 
-        let userFuture = User.find(userRoleDto.userId, on: request.db).unwrap(or: EntityNotFoundError.userNotFound)
-        let roleFuture = Role.find(userRoleDto.roleId, on: request.db).unwrap(or: EntityNotFoundError.roleNotFound)
-
-        let attachFuture = userFuture.and(roleFuture).map { (user, role) in
-            user.$roles.attach(role, on: request.db)
+        let user = try await User.find(userRoleDto.userId, on: request.db)
+        guard let user = user else {
+            throw EntityNotFoundError.userNotFound
+        }
+        
+        let role = try await Role.find(userRoleDto.roleId, on: request.db)
+        guard let role = role else {
+            throw EntityNotFoundError.roleNotFound
         }
 
-        return attachFuture.transform(to: HTTPStatus.ok)
+        try await user.$roles.attach(role, on: request.db)
+
+        return HTTPStatus.ok
     }
 
     /// Disconnects role and user.
-    func disconnect(request: Request) throws -> EventLoopFuture<HTTPResponseStatus> {
+    func disconnect(request: Request) async throws -> HTTPResponseStatus {
         let userRoleDto = try request.content.decode(UserRoleDto.self)
 
-        let userFuture = User.find(userRoleDto.userId, on: request.db).unwrap(or: EntityNotFoundError.userNotFound)
-        let roleFuture = Role.find(userRoleDto.roleId, on: request.db).unwrap(or: EntityNotFoundError.roleNotFound)
-
-        let attachFuture = userFuture.and(roleFuture).map { (user, role) in
-            user.$roles.detach(role, on: request.db)
+        let user = try await User.find(userRoleDto.userId, on: request.db)
+        guard let user = user else {
+            throw EntityNotFoundError.userNotFound
+        }
+        
+        let role = try await Role.find(userRoleDto.roleId, on: request.db)
+        guard let role = role else {
+            throw EntityNotFoundError.roleNotFound
         }
 
-        return attachFuture.transform(to: HTTPStatus.ok)
+        try await user.$roles.detach(role, on: request.db)
+
+        return HTTPStatus.ok
     }
 }

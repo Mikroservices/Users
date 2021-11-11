@@ -26,7 +26,7 @@ final class UsersController: RouteCollection {
     }
 
     /// User profile.
-    func read(request: Request) throws -> EventLoopFuture<UserDto> {
+    func read(request: Request) async throws -> UserDto {
 
         guard let userName = request.parameters.get("name") else {
             throw Abort(.badRequest)
@@ -34,23 +34,21 @@ final class UsersController: RouteCollection {
         
         let usersService = request.application.services.usersService
         let userNameNormalized = userName.replacingOccurrences(of: "@", with: "").uppercased()
-        let userFuture = usersService.get(on: request, userName: userNameNormalized)
+        let userFromDb = try await usersService.get(on: request, userName: userNameNormalized)
 
-        return userFuture.flatMap { userFromDb in
-            guard let user = userFromDb else {
-                return request.fail(EntityNotFoundError.userNotFound)
-            }
-            
-            let userProfile = self.cleanUserProfile(on: request,
-                                                    user: user,
-                                                    userNameFromRequest: userNameNormalized)
-            
-            return request.success(userProfile)
+        guard let user = userFromDb else {
+            throw EntityNotFoundError.userNotFound
         }
+        
+        let userProfile = self.cleanUserProfile(on: request,
+                                                user: user,
+                                                userNameFromRequest: userNameNormalized)
+        
+        return userProfile
     }
 
     /// Update user data.
-    func update(request: Request) throws -> EventLoopFuture<UserDto> {
+    func update(request: Request) async throws -> UserDto {
 
         guard let userName = request.parameters.get("name") else {
             throw Abort(.badRequest)
@@ -68,13 +66,13 @@ final class UsersController: RouteCollection {
         try UserDto.validate(content: request)
         
         let usersService = request.application.services.usersService
-        return usersService.updateUser(on: request, userDto: userDto, userNameNormalized: userNameNormalized).map { user in
-            UserDto(from: user)
-        }
+        let user = try await usersService.updateUser(on: request, userDto: userDto, userNameNormalized: userNameNormalized)
+        
+        return UserDto(from: user)
     }
 
     /// Delete user.
-    func delete(request: Request) throws -> EventLoopFuture<HTTPStatus> {
+    func delete(request: Request) async throws -> HTTPStatus {
 
         guard let userName = request.parameters.get("name") else {
             throw Abort(.badRequest)
@@ -89,8 +87,9 @@ final class UsersController: RouteCollection {
         }
         
         let usersService = request.application.services.usersService
-        return usersService.deleteUser(on: request, userNameNormalized: userNameNormalized)
-            .transform(to: HTTPStatus.ok)
+        try await usersService.deleteUser(on: request, userNameNormalized: userNameNormalized)
+        
+        return HTTPStatus.ok
     }
 
     private func cleanUserProfile(on request: Request, user: User, userNameFromRequest: String) -> UserDto {

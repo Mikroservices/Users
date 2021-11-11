@@ -25,7 +25,7 @@ final class RegisterController: RouteCollection {
     }
 
     /// Register new user.
-    func newUser(request: Request) throws -> EventLoopFuture<Response> {
+    func newUser(request: Request) async throws -> Response {
         let registerUserDto = try request.content.decode(RegisterUserDto.self)
         try RegisterUserDto.validate(content: request)
 
@@ -33,83 +33,67 @@ final class RegisterController: RouteCollection {
             throw RegisterError.securityTokenIsMandatory
         }
 
-        let captchaValidateFuture = try self.validateCaptcha(on: request, captchaToken: captchaToken)
+        try await self.validateCaptcha(on: request, captchaToken: captchaToken)
         
         let usersService = request.application.services.usersService
+        try await usersService.validateUserName(on: request, userName: registerUserDto.userName)
+        try await usersService.validateEmail(on: request, email: registerUserDto.email)
 
-        let validateUserNameFuture = captchaValidateFuture.flatMap {
-            usersService.validateUserName(on: request, userName: registerUserDto.userName)
-        }
+        let user = try await self.createUser(on: request, registerUserDto: registerUserDto)
+        try await self.sendNewUserEmail(on: request, user: user, redirectBaseUrl: registerUserDto.redirectBaseUrl)
 
-        let validateEmailFuture = validateUserNameFuture.flatMap {
-            usersService.validateEmail(on: request, email: registerUserDto.email)
-        }
 
-        let createUserFuture = validateEmailFuture.flatMapThrowing {
-            try self.createUser(on: request, registerUserDto: registerUserDto)
-        }.flatMap { user in user }
-
-        let sendEmailFuture = createUserFuture.flatMapThrowing { user in
-            try self.sendNewUserEmail(on: request, user: user, redirectBaseUrl: registerUserDto.redirectBaseUrl)
-        }.flatMap { user in user }
-
-        return sendEmailFuture.flatMap { user in
-            self.createNewUserResponse(on: request, user: user)
-        }
+        let response = try await self.createNewUserResponse(on: request, user: user)
+        return response
     }
 
     /// New account (email) confirmation.
-    func confirm(request: Request) throws -> EventLoopFuture<HTTPResponseStatus> {
+    func confirm(request: Request) async throws -> HTTPResponseStatus {
         let confirmEmailRequestDto = try request.content.decode(ConfirmEmailRequestDto.self)
         let usersService = request.application.services.usersService
 
-        let confirmEmailFuture = usersService.confirmEmail(on: request,
-                                                           userId: confirmEmailRequestDto.id,
-                                                           confirmationGuid: confirmEmailRequestDto.confirmationGuid)
+        try await usersService.confirmEmail(on: request,
+                                            userId: confirmEmailRequestDto.id,
+                                            confirmationGuid: confirmEmailRequestDto.confirmationGuid)
 
-        return confirmEmailFuture.transform(to: HTTPStatus.ok)
+        return HTTPStatus.ok
     }
 
     /// User name verification.
-    func isUserNameTaken(request: Request) throws -> EventLoopFuture<BooleanResponseDto> {
+    func isUserNameTaken(request: Request) async throws -> BooleanResponseDto {
 
         guard let userName = request.parameters.get("name") else {
             throw Abort(.badRequest)
         }
         
         let usersService = request.application.services.usersService
-        let isUserNameTakenFuture = usersService.isUserNameTaken(on: request, userName: userName)
+        let result = try await usersService.isUserNameTaken(on: request, userName: userName)
 
-        return isUserNameTakenFuture.map { result in
-            BooleanResponseDto(result: result)
-        }
+        return BooleanResponseDto(result: result)
     }
 
     /// Email verification.
-    func isEmailConnected(request: Request) throws -> EventLoopFuture<BooleanResponseDto> {
+    func isEmailConnected(request: Request) async throws -> BooleanResponseDto {
 
         guard let email = request.parameters.get("email") else {
             throw Abort(.badRequest)
         }
         
         let usersService = request.application.services.usersService
-        let isEmailConnectedFuture = usersService.isEmailConnected(on: request, email: email)
+        let result = try await usersService.isEmailConnected(on: request, email: email)
 
-        return isEmailConnectedFuture.map { result in
-            BooleanResponseDto(result: result)
-        }
+        return BooleanResponseDto(result: result)
     }
 
-    private func validateCaptcha(on request: Request, captchaToken: String) throws -> EventLoopFuture<Void> {
+    private func validateCaptcha(on request: Request, captchaToken: String) async throws {
         let captchaService = request.application.services.captchaService
-        return try captchaService.validate(on: request, captchaFormResponse: captchaToken).flatMapThrowing { success in
-            if !success {
-                throw RegisterError.securityTokenIsInvalid
-            }
+        let success = try await captchaService.validate(on: request, captchaFormResponse: captchaToken)
+        if !success {
+            throw RegisterError.securityTokenIsInvalid
         }
     }
 
-    private func createUser(on request: Request, registerUserDto: RegisterUserDto) throws -> EventLoopFuture<User> {
+    private func createUser(on request: Request, registerUserDto: RegisterUserDto) async throws -> User {
 
         let rolesService = request.application.services.rolesService
         let usersService = request.application.services.usersService
@@ -125,42 +109,32 @@ final class RegisterController: RouteCollection {
                         emailConfirmationGuid: emailConfirmationGuid,
                         gravatarHash: gravatarHash)
 
-        let saveUserFuture = user.save(on: request.db)
+        try await user.save(on: request.db)
 
-        let rolesWrappedFuture = saveUserFuture.map { _ in
-            rolesService.getDefault(on: request)
-        }
-        
-        let rolesFuture = rolesWrappedFuture.flatMap { roles in
-            roles
-        }
-        
-        return rolesFuture.flatMap { roles -> EventLoopFuture<User> in
-            var rolesSavedFuture: [EventLoopFuture<Void>] = [EventLoopFuture<Void>]()
-            roles.forEach { role in
-                let roleSavedFuture = user.$roles.attach(role, on: request.db)
-                rolesSavedFuture.append(roleSavedFuture)
-            }
-            
-            return EventLoopFuture.andAllSucceed(rolesSavedFuture, on: request.eventLoop).map { _ -> User in
-                user
+        let roles = try await rolesService.getDefault(on: request)
+        await withThrowingTaskGroup(of: Void.self) { group in
+            for role in roles {
+                group.addTask {
+                    try await user.$roles.attach(role, on: request.db)
+                }
             }
         }
+
+        return user
     }
 
-    private func sendNewUserEmail(on request: Request, user: User, redirectBaseUrl: String) throws -> EventLoopFuture<User> {
+    private func sendNewUserEmail(on request: Request, user: User, redirectBaseUrl: String) async throws {
         let emailsService = request.application.services.emailsService
-        let sendEmailFuture = try emailsService.sendConfirmAccountEmail(on: request, user: user, redirectBaseUrl: redirectBaseUrl)
-        return sendEmailFuture.transform(to: user)
+        try await emailsService.sendConfirmAccountEmail(on: request, user: user, redirectBaseUrl: redirectBaseUrl)
     }
 
-    private func createNewUserResponse(on request: Request, user: User) -> EventLoopFuture<Response> {
+    private func createNewUserResponse(on request: Request, user: User) async throws -> Response {
         let createdUserDto = UserDto(from: user)
         
         var headers = HTTPHeaders()
         headers.replaceOrAdd(name: .location, value: "/\(UsersController.uri)/@\(user.userName)")
         
-        return createdUserDto.encodeResponse(status: .created, headers: headers, for: request)
+        return try await createdUserDto.encodeResponse(status: .created, headers: headers, for: request)
     }
 }
 

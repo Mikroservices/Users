@@ -17,11 +17,11 @@ extension Application.Services {
 }
 
 protocol TokensServiceType {
-    func createAccessTokens(on request: Request, forUser user: User) -> EventLoopFuture<AccessTokenDto>
-    func updateAccessTokens(on request: Request, forUser user: User, andRefreshToken refreshToken: RefreshToken) -> EventLoopFuture<AccessTokenDto>
-    func validateRefreshToken(on request: Request, refreshToken: String) -> EventLoopFuture<RefreshToken>
-    func getUserByRefreshToken(on request: Request, refreshToken: String) -> EventLoopFuture<User>
-    func revokeRefreshTokens(on request: Request, forUser user: User) -> EventLoopFuture<Void>
+    func createAccessTokens(on request: Request, forUser user: User) async throws-> AccessTokenDto
+    func updateAccessTokens(on request: Request, forUser user: User, andRefreshToken refreshToken: RefreshToken) async throws -> AccessTokenDto
+    func validateRefreshToken(on request: Request, refreshToken: String) async throws -> RefreshToken
+    func getUserByRefreshToken(on request: Request, refreshToken: String) async throws -> User
+    func revokeRefreshTokens(on request: Request, forUser user: User) async throws
 }
 
 final class TokensService: TokensServiceType {
@@ -29,87 +29,60 @@ final class TokensService: TokensServiceType {
     private let refreshTokenTime: TimeInterval = 30 * 24 * 60 * 60  // 30 days
     private let accessTokenTime: TimeInterval = 60 * 60             // 1 hour
     
-    public func validateRefreshToken(on request: Request, refreshToken: String) -> EventLoopFuture<RefreshToken> {
-        return RefreshToken.query(on: request.db).filter(\.$token == refreshToken).first().flatMap { refreshTokenFromDb in
+    public func validateRefreshToken(on request: Request, refreshToken: String) async throws -> RefreshToken {
+        let refreshTokenFromDb = try await RefreshToken.query(on: request.db).filter(\.$token == refreshToken).first()
 
-            guard let refreshToken = refreshTokenFromDb else {
-                return request.fail(EntityNotFoundError.refreshTokenNotFound)
-            }
-
-            if refreshToken.revoked {
-                return request.fail(RefreshTokenError.refreshTokenRevoked)
-            }
-
-            if refreshToken.expiryDate < Date()  {
-                return request.fail(RefreshTokenError.refreshTokenExpired)
-            }
-            
-            return request.success(refreshToken)
+        guard let refreshToken = refreshTokenFromDb else {
+            throw EntityNotFoundError.refreshTokenNotFound
         }
-    }
-    
-    public func createAccessTokens(on request: Request, forUser user: User) -> EventLoopFuture<AccessTokenDto> {
-        do {
-            let accessTokenFuture = try self.createAccessToken(on: request, forUser: user)
-            let refreshTokenFuture = try self.createRefreshToken(on: request, forUser: user)
 
-            let combinedFuture = accessTokenFuture.and(refreshTokenFuture)
-            let resultAll = combinedFuture.map { (accessToken, refreshToken) in
-                AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
-            }
-
-            return resultAll
-        } catch {
-            return request.fail(LoginError.invalidLoginCredentials)
+        if refreshToken.revoked {
+            throw RefreshTokenError.refreshTokenRevoked
         }
-    }
-    
-    public func updateAccessTokens(on request: Request, forUser user: User, andRefreshToken refreshToken: RefreshToken) -> EventLoopFuture<AccessTokenDto> {
-        do {
-             let accessTokenFuture = try self.createAccessToken(on: request, forUser: user)
-             let refreshTokenFuture = try self.updateRefreshToken(on: request, forToken: refreshToken)
-         
-             let combinedFuture = accessTokenFuture.and(refreshTokenFuture)
-             let resultAll = combinedFuture.map { (accessToken, refreshToken) in
-                 AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
-             }
-             
-             return resultAll
-         } catch {
-             return request.fail(LoginError.invalidLoginCredentials)
-         }
-    }
-    
-    public func getUserByRefreshToken(on request: Request, refreshToken: String) -> EventLoopFuture<User> {
-        let refreshTokenFuture = RefreshToken.query(on: request.db).with(\.$user).filter(\.$token == refreshToken).first()
-        
-        let userFuture = refreshTokenFuture.flatMap { refreshTokenFromDb -> EventLoopFuture<User> in
-            
-            guard let refreshToken = refreshTokenFromDb else {
-                return request.fail(EntityNotFoundError.refreshTokenNotFound)
-            }
-            
-            if refreshToken.user.isBlocked {
-                return request.fail(LoginError.userAccountIsBlocked)
-            }
 
-            return request.success(refreshToken.user)
+        if refreshToken.expiryDate < Date()  {
+            throw RefreshTokenError.refreshTokenExpired
         }
         
-        return userFuture
+        return refreshToken
     }
     
-    private func createAccessToken(on request: Request, forUser user: User) throws -> EventLoopFuture<String> {
-        let authorizationPayloadFlatFuture = try self.createAuthenticationPayload(request: request, forUser: user)
+    public func createAccessTokens(on request: Request, forUser user: User) async throws -> AccessTokenDto {
+        let accessToken = try await self.createAccessToken(on: request, forUser: user)
+        let refreshToken = try await self.createRefreshToken(on: request, forUser: user)
 
-        return authorizationPayloadFlatFuture.flatMapThrowing { authorizationPayload in
-            let accessToken = try request.jwt.sign(authorizationPayload)
-            return accessToken
+        return AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
+    }
+    
+    public func updateAccessTokens(on request: Request, forUser user: User, andRefreshToken refreshToken: RefreshToken) async throws -> AccessTokenDto {
+        let accessToken = try await self.createAccessToken(on: request, forUser: user)
+        let refreshToken = try await  self.updateRefreshToken(on: request, forToken: refreshToken)
+     
+        return AccessTokenDto(accessToken: accessToken, refreshToken: refreshToken)
+    }
+    
+    public func getUserByRefreshToken(on request: Request, refreshToken: String) async throws -> User {
+        let refreshTokenFromDb = try await RefreshToken.query(on: request.db).with(\.$user).filter(\.$token == refreshToken).first()
+                    
+        guard let refreshToken = refreshTokenFromDb else {
+            throw EntityNotFoundError.refreshTokenNotFound
         }
+        
+        if refreshToken.user.isBlocked {
+            throw LoginError.userAccountIsBlocked
+        }
+
+        return refreshToken.user
+    }
+    
+    private func createAccessToken(on request: Request, forUser user: User) async throws -> String {
+        let authorizationPayload = try await self.createAuthenticationPayload(request: request, forUser: user)
+
+        let accessToken = try request.jwt.sign(authorizationPayload)
+        return accessToken
     }
 
-    private func createRefreshToken(on request: Request, forUser user: User) throws -> EventLoopFuture<String> {
-
+    private func createRefreshToken(on request: Request, forUser user: User) async throws -> String {
         guard let userId = user.id else {
             throw RefreshTokenError.userIdNotSpecified
         }
@@ -118,62 +91,51 @@ final class TokensService: TokensServiceType {
         let expiryDate = Date().addingTimeInterval(self.refreshTokenTime)
         let refreshToken = RefreshToken(userId: userId, token: token, expiryDate: expiryDate)
 
-        return refreshToken.save(on: request.db).map {
-            refreshToken.token
-        }
+        try await refreshToken.save(on: request.db)
+        return refreshToken.token
     }
 
-    private func updateRefreshToken(on request: Request, forToken refreshToken: RefreshToken) throws -> EventLoopFuture<String> {
+    private func updateRefreshToken(on request: Request, forToken refreshToken: RefreshToken) async throws -> String {
         refreshToken.token = String.createRandomString(length: 40)
         refreshToken.expiryDate = Date().addingTimeInterval(self.refreshTokenTime)
 
-        return refreshToken.save(on: request.db).map {
-            refreshToken.token
-        }
+        try await refreshToken.save(on: request.db)
+        return refreshToken.token
     }
     
-    public func revokeRefreshTokens(on request: Request, forUser user: User) -> EventLoopFuture<Void> {
-        let refreshTokensFuture = RefreshToken.query(on: request.db).filter(\.$user.$id == user.id!).all()
-        return refreshTokensFuture.flatMap { refreshTokens in
-            var refreshTokensSavedFuture: [EventLoopFuture<Void>] = [EventLoopFuture<Void>]()
-            refreshTokens.forEach { refreshToken in
+    public func revokeRefreshTokens(on request: Request, forUser user: User) async throws {
+        let refreshTokens = try await RefreshToken.query(on: request.db).filter(\.$user.$id == user.id!).all()
+        
+        try await withThrowingTaskGroup(of: Void.self) { group in
+            for refreshToken in refreshTokens {
                 refreshToken.revoked = true
-                let savedFuture = refreshToken.save(on: request.db)
-                refreshTokensSavedFuture.append(savedFuture)
+                try await refreshToken.save(on: request.db)
             }
-            
-            return EventLoopFuture.andAllSucceed(refreshTokensSavedFuture, on: request.eventLoop)
         }
     }
 
-    private func createAuthenticationPayload(request: Request, forUser user: User) throws -> EventLoopFuture<UserPayload> {
+    private func createAuthenticationPayload(request: Request, forUser user: User) async throws -> UserPayload {
 
         guard let userId = user.id else {
             throw Abort(.unauthorized)
         }
         
-        return User.query(on: request.db).with(\.$roles).filter(\.$id == userId).first().map { userFromDb in
+        let userFromDb = try await User.query(on: request.db).with(\.$roles).filter(\.$id == userId).first()
+        let superUserRoles = userFromDb?.roles.filter({ $0.hasSuperPrivileges == true }).count
 
-            let expirationDate = Date().addingTimeInterval(TimeInterval(self.accessTokenTime))
-            
-            let superUserRoles = userFromDb?.roles.filter({ $0.hasSuperPrivileges == true }).count
-            var isSuperUser = false
-            if let superUserRoles = superUserRoles {
-                isSuperUser = superUserRoles > 0
-            }
-            
-            let authorizationPayload = UserPayload(
-                id: userId,
-                userName: user.userName,
-                email: user.email,
-                name: user.name,
-                exp: expirationDate,
-                gravatarHash: user.gravatarHash,
-                roles: userFromDb?.roles.map { $0.code } ?? [],
-                isSuperUser: isSuperUser
-            )
+        let expirationDate = Date().addingTimeInterval(TimeInterval(self.accessTokenTime))
 
-            return authorizationPayload
-        }
+        let authorizationPayload = UserPayload(
+            id: userId,
+            userName: user.userName,
+            email: user.email,
+            name: user.name,
+            exp: expirationDate,
+            gravatarHash: user.gravatarHash,
+            roles: userFromDb?.roles.map { $0.code } ?? [],
+            isSuperUser: superUserRoles ?? 0 > 0
+        )
+
+        return authorizationPayload
     }
 }

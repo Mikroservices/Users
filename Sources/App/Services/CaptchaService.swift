@@ -17,15 +17,13 @@ extension Application.Services {
 }
 
 protocol CaptchaServiceType {
-    func validate(on request: Request, captchaFormResponse: String) throws -> EventLoopFuture<Bool>
+    func validate(on request: Request, captchaFormResponse: String) async throws -> Bool
 }
 
 final class CaptchaService: CaptchaServiceType {
 
-    public func validate(on request: Request, captchaFormResponse: String) throws -> EventLoopFuture<Bool> {
-        let validationFuture = request.validate(captchaFormResponse: captchaFormResponse)
-        return validationFuture.map { result -> Bool in
-            return result
-        }
+    public func validate(on request: Request, captchaFormResponse: String) async throws -> Bool {
+        let result = try await request.validate(captchaFormResponse: captchaFormResponse)
+        return result
     }
 }
