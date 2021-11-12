@@ -8,13 +8,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@master
-    - uses: YOCKOW/Action-setup-swift@master
+    - name: Checkout repository
+      uses: actions/checkout@v2
+    - name: Install swift
+      uses: YOCKOW/Action-setup-swift@v1
       with:
-        swift-version: '5.3'
+        swift-version: '5.5.1'
     - name: Install SQLite libs
       run: sudo apt-get install libsqlite3-dev
     - name: Build
-      run: swift build --enable-test-discovery
+      run: swift build
     - name: Tests
-      run: swift test --enable-test-discovery
+      run: swift test

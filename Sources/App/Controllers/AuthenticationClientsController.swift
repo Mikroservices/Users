@@ -39,46 +39,40 @@ final class AuthenticationClientsController: RouteCollection {
     }
 
     /// Create new authentication client.
-    func create(request: Request) throws -> EventLoopFuture<Response> {
+    func create(request: Request) async throws -> Response {
         let authClientsService = request.application.services.authenticationClientsService
         let authClientDto = try request.content.decode(AuthClientDto.self)
         try AuthClientDto.validate(content: request)
 
-        let validateUriFuture = authClientsService.validateUri(on: request, uri: authClientDto.uri, authClientId: nil)
-        let createAuthClientFuture = validateUriFuture.map { _ in
-            self.createAuthClient(on: request, authClientDto: authClientDto)
-        }.flatMap { roleFuture in
-            return roleFuture
-        }
+        try await authClientsService.validateUri(on: request, uri: authClientDto.uri, authClientId: nil)
+        let authClient = try await self.createAuthClient(on: request, authClientDto: authClientDto)
+        let response = try await self.createNewAuthClientResponse(on: request, authClient: authClient)
         
-        return createAuthClientFuture.flatMapThrowing { authClient -> EventLoopFuture<Response> in
-            try self.createNewAuthClientResponse(on: request, authClient: authClient)
-        }.flatMap { authClientFuture in
-            return authClientFuture
-        }
+        return response
     }
 
     /// Get all authentication clients.
-    func list(request: Request) throws -> EventLoopFuture<[AuthClientDto]> {
-        return AuthClient.query(on: request.db).all().map { authClients in
-            authClients.map { authClient in AuthClientDto(from: authClient) }
-        }
+    func list(request: Request) async throws -> [AuthClientDto] {
+        let authClients = try await AuthClient.query(on: request.db).all()
+        return authClients.map { authClient in AuthClientDto(from: authClient) }
     }
 
     /// Get specific authentication client.
-    func read(request: Request) throws -> EventLoopFuture<AuthClientDto> {
-        
+    func read(request: Request) async throws -> AuthClientDto {
         guard let authClientId = request.parameters.get("id", as: UUID.self) else {
             throw AuthClientError.incorrectAuthClientId
         }
 
-        return self.getAuthClientById(on: request, authClientId: authClientId).map { authClient in
-            AuthClientDto(from: authClient)
+        let authClient = try await self.getAuthClientById(on: request, authClientId: authClientId)
+        guard let authClient = authClient else {
+            throw EntityNotFoundError.authClientNotFound
         }
+        
+        return AuthClientDto(from: authClient)
     }
 
     /// Update specific authentication client.
-    func update(request: Request) throws -> EventLoopFuture<AuthClientDto> {
+    func update(request: Request) async throws -> AuthClientDto {
 
         guard let authClientId = request.parameters.get("id", as: UUID.self) else {
             throw AuthClientError.incorrectAuthClientId
@@ -88,55 +82,55 @@ final class AuthenticationClientsController: RouteCollection {
         let authClientDto = try request.content.decode(AuthClientDto.self)
         try AuthClientDto.validate(content: request)
         
-        let authClientFuture = self.getAuthClientById(on: request, authClientId: authClientId)
-        let validateUriFuture = authClientFuture.flatMap { authClient in
-            authClientsService.validateUri(on: request, uri: authClientDto.uri, authClientId: authClient.id).transform(to: authClient)
+        let authClient = try await self.getAuthClientById(on: request, authClientId: authClientId)
+        guard let authClient = authClient else {
+            throw EntityNotFoundError.authClientNotFound
         }
+        
+        try await authClientsService.validateUri(on: request, uri: authClientDto.uri, authClientId: authClient.id)
+        try await self.updateAuthClient(on: request, from: authClientDto, to: authClient)
 
-        let updateFuture = validateUriFuture.flatMap { authClient in
-            self.updateAuthClient(on: request, from: authClientDto, to: authClient).transform(to: authClient)
-        }
-
-        return updateFuture.map { authClient in
-            AuthClientDto(from: authClient)
-        }
+        return AuthClientDto(from: authClient)
     }
 
     /// Delete specific authentication client.
-    func delete(request: Request) throws -> EventLoopFuture<HTTPStatus> {
+    func delete(request: Request) async throws -> HTTPStatus {
         guard let authClientId = request.parameters.get("id", as: UUID.self) else {
             throw AuthClientError.incorrectAuthClientId
         }
 
-        let authClientFuture = self.getAuthClientById(on: request, authClientId: authClientId)
-        let deleteFuture = authClientFuture.flatMap { authClient in
-            authClient.delete(on: request.db)
+        let authClient = try await self.getAuthClientById(on: request, authClientId: authClientId)
+        guard let authClient = authClient else {
+            throw EntityNotFoundError.authClientNotFound
         }
+        
+        try await authClient.delete(on: request.db)
 
-        return deleteFuture.transform(to: HTTPStatus.ok)
+        return HTTPStatus.ok
     }
 
-    private func createAuthClient(on request: Request, authClientDto: AuthClientDto) -> EventLoopFuture<AuthClient> {
+    private func createAuthClient(on request: Request, authClientDto: AuthClientDto) async throws-> AuthClient {
         let authClient = AuthClient(from: authClientDto)
-        return authClient.save(on: request.db).transform(to: authClient)
+        try await authClient.save(on: request.db)
+        
+        return authClient
     }
 
-    private func createNewAuthClientResponse(on request: Request, authClient: AuthClient) throws -> EventLoopFuture<Response> {
+    private func createNewAuthClientResponse(on request: Request, authClient: AuthClient) async throws -> Response {
         let createdAuthClientDto = AuthClientDto(from: authClient)
                 
-        return createdAuthClientDto.encodeResponse(for: request).map { response in
-            response.headers.replaceOrAdd(name: .location, value: "/\(AuthenticationClientsController.uri)/\(authClient.id?.uuidString ?? "")")
-            response.status = .created
+        let response = try await createdAuthClientDto.encodeResponse(for: request)
+        response.headers.replaceOrAdd(name: .location, value: "/\(AuthenticationClientsController.uri)/\(authClient.id?.uuidString ?? "")")
+        response.status = .created
 
-            return response
-        }
+        return response
     }
 
-    private func getAuthClientById(on request: Request, authClientId: UUID) -> EventLoopFuture<AuthClient> {
-        return AuthClient.find(authClientId, on: request.db).unwrap(or: EntityNotFoundError.authClientNotFound)
+    private func getAuthClientById(on request: Request, authClientId: UUID) async throws -> AuthClient? {
+        return try await AuthClient.find(authClientId, on: request.db)
     }
 
-    private func updateAuthClient(on request: Request, from authClientDto: AuthClientDto, to authClient: AuthClient) -> EventLoopFuture<Void> {
+    private func updateAuthClient(on request: Request, from authClientDto: AuthClientDto, to authClient: AuthClient) async throws {
         authClient.type = authClientDto.type
         authClient.name = authClientDto.name
         authClient.uri = authClientDto.uri
@@ -146,6 +140,6 @@ final class AuthenticationClientsController: RouteCollection {
         authClient.callbackUrl = authClientDto.callbackUrl
         authClient.svgIcon = authClientDto.svgIcon
 
-        return authClient.update(on: request.db)
+        try await authClient.update(on: request.db)
     }
 }

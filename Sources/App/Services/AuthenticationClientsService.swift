@@ -17,30 +17,25 @@ extension Application.Services {
 }
 
 protocol AuthenticationClientsServiceType {
-    func validateUri(on request: Request, uri: String, authClientId: UUID?) -> EventLoopFuture<Void>
+    func validateUri(on request: Request, uri: String, authClientId: UUID?) async throws
 }
 
 final class AuthenticationClientsService: AuthenticationClientsServiceType {
     
-    func validateUri(on request: Request, uri: String, authClientId: UUID?) -> EventLoopFuture<Void> {
+    func validateUri(on request: Request, uri: String, authClientId: UUID?) async throws {
         if let unwrapedAuthClientId = authClientId {
-            return AuthClient.query(on: request.db).group(.and) { verifyUriGroup in
+            let authClient = try await  AuthClient.query(on: request.db).group(.and) { verifyUriGroup in
                 verifyUriGroup.filter(\.$uri == uri)
                 verifyUriGroup.filter(\.$id != unwrapedAuthClientId)
-            }.first().flatMap { authClient -> EventLoopFuture<Void> in
-                if authClient != nil {
-                    return request.fail(AuthClientError.authClientWithUriExists)
-                }
-                
-                return request.success()
+            }.first()
+
+            if authClient != nil {
+                throw AuthClientError.authClientWithUriExists
             }
         } else {
-            return AuthClient.query(on: request.db).filter(\.$uri == uri).first().flatMap { authClient -> EventLoopFuture<Void> in
-                if authClient != nil {
-                    return request.fail(AuthClientError.authClientWithUriExists)
-                }
-                
-                return request.success()
+            let authClient = try await AuthClient.query(on: request.db).filter(\.$uri == uri).first()
+            if authClient != nil {
+                throw AuthClientError.authClientWithUriExists
             }
         }
     }
